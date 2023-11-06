@@ -1,6 +1,7 @@
 import axios from 'axios';
-import verifyJWT, { OTHENT_PUBLIC_KEY } from './utils/verifyJWT.js';
-import importKey from './utils/importKey.js'
+import verifyJWT, { OTHENT_PUBLIC_KEY } from './utils/auth/verifyJWT';
+// @ts-ignore
+// import importKey from './utils/importKey.js'
 
 export default async function createUser(accessToken: string): Promise<any> {
 
@@ -9,6 +10,7 @@ export default async function createUser(accessToken: string): Promise<any> {
         return { error: 'invalid JWT' };
     }
 
+    // @ts-ignore
     const { mnemonic, walletAddress } = await importKey()
 
 

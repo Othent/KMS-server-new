@@ -1,23 +1,36 @@
-import { kmsClient } from './utils/kmsClient.js';
-import { changeId } from './utils/changeId.js';
+import { kmsClient } from './utils/kms/kmsClient';
+import { changeId } from './utils/tools/changeId';
 
 
-export default async function encrypt(plaintext: Uint8Array | string | null, keyName: string): Promise<any> {
+export default async function encrypt(plaintext: Buffer, keyName: string): Promise<any> {
+
+    if (!plaintext || !keyName || !process.env.kmsProjectId) {
+        console.log('Please specify both plaintext/keyName/process.env.kmsProjectId')
+        throw new Error('Please specify both plaintext/keyName/process.env.kmsProjectId')
+    }
 
     const safeId = changeId(keyName)
 
-    // const fullKeyName = `projects/auth-custom-try/locations/global/keyRings/Canada-Dry/cryptoKeys/${safeId}`
-    const fullKeyName = `projects/auth-custom-try/locations/global/keyRings/Canada-Dry/cryptoKeys/edkey`
+    const fullKeyName = kmsClient.cryptoKeyPath(process.env.kmsProjectId, 'global', safeId, 'encryptDecrypt')
 
-    const [result] = await kmsClient.encrypt({
-        name: fullKeyName,
-        plaintext: plaintext
-    });
+    try {
 
-    if (!result || !result.ciphertext) {
-        throw new Error('Encryption failed or returned null/undefined ciphertext');
+        const [encryptResponse] = await kmsClient.encrypt({
+            name: fullKeyName,
+            plaintext: plaintext,
+        });
+
+        if (!encryptResponse || !encryptResponse.ciphertext) {
+            console.log('Encryption failed or returned null/undefined ciphertext')
+            throw new Error('Encryption failed or returned null/undefined ciphertext');
+        }
+
+
+        return { data: encryptResponse.ciphertext }
+
+    } catch (e) {
+        console.log(e)
     }
 
-    return { data: result.ciphertext.toString() }
 
 }

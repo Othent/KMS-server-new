@@ -1,8 +1,5 @@
-// @ts-ignore
 import express from 'express';
-// @ts-ignore
 import cors from 'cors';
-// @ts-ignore
 import bodyParser from 'body-parser';
 import multer from 'multer';
 const upload = multer();
@@ -12,7 +9,8 @@ app.use(cors({
 }));
 app.use(bodyParser.json({ limit: '100mb' }));
 app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));
-
+import * as dotEnv from 'dotenv'
+dotEnv.config()
 
 
 // Home (ping)
@@ -23,8 +21,9 @@ app.get('/', (req: express.Request, res: express.Response) => {
 
 
 // Create user
-import createUser from './lib/createUser.js';
+import createUser from './lib/createUser';
 app.post('/create-user', (req: express.Request, res: express.Response) => {
+  console.log('\x1b[36m%s\x1b[0m', `Request: /create-user, body: ${JSON.stringify(req.body)}`)
   createUser(req.body.accessToken)
     .then((response: any) => {
       res.json(response);
@@ -37,8 +36,9 @@ app.post('/create-user', (req: express.Request, res: express.Response) => {
 
 
 // Decrypt
-import decrypt from './lib/decrypt.js';
+import decrypt from './lib/decrypt';
 app.post('/decrypt', upload.single('ciphertext'), (req: express.Request, res: express.Response) => {
+  console.log('\x1b[36m%s\x1b[0m', `Request: /decrypt, body: ${JSON.stringify(req.body)}`)
   decrypt(req.body.ciphertext, req.body.keyName)
     .then((response: any) => {
       res.json(response);
@@ -51,8 +51,9 @@ app.post('/decrypt', upload.single('ciphertext'), (req: express.Request, res: ex
 
 
 // Encrypt
-import encrypt from './lib/encrypt.js';
+import encrypt from './lib/encrypt';
 app.post('/encrypt', upload.single('plaintext'), (req: express.Request, res: express.Response) => {
+  console.log('\x1b[36m%s\x1b[0m', `Request: /encrypt, body: ${JSON.stringify(req.body)}`)
   encrypt(req.body.plaintext, req.body.keyName)
     .then((response: any) => {
       res.json(response);
@@ -65,8 +66,9 @@ app.post('/encrypt', upload.single('plaintext'), (req: express.Request, res: exp
 
 
 // Get public key
-import getPublicKey from './lib/getPublicKey.js';
+import getPublicKey from './lib/getPublicKey';
 app.post('/get-public-key', (req: express.Request, res: express.Response) => {
+  console.log('\x1b[36m%s\x1b[0m', `Request: /get-public-key, body: ${JSON.stringify(req.body)}`)
   getPublicKey(req.body.keyName)
     .then((response: any) => {
       res.json(response);
@@ -79,8 +81,9 @@ app.post('/get-public-key', (req: express.Request, res: express.Response) => {
 
 
 // Sign
-import sign from './lib/sign.js';
-app.post('/sign', upload.single('data'), (req: express.Request, res: express.Response) => {
+import sign from './lib/sign';
+app.post('/sign', (req: express.Request, res: express.Response) => {
+  console.log('\x1b[36m%s\x1b[0m', `Request: /sign, body: ${JSON.stringify(req.body)}`)
   sign(req.body.data, req.body.keyName)
     .then((response: any) => {
       res.json(response);
@@ -94,7 +97,7 @@ app.post('/sign', upload.single('data'), (req: express.Request, res: express.Res
 
 // Start up server
 app.listen(3001, () => {
-  console.log(`Server **LIVE** listening on port 3001`);
+  console.log('\x1b[36m%s\x1b[0m', `Server **LIVE** listening on port 3001`)
 });
 
 

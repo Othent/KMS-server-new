@@ -1,26 +1,35 @@
-import { kmsClient } from './utils/kmsClient.js';
-import { changeId } from './utils/changeId.js';
+import { kmsClient } from './utils/kms/kmsClient';
+import { changeId } from './utils/tools/changeId';
 
 
 export default async function decrypt(ciphertext: string, keyName: string): Promise<any> {
 
-    if (!ciphertext || !keyName) {
-        throw new Error('Please specify both ciphertext/keyName')
+    if (!ciphertext || !keyName || !process.env.kmsProjectId) {
+        console.log(ciphertext, keyName, process.env.kmsProjectId)
+        console.log('Please specify both ciphertext/keyName/process.env.kmsProjectId')
+        throw new Error('Please specify both ciphertext/keyName/process.env.kmsProjectId')
     }
 
     const safeId = changeId(keyName);
-    // const fullKeyName = `projects/auth-custom-try/locations/global/keyRings/Canada-Dry/cryptoKeys/${safeId}`;
-    const fullKeyName = `projects/auth-custom-try/locations/global/keyRings/Canada-Dry/cryptoKeys/edkey`;
 
-    const [result] = await kmsClient.decrypt({
-        name: fullKeyName,
-        ciphertext: ciphertext,
-    });
+    const fullKeyName = kmsClient.cryptoKeyPath(process.env.kmsProjectId, 'global', safeId, 'encryptDecrypt');
 
-    if (!result || !result.plaintext) {
-        throw new Error('Decryption failed or returned null/undefined plaintext');
+    try {
+
+        const [decryptResponse] = await kmsClient.decrypt({
+            name: fullKeyName,
+            ciphertext: ciphertext,
+        });
+
+        if (!decryptResponse || !decryptResponse.plaintext) {
+            console.log('Decryption failed or returned null/undefined plaintext')
+            throw new Error('Decryption failed or returned null/undefined plaintext');
+        }
+
+        return { data: decryptResponse }
+
+    } catch (e) {
+        console.log(e)
     }
-
-    return { data: result.plaintext.toString() }
 
 }

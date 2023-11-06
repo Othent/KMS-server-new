@@ -1,19 +1,30 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "ESNext",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
+    /* Language and Environment */
+    "target": "es2018",
+    "lib": ["es2018", "DOM"],
+
+    /* Modules */
+    "module": "ES2015",
     "moduleResolution": "node",
+
+    /* JavaScript Support */
+    //"allowJs": true,
+
+    /* Emit */
+    "declaration": true,
+    "sourceMap": true,
+    "outDir": "dist",
+
+    /* Interop Constraints */
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+
+    /* Type Checking */
+    "strict": true
   },
   "include": [
     "src/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules", "dist/", "tests/"]
 }

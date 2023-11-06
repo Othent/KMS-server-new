@@ -1,17 +1,34 @@
-import { kmsClient } from './utils/kmsClient.js';
-import { changeId } from './utils/changeId.js';
+import { kmsClient } from './utils/kms/kmsClient';
+import { changeId } from './utils/tools/changeId';
 
 
-export default async function sign(data: Uint8Array|string|null, keyName: string): Promise<any> {
+export default async function sign(data: any, keyName: string): Promise<any> {
+
+    if (!data || !keyName || !process.env.kmsProjectId) {
+        console.log(data, keyName, process.env.kmsProjectId)
+        console.log('Please specify both data/keyName/process.env.kmsProjectId')
+        throw new Error('Please specify both data/keyName/process.env.kmsProjectId')
+    }
 
     const safeId = changeId(keyName);
-    // const fullKeyName = `projects/auth-custom-try/locations/global/keyRings/Canada-Dry/cryptoKeys/${safeId}/cryptoKeyVersions/1`;
-    const fullKeyName = `projects/auth-custom-try/locations/global/keyRings/Canada-Dry/cryptoKeys/signkey/cryptoKeyVersions/1`;
 
-    const [signResponse] = await kmsClient.asymmetricSign({
-        name: fullKeyName,
-        data: data
-    });
+    const fullKeyName = kmsClient.cryptoKeyVersionPath(process.env.kmsProjectId, 'global', safeId, 'sign', '4');
 
-    return { data: signResponse };
+    const uint8Array = Buffer.from(data)
+
+    try {
+
+        const [signResponse] = await kmsClient.asymmetricSign({
+            name: fullKeyName,
+            data: uint8Array
+        });
+
+        const safeRes = JSON.stringify(signResponse.signature)
+
+        return { data: safeRes };
+
+    } catch (e) {
+        console.log(e)
+    }
+
 }
