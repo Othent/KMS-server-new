@@ -39,7 +39,8 @@ app.post('/create-user', (req: express.Request, res: express.Response) => {
 import decrypt from './lib/decrypt';
 app.post('/decrypt', upload.single('ciphertext'), (req: express.Request, res: express.Response) => {
   console.log('\x1b[36m%s\x1b[0m', `Request: /decrypt, body: ${JSON.stringify(req.body)}`)
-  decrypt(req.body.ciphertext, req.body.keyName)
+  // decrypt(req.body.ciphertext, req.body.keyName)
+  decrypt(req.body.ciphertext, 'google-oauth2|113378216876216346016')
     .then((response: any) => {
       res.json(response);
     })
@@ -54,7 +55,8 @@ app.post('/decrypt', upload.single('ciphertext'), (req: express.Request, res: ex
 import encrypt from './lib/encrypt';
 app.post('/encrypt', upload.single('plaintext'), (req: express.Request, res: express.Response) => {
   console.log('\x1b[36m%s\x1b[0m', `Request: /encrypt, body: ${JSON.stringify(req.body)}`)
-  encrypt(req.body.plaintext, req.body.keyName)
+  // encrypt(req.body.plaintext, req.body.keyName)
+  encrypt(req.body.plaintext, 'google-oauth2|113378216876216346016')
     .then((response: any) => {
       res.json(response);
     })
@@ -69,7 +71,8 @@ app.post('/encrypt', upload.single('plaintext'), (req: express.Request, res: exp
 import getPublicKey from './lib/getPublicKey';
 app.post('/get-public-key', (req: express.Request, res: express.Response) => {
   console.log('\x1b[36m%s\x1b[0m', `Request: /get-public-key, body: ${JSON.stringify(req.body)}`)
-  getPublicKey(req.body.keyName)
+  // getPublicKey(req.body.keyName)
+  getPublicKey('google-oauth2|113378216876216346016')
     .then((response: any) => {
       res.json(response);
     })
@@ -84,7 +87,8 @@ app.post('/get-public-key', (req: express.Request, res: express.Response) => {
 import sign from './lib/sign';
 app.post('/sign', (req: express.Request, res: express.Response) => {
   console.log('\x1b[36m%s\x1b[0m', `Request: /sign, body: ${JSON.stringify(req.body)}`)
-  sign(req.body.data, req.body.keyName)
+  // sign(req.body.data, req.body.keyName)
+  sign(req.body.data, 'google-oauth2|113378216876216346016')
     .then((response: any) => {
       res.json(response);
     })
