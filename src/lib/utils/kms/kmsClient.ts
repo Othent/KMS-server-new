@@ -1,3 +1,9 @@
 import { KeyManagementServiceClient } from '@google-cloud/kms';
 
-export const kmsClient = new KeyManagementServiceClient();
+
+if (!process.env.googleCredentials) {
+    console.log('Please specify a googleCredentials file in the .env')
+    throw new Error('Please specify a googleCredentials file in the .env')
+}
+
+export const kmsClient = new KeyManagementServiceClient({ credentials: JSON.parse(process.env.googleCredentials) });
