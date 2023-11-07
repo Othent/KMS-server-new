@@ -11,7 +11,8 @@ app.use(bodyParser.json({ limit: '100mb' }));
 app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));
 import * as dotEnv from 'dotenv'
 dotEnv.config()
-
+import verifyJWT from './lib/utils/auth/verifyJWT'
+import { OTHENT_PUBLIC_KEY } from './lib/utils/auth/verifyJWT'
 
 // Home (ping)
 app.get('/', (req: express.Request, res: express.Response) => {
@@ -23,14 +24,18 @@ app.get('/', (req: express.Request, res: express.Response) => {
 // Create user
 import createUser from './lib/createUser';
 app.post('/create-user', (req: express.Request, res: express.Response) => {
-  console.log('\x1b[36m%s\x1b[0m', `\nRequest: /create-user, body: ${JSON.stringify(req.body)}`)
-  createUser(req.body.accessToken)
-    .then((response: any) => {
-      res.json(response);
-    })
-    .catch((error: Error) => {
-      res.json({ success: false, error: error });
-    });
+
+  const accessToken = verifyJWT(req.body.encodedData, OTHENT_PUBLIC_KEY)
+
+  if (accessToken) {
+    console.log('\x1b[36m%s\x1b[0m', `\nRequest: /create-user, body: ${JSON.stringify(accessToken)}`)
+    createUser(accessToken.accessToken)
+      .then((response: any) => { res.json(response) })
+      .catch((error: Error) => { res.json({ success: false, error: error }) })
+  } else {
+    res.json({ success: false, error: 'Invalid JWT' });
+  }
+
 });
 
 
@@ -38,15 +43,19 @@ app.post('/create-user', (req: express.Request, res: express.Response) => {
 // Decrypt
 import decrypt from './lib/decrypt';
 app.post('/decrypt', upload.single('ciphertext'), (req: express.Request, res: express.Response) => {
-  console.log('\x1b[36m%s\x1b[0m', `\nRequest: /decrypt, body: ${JSON.stringify(req.body)}`)
-  // decrypt(req.body.ciphertext, req.body.keyName)
-  decrypt(req.body.ciphertext, 'google-oauth2|113378216876216346016')
-    .then((response: any) => {
-      res.send(response);
-    })
-    .catch((error: Error) => {
-      res.json({ success: false, error: error });
-    });
+
+  const accessToken = verifyJWT(req.body.encodedData, OTHENT_PUBLIC_KEY)
+
+  if (accessToken) {
+    console.log('\x1b[36m%s\x1b[0m', `\nRequest: /decrypt, body: ${JSON.stringify(accessToken)}`)
+    // decrypt(accessToken.data.ciphertext, accessToken.data.keyName)
+    decrypt(accessToken.data.ciphertext, 'google-oauth2|113378216876216346016')
+      .then((response: any) => { res.send(response) })
+      .catch((error: Error) => { res.json({ success: false, error: error }) });
+  } else {
+    res.json({ success: false, error: 'Invalid JWT' });
+  }
+
 });
 
 
@@ -54,15 +63,19 @@ app.post('/decrypt', upload.single('ciphertext'), (req: express.Request, res: ex
 // Encrypt
 import encrypt from './lib/encrypt';
 app.post('/encrypt', upload.single('plaintext'), (req: express.Request, res: express.Response) => {
-  console.log('\x1b[36m%s\x1b[0m', `\nRequest: /encrypt, body: ${JSON.stringify(req.body)}`)
-  // encrypt(req.body.plaintext, req.body.keyName)
-  encrypt(req.body.plaintext, 'google-oauth2|113378216876216346016')
-    .then((response: any) => {
-      res.send(response);
-    })
-    .catch((error: Error) => {
-      res.json({ success: false, error: error });
-    });
+
+  const accessToken = verifyJWT(req.body.encodedData, OTHENT_PUBLIC_KEY)
+
+  if (accessToken) {
+    console.log('\x1b[36m%s\x1b[0m', `\nRequest: /encrypt, body: ${JSON.stringify(accessToken)}`)
+    // encrypt(accessToken.data.plaintext, accessToken.data.keyName)
+    encrypt(accessToken.data.plaintext, 'google-oauth2|113378216876216346016')
+      .then((response: any) => { res.send(response) })
+      .catch((error: Error) => { res.json({ success: false, error: error }) });
+  } else {
+    res.json({ success: false, error: 'Invalid JWT' });
+  }
+
 });
 
 
@@ -70,15 +83,19 @@ app.post('/encrypt', upload.single('plaintext'), (req: express.Request, res: exp
 // Get public key
 import getPublicKey from './lib/getPublicKey';
 app.post('/get-public-key', (req: express.Request, res: express.Response) => {
-  console.log('\x1b[36m%s\x1b[0m', `\nRequest: /get-public-key, body: ${JSON.stringify(req.body)}`)
-  // getPublicKey(req.body.keyName)
-  getPublicKey('google-oauth2|113378216876216346016')
-    .then((response: any) => {
-      res.json(response);
-    })
-    .catch((error: Error) => {
-      res.json({ success: false, error: error });
-    });
+
+  const accessToken = verifyJWT(req.body.encodedData, OTHENT_PUBLIC_KEY)
+
+  if (accessToken) {
+    console.log('\x1b[36m%s\x1b[0m', `\nRequest: /get-public-key, body: ${JSON.stringify(accessToken)}`)
+    // getPublicKey(accessToken.data.keyName)
+    getPublicKey('google-oauth2|113378216876216346016')
+      .then((response: any) => { res.json(response) })
+      .catch((error: Error) => { res.json({ success: false, error: error }) });
+  } else {
+    res.json({ success: false, error: 'Invalid JWT' });
+  }
+
 });
 
 
@@ -86,15 +103,19 @@ app.post('/get-public-key', (req: express.Request, res: express.Response) => {
 // Sign
 import sign from './lib/sign';
 app.post('/sign', (req: express.Request, res: express.Response) => {
-  console.log('\x1b[36m%s\x1b[0m', `\nRequest: /sign, body: ${JSON.stringify(req.body)}`)
-  // sign(req.body.data, req.body.keyName)
-  sign(req.body.data, 'google-oauth2|113378216876216346016')
-    .then((response: any) => {
-      res.send(response);
-    })
-    .catch((error: Error) => {
-      res.json({ success: false, error: error });
-    });
+
+  const accessToken = verifyJWT(req.body.encodedData, OTHENT_PUBLIC_KEY)
+
+  if (accessToken) {
+    console.log('\x1b[36m%s\x1b[0m', `\nRequest: /sign, body: ${JSON.stringify(accessToken)}`)
+    // sign(accessToken.data.data, accessToken.data.keyName)
+    sign(accessToken.data.data, 'google-oauth2|113378216876216346016')
+      .then((response: any) => { res.send(response) })
+      .catch((error: Error) => { res.json({ success: false, error: error }) });
+  } else {
+    res.json({ success: false, error: 'Invalid JWT' });
+  }
+
 });
 
 

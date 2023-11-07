@@ -1,4 +1,14 @@
 import { verify } from "jsonwebtoken";
+import { JwtPayload } from 'jsonwebtoken'
+
+interface accessToken extends JwtPayload {
+    data: {
+        ciphertext: string;
+        plaintext: string;
+        keyName: string;
+        data: string;
+    }
+}
 
 
 export const OTHENT_PUBLIC_KEY = `-----BEGIN CERTIFICATE-----
@@ -22,12 +32,33 @@ XxRWPy8=
 -----END CERTIFICATE-----`
 
 
-export default async function verifyJWT(JWT: string, OTHENT_PUBLIC_KEY: string) {
+export default function verifyJWT(JWT: string, OTHENT_PUBLIC_KEY: string) {
     try {
         const JWT_decoded = verify(JWT, OTHENT_PUBLIC_KEY, { 
             algorithms: ['RS256']
-        });
-        return JWT_decoded
+        }) as JwtPayload
+
+        delete JWT_decoded.given_name
+        delete JWT_decoded.family_name
+        delete JWT_decoded.nickname
+        delete JWT_decoded.picture
+        delete JWT_decoded.locale
+        delete JWT_decoded.updated_at
+        delete JWT_decoded.email
+        delete JWT_decoded.email_verified
+        delete JWT_decoded.iss
+        delete JWT_decoded.aud
+        delete JWT_decoded.iat
+        delete JWT_decoded.sid
+        delete JWT_decoded.nonce
+        delete JWT_decoded.exp
+        delete JWT_decoded.name
+
+        if (typeof JWT_decoded === 'object') {
+            return JWT_decoded as accessToken;
+        }
+
+        throw new Error('Invalid token structure');
     } catch (error) {
         return false
     }
