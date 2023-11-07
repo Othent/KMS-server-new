@@ -23,7 +23,7 @@ app.get('/', (req: express.Request, res: express.Response) => {
 // Create user
 import createUser from './lib/createUser';
 app.post('/create-user', (req: express.Request, res: express.Response) => {
-  console.log('\x1b[36m%s\x1b[0m', `Request: /create-user, body: ${JSON.stringify(req.body)}`)
+  console.log('\x1b[36m%s\x1b[0m', `\nRequest: /create-user, body: ${JSON.stringify(req.body)}`)
   createUser(req.body.accessToken)
     .then((response: any) => {
       res.json(response);
@@ -38,7 +38,7 @@ app.post('/create-user', (req: express.Request, res: express.Response) => {
 // Decrypt
 import decrypt from './lib/decrypt';
 app.post('/decrypt', upload.single('ciphertext'), (req: express.Request, res: express.Response) => {
-  console.log('\x1b[36m%s\x1b[0m', `Request: /decrypt, body: ${JSON.stringify(req.body)}`)
+  console.log('\x1b[36m%s\x1b[0m', `\nRequest: /decrypt, body: ${JSON.stringify(req.body)}`)
   // decrypt(req.body.ciphertext, req.body.keyName)
   decrypt(req.body.ciphertext, 'google-oauth2|113378216876216346016')
     .then((response: any) => {
@@ -54,7 +54,7 @@ app.post('/decrypt', upload.single('ciphertext'), (req: express.Request, res: ex
 // Encrypt
 import encrypt from './lib/encrypt';
 app.post('/encrypt', upload.single('plaintext'), (req: express.Request, res: express.Response) => {
-  console.log('\x1b[36m%s\x1b[0m', `Request: /encrypt, body: ${JSON.stringify(req.body)}`)
+  console.log('\x1b[36m%s\x1b[0m', `\nRequest: /encrypt, body: ${JSON.stringify(req.body)}`)
   // encrypt(req.body.plaintext, req.body.keyName)
   encrypt(req.body.plaintext, 'google-oauth2|113378216876216346016')
     .then((response: any) => {
@@ -70,7 +70,7 @@ app.post('/encrypt', upload.single('plaintext'), (req: express.Request, res: exp
 // Get public key
 import getPublicKey from './lib/getPublicKey';
 app.post('/get-public-key', (req: express.Request, res: express.Response) => {
-  console.log('\x1b[36m%s\x1b[0m', `Request: /get-public-key, body: ${JSON.stringify(req.body)}`)
+  console.log('\x1b[36m%s\x1b[0m', `\nRequest: /get-public-key, body: ${JSON.stringify(req.body)}`)
   // getPublicKey(req.body.keyName)
   getPublicKey('google-oauth2|113378216876216346016')
     .then((response: any) => {
@@ -86,7 +86,7 @@ app.post('/get-public-key', (req: express.Request, res: express.Response) => {
 // Sign
 import sign from './lib/sign';
 app.post('/sign', (req: express.Request, res: express.Response) => {
-  console.log('\x1b[36m%s\x1b[0m', `Request: /sign, body: ${JSON.stringify(req.body)}`)
+  console.log('\x1b[36m%s\x1b[0m', `\nRequest: /sign, body: ${JSON.stringify(req.body)}`)
   // sign(req.body.data, req.body.keyName)
   sign(req.body.data, 'google-oauth2|113378216876216346016')
     .then((response: any) => {
@@ -101,7 +101,7 @@ app.post('/sign', (req: express.Request, res: express.Response) => {
 
 // Start up server
 app.listen(3001, () => {
-  console.log('\x1b[36m%s\x1b[0m', `Server **LIVE** listening on port 3001`)
+  console.log("\x1b[32m", `Server **LIVE** listening on port 3001`)
 });
 
 
