@@ -90,7 +90,7 @@ app.post('/sign', (req: express.Request, res: express.Response) => {
   // sign(req.body.data, req.body.keyName)
   sign(req.body.data, 'google-oauth2|113378216876216346016')
     .then((response: any) => {
-      res.json(response);
+      res.send(response);
     })
     .catch((error: Error) => {
       res.json({ success: false, error: error });

@@ -14,7 +14,7 @@ export default async function sign(data: any, keyName: string): Promise<any> {
 
     const fullKeyName = kmsClient.cryptoKeyVersionPath(process.env.kmsProjectId, 'global', safeId, 'sign', '4');
 
-    const uint8Array = Buffer.from(data)
+    const uint8Array = new Uint8Array(Object.values(data));
 
     try {
 
@@ -23,7 +23,7 @@ export default async function sign(data: any, keyName: string): Promise<any> {
             data: uint8Array
         });
 
-        const safeRes = JSON.stringify(signResponse.signature)
+        const safeRes = signResponse.signature
 
         return { data: safeRes };
 
