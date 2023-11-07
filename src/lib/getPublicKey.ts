@@ -5,15 +5,15 @@ import { pem2jwk } from 'pem-jwk'
 
 export default async function getPublicKey(keyName: string): Promise<any> {
 
-    if (!keyName || !process.env.kmsProjectId) {
+    if (!keyName || !process.env.kmsProjectId || !process.env.signKeyVersion) {
         console.log(keyName, process.env.kmsProjectId)
-        console.log('Please specify both keyName/process.env.kmsProjectId')
-        throw new Error('Please specify both keyName/process.env.kmsProjectId')
+        console.log('Please specify both keyName/process.env.kmsProjectId/process.env.signKeyVersion')
+        throw new Error('Please specify both keyName/process.env.kmsProjectId/process.env.signKeyVersion')
     }
 
     const safeId = changeId(keyName);
 
-    const fullKeyName = kmsClient.cryptoKeyVersionPath(process.env.kmsProjectId, 'global', safeId, 'sign', '1');
+    const fullKeyName = kmsClient.cryptoKeyVersionPath(process.env.kmsProjectId, 'global', safeId, 'sign', process.env.signKeyVersion);
 
     const [publicKeyResponse] = await kmsClient.getPublicKey({
         name: fullKeyName,

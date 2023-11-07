@@ -4,15 +4,15 @@ import { changeId } from './utils/tools/changeId';
 
 export default async function sign(data: any, keyName: string): Promise<any> {
 
-    if (!data || !keyName || !process.env.kmsProjectId) {
+    if (!data || !keyName || !process.env.kmsProjectId || !process.env.signKeyVersion) {
         console.log(data, keyName, process.env.kmsProjectId)
-        console.log('Please specify both data/keyName/process.env.kmsProjectId')
-        throw new Error('Please specify both data/keyName/process.env.kmsProjectId')
+        console.log('Please specify both data/keyName/process.env.kmsProjectId/process.env.signKeyVersion')
+        throw new Error('Please specify both data/keyName/process.env.kmsProjectId/process.env.signKeyVersion')
     }
 
     const safeId = changeId(keyName);
 
-    const fullKeyName = kmsClient.cryptoKeyVersionPath(process.env.kmsProjectId, 'global', safeId, 'sign', '4');
+    const fullKeyName = kmsClient.cryptoKeyVersionPath(process.env.kmsProjectId, 'global', safeId, 'sign', process.env.signKeyVersion);
 
     const uint8Array = new Uint8Array(Object.values(data));
 
