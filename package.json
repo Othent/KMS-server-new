@@ -14,7 +14,7 @@
     "dev": "npm run build && node dist/index.js",
     "postinstall": "rm -rf ./dist && rollup -c && dts-bundle-generator src/index.ts -o dist/index.d.ts --no-banner",
     "heroku-postbuild": "rm -rf ./dist && rollup -c && dts-bundle-generator src/index.ts -o dist/index.d.ts --no-banner",
-    "test": "jest tests/"
+    "test": "jest tests/tests/ --coverage"
   },
   "jest": {
     "preset": "ts-jest",
