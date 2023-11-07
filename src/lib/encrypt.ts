@@ -2,23 +2,24 @@ import { kmsClient } from './utils/kms/kmsClient';
 import { changeId } from './utils/tools/changeId';
 
 
-export default async function encrypt(plaintext: Buffer, keyName: string): Promise<any> {
+export default async function encrypt(plaintextData: string, keyName: string): Promise<any> {
 
-    if (!plaintext || !keyName || !process.env.kmsProjectId) {
-        console.log('Please specify both plaintext/keyName/process.env.kmsProjectId')
-        throw new Error('Please specify both plaintext/keyName/process.env.kmsProjectId')
+    if (!plaintextData || !keyName || !process.env.kmsProjectId) {
+        console.log('Please specify both plaintextData/keyName/process.env.kmsProjectId')
+        throw new Error('Please specify both plaintextData/keyName/process.env.kmsProjectId')
     }
 
     const safeId = changeId(keyName)
 
-    const fullKeyName = kmsClient.cryptoKeyPath(process.env.kmsProjectId, 'global', safeId, 'encryptDecrypt')
+    const name = kmsClient.cryptoKeyPath(process.env.kmsProjectId, 'global', safeId, 'encryptDecrypt')
 
     try {
 
         const [encryptResponse] = await kmsClient.encrypt({
-            name: fullKeyName,
-            plaintext: plaintext,
+            name,
+            plaintext: Buffer.from(plaintextData),
         });
+
 
         if (!encryptResponse || !encryptResponse.ciphertext) {
             console.log('Encryption failed or returned null/undefined ciphertext')

@@ -42,7 +42,7 @@ app.post('/decrypt', upload.single('ciphertext'), (req: express.Request, res: ex
   // decrypt(req.body.ciphertext, req.body.keyName)
   decrypt(req.body.ciphertext, 'google-oauth2|113378216876216346016')
     .then((response: any) => {
-      res.json(response);
+      res.send(response);
     })
     .catch((error: Error) => {
       res.json({ success: false, error: error });
@@ -58,7 +58,7 @@ app.post('/encrypt', upload.single('plaintext'), (req: express.Request, res: exp
   // encrypt(req.body.plaintext, req.body.keyName)
   encrypt(req.body.plaintext, 'google-oauth2|113378216876216346016')
     .then((response: any) => {
-      res.json(response);
+      res.send(response);
     })
     .catch((error: Error) => {
       res.json({ success: false, error: error });
