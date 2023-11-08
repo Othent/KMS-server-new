@@ -1,15 +1,14 @@
 import { verify } from "jsonwebtoken";
-import { JwtPayload } from 'jsonwebtoken'
+import { JwtPayload } from "jsonwebtoken";
 
 interface accessToken extends JwtPayload {
-    data: {
-        ciphertext: string;
-        plaintext: string;
-        keyName: string;
-        data: string;
-    }
+  data: {
+    ciphertext: string;
+    plaintext: string;
+    keyName: string;
+    data: string;
+  };
 }
-
 
 export const OTHENT_PUBLIC_KEY = `-----BEGIN CERTIFICATE-----
 MIIDATCCAemgAwIBAgIJCASZzYUxA3ZaMA0GCSqGSIb3DQEBCwUAMB4xHDAaBgNV
@@ -29,39 +28,36 @@ p2YZm2gUDTiMQz1QQdKVmjB9TnNYP9jI7b4lupfuDeMntAVAo8b8WCrRQV4voN88
 czxVhbQzxSOJlvug/pN3uUuyGo8DB4WDtBpb3fSnNAiox1n33E93P6zhyPg5QVSQ
 lY/ACXm3UhY5UsRZXEzjoAL/ymM68b6B/85N4Xypve+bUk+Zwb9Ojmwb0pU9azQE
 XxRWPy8=
------END CERTIFICATE-----`
-
+-----END CERTIFICATE-----`;
 
 export default function verifyJWT(JWT: string, OTHENT_PUBLIC_KEY: string) {
-    try {
-        const JWT_decoded = verify(JWT, OTHENT_PUBLIC_KEY, { 
-            algorithms: ['RS256']
-        }) as JwtPayload
+  try {
+    const JWT_decoded = verify(JWT, OTHENT_PUBLIC_KEY, {
+      algorithms: ["RS256"],
+    }) as JwtPayload;
 
-        delete JWT_decoded.given_name
-        delete JWT_decoded.family_name
-        delete JWT_decoded.nickname
-        delete JWT_decoded.picture
-        delete JWT_decoded.locale
-        delete JWT_decoded.updated_at
-        delete JWT_decoded.email
-        delete JWT_decoded.email_verified
-        delete JWT_decoded.iss
-        delete JWT_decoded.aud
-        delete JWT_decoded.iat
-        delete JWT_decoded.sid
-        delete JWT_decoded.nonce
-        delete JWT_decoded.exp
-        delete JWT_decoded.name
+    delete JWT_decoded.given_name;
+    delete JWT_decoded.family_name;
+    delete JWT_decoded.nickname;
+    delete JWT_decoded.picture;
+    delete JWT_decoded.locale;
+    delete JWT_decoded.updated_at;
+    delete JWT_decoded.email;
+    delete JWT_decoded.email_verified;
+    delete JWT_decoded.iss;
+    delete JWT_decoded.aud;
+    delete JWT_decoded.iat;
+    delete JWT_decoded.sid;
+    delete JWT_decoded.nonce;
+    delete JWT_decoded.exp;
+    delete JWT_decoded.name;
 
-        if (typeof JWT_decoded === 'object') {
-            return JWT_decoded as accessToken;
-        }
-
-        throw new Error('Invalid token structure');
-    } catch (error) {
-        return false
+    if (typeof JWT_decoded === "object") {
+      return JWT_decoded as accessToken;
     }
+
+    throw new Error("Invalid token structure");
+  } catch (error) {
+    return false;
+  }
 }
-
-

@@ -1,8 +1,7 @@
-import { kmsClient } from './kmsClient.js';
-import jwkToPem from 'jwk-to-pem';
-import { generateKey } from '../arweave/generateKey.js';
-import { ownerToAddress } from '../arweave/arweaveUtils.js';
-
+import { kmsClient } from "./kmsClient.js";
+import jwkToPem from "jwk-to-pem";
+import { generateKey } from "../arweave/generateKey.js";
+import { ownerToAddress } from "../arweave/arweaveUtils.js";
 
 const JobPEM = `-----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA49RpJabPsIkTLApbA7eU
@@ -18,19 +17,18 @@ wqVq1NaFvIp779phyewnEZjTO42I+ZgYor09ncoL5f4SA3dG/Uyz+eGUYfhzm6+p
 kIqIQWJNSzoeGw3fbO8SujYtWKHFaLcvpGwG6TMqvB51d3f5acLGsOlmrjinFcrD
 ATkPvTqcglVzb+dOEMLkGFcCAwEAAQ==
 -----END PUBLIC KEY-----
-`
-
+`;
 
 async function createImportJob(importJobId: string) {
-    return await kmsClient.createImportJob({
-        parent: 'projects/auth-custom-try/locations/global/keyRings/Canada-Dry',
-        importJobId: importJobId,
-        importJob: {
-            importMethod: 'RSA_OAEP_4096_SHA1_AES_256',
-            protectionLevel: 'SOFTWARE',
-            // publicKey: { pem: PublicPemJWK }
-        },
-    })
+  return await kmsClient.createImportJob({
+    parent: "projects/auth-custom-try/locations/global/keyRings/Canada-Dry",
+    importJobId: importJobId,
+    importJob: {
+      importMethod: "RSA_OAEP_4096_SHA1_AES_256",
+      protectionLevel: "SOFTWARE",
+      // publicKey: { pem: PublicPemJWK }
+    },
+  });
 }
 
 // async function importTheKey(importJobId, cryptoKeyId, rsaAesWrappedKey) {
@@ -43,7 +41,6 @@ async function createImportJob(importJobId: string) {
 //     });
 //   }
 
-
 //   async function prepareKeyForImport(JWK) {
 
 //     const stringJWK = JSON.stringify(JWK)
@@ -55,31 +52,26 @@ async function createImportJob(importJobId: string) {
 //       oaepHash: 'sha256',
 //   }, bufferStuff);
 
-
-  
 //     return bufferStuff;
 //   }
 
-
-
 export default async function importKey(): Promise<any> {
-    await createImportJob('Job3')
+  await createImportJob("Job3");
 
-    const { mnemonic, JWK } = await generateKey();
+  const { mnemonic, JWK } = await generateKey();
 
-    delete JWK.d
-    delete JWK.p
-    delete JWK.q
-    delete JWK.dp
-    delete JWK.dq
-    delete JWK.qi
+  delete JWK.d;
+  delete JWK.p;
+  delete JWK.q;
+  delete JWK.dp;
+  delete JWK.dq;
+  delete JWK.qi;
 
+  // const processedKey = await prepareKeyForImport(JWK)
 
-    // const processedKey = await prepareKeyForImport(JWK)
+  // const res = await importTheKey('Job3', 'Key', processedKey)
 
-    // const res = await importTheKey('Job3', 'Key', processedKey)
+  const walletAddress = await ownerToAddress(JWK.n);
 
-    const walletAddress = await ownerToAddress(JWK.n)
-
-    return { mnemonic, walletAddress };
+  return { mnemonic, walletAddress };
 }

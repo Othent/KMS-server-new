@@ -1,28 +1,35 @@
-import { kmsClient } from './utils/kms/kmsClient';
-import { changeId } from './utils/tools/changeId';
-import { pem2jwk } from 'pem-jwk'
-
+import { kmsClient } from "./utils/kms/kmsClient";
+import { changeId } from "./utils/tools/changeId";
+import { pem2jwk } from "pem-jwk";
 
 export default async function getPublicKey(keyName: string): Promise<any> {
+  if (!keyName || !process.env.kmsProjectId || !process.env.signKeyVersion) {
+    console.log(keyName, process.env.kmsProjectId);
+    console.log(
+      "Please specify both keyName/process.env.kmsProjectId/process.env.signKeyVersion",
+    );
+    throw new Error(
+      "Please specify both keyName/process.env.kmsProjectId/process.env.signKeyVersion",
+    );
+  }
 
-    if (!keyName || !process.env.kmsProjectId || !process.env.signKeyVersion) {
-        console.log(keyName, process.env.kmsProjectId)
-        console.log('Please specify both keyName/process.env.kmsProjectId/process.env.signKeyVersion')
-        throw new Error('Please specify both keyName/process.env.kmsProjectId/process.env.signKeyVersion')
-    }
+  const safeId = changeId(keyName);
 
-    const safeId = changeId(keyName);
+  const fullKeyName = kmsClient.cryptoKeyVersionPath(
+    process.env.kmsProjectId,
+    "global",
+    safeId,
+    "sign",
+    process.env.signKeyVersion,
+  );
 
-    const fullKeyName = kmsClient.cryptoKeyVersionPath(process.env.kmsProjectId, 'global', safeId, 'sign', process.env.signKeyVersion);
+  const [publicKeyResponse] = await kmsClient.getPublicKey({
+    name: fullKeyName,
+  });
 
-    const [publicKeyResponse] = await kmsClient.getPublicKey({
-        name: fullKeyName,
-    });
+  const pem = publicKeyResponse.pem;
+  // @ts-ignore, ignore types for pem file
+  const publicKey = pem2jwk(pem);
 
-    const pem = publicKeyResponse.pem
-    // @ts-ignore, ignore types for pem file
-    const publicKey = pem2jwk(pem)
-
-    return { data: publicKey.n }
-
+  return { data: publicKey.n };
 }
