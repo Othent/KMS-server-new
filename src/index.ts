@@ -1,4 +1,3 @@
-console.log(1)
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
@@ -12,13 +11,10 @@ app.use(
 );
 app.use(bodyParser.json({ limit: "100mb" }));
 app.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
-console.log(2)
-// import * as dotEnv from "dotenv";
-// dotEnv.config();
+import * as dotEnv from "dotenv";
+dotEnv.config();
 import verifyJWT from "./lib/utils/auth/verifyJWT";
 import { OTHENT_PUBLIC_KEY } from "./lib/utils/auth/verifyJWT";
-
-console.log(3)
 
 // Home (ping)
 app.get("/", (req: express.Request, res: express.Response) => {

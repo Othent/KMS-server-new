@@ -1,6 +1,6 @@
 import { KeyManagementServiceClient } from "@google-cloud/kms";
-// import * as dotEnv from "dotenv";
-// dotEnv.config();
+import * as dotEnv from "dotenv";
+dotEnv.config();
 
 export const kmsClient = (() => {
   if (!process.env.googleCredentials) {
