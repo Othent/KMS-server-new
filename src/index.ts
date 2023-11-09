@@ -157,8 +157,9 @@ app.post("/sign", (req: express.Request, res: express.Response) => {
 });
 
 // Start up server
-app.listen(3001, () => {
-  console.log("\x1b[32m", `Server **LIVE** listening on port 3001`);
+const port = process.env.PORT;
+app.listen(port, () => {
+  console.log("\x1b[32m", `Server **LIVE** listening on port ${port}`);
 });
 
 export default app;
