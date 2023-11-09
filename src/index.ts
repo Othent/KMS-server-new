@@ -34,7 +34,7 @@ app.post("/create-user", (req: express.Request, res: express.Response) => {
     createUser(accessToken)
       .then((response: any) => {
         console.log(
-          "\x1b[36m%s\x1b[0m",
+          "\x1b[32m",
           `Response: /create-user: ${JSON.stringify(response)}`,
         );
         res.json(response);
@@ -63,7 +63,7 @@ app.post(
       decrypt(accessToken.data.ciphertext, accessToken.data.keyName)
         .then((response: any) => {
           console.log(
-            "\x1b[36m%s\x1b[0m",
+            "\x1b[32m",
             `Response: /decrypt: ${JSON.stringify(response)}`,
           );
           res.send(response);
@@ -93,7 +93,7 @@ app.post(
       encrypt(accessToken.data.plaintext, accessToken.data.keyName)
         .then((response: any) => {
           console.log(
-            "\x1b[36m%s\x1b[0m",
+            "\x1b[32m",
             `Response: /encrypt: ${JSON.stringify(response)}`,
           );
           res.send(response);
@@ -120,7 +120,7 @@ app.post("/get-public-key", (req: express.Request, res: express.Response) => {
     getPublicKey(accessToken.data.keyName)
       .then((response: any) => {
         console.log(
-          "\x1b[36m%s\x1b[0m",
+          "\x1b[32m",
           `Response: /get-public-key: ${JSON.stringify(response)}`,
         );
         res.json(response);
@@ -145,10 +145,7 @@ app.post("/sign", (req: express.Request, res: express.Response) => {
     );
     sign(accessToken.data.data, accessToken.data.keyName)
       .then((response: any) => {
-        console.log(
-          "\x1b[36m%s\x1b[0m",
-          `Response: /sign: ${JSON.stringify(response)}`,
-        );
+        console.log("\x1b[32m", `Response: /sign: ${JSON.stringify(response)}`);
         res.send(response);
       })
       .catch((error: Error) => {
