@@ -1,16 +1,20 @@
 name: Test SDK functions
+
 on: [push, pull_request]
+
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
+    name: 🚀 Test SDK functions
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: 📚 checkout
+        uses: actions/checkout@v2.1.1
+      - name: 🟢 node
+        uses: actions/setup-node@v2.5.0
         with:
-          node-version: "20.5.0"
-      - name: Install dependencies
+          node-version: 20.5.0
+          registry-url: https://registry.npmjs.org
+      - name: 📦 install dependencies
         run: npm install
       - name: Run tests
         run: npm test
