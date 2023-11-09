@@ -1,16 +1,19 @@
 import axios from "axios";
-import verifyJWT, { OTHENT_PUBLIC_KEY } from "./utils/auth/verifyJWT";
-// @ts-ignore
-// import importKey from './utils/importKey.js'
+import { createKMSUser } from "./utils/kms/createKMSUser";
+import { changeId } from "./utils/tools/changeId";
 
-export default async function createUser(accessToken: string): Promise<any> {
-  const JWT = await verifyJWT(accessToken, OTHENT_PUBLIC_KEY);
-  if (!JWT) {
+export default async function createUser(JWT: any): Promise<any> {
+  if (!JWT || !JWT.sub) {
     return { error: "invalid JWT" };
   }
 
-  // @ts-ignore
-  const { mnemonic, walletAddress } = await importKey();
+  const safeId = changeId(JWT.sub);
+
+  const initKMSUser = await createKMSUser(safeId);
+
+  if (!initKMSUser) {
+    throw new Error("Error initializing users KMS.");
+  }
 
   const tokenParams = {
     grant_type: "client_credentials",
@@ -35,17 +38,14 @@ export default async function createUser(accessToken: string): Promise<any> {
       },
       data: {
         user_metadata: {
-          wallet_address: walletAddress,
-          initJWT: JWT,
           authSystem: "KMS",
         },
       },
     };
 
     const userResponse = await axios.request(options);
-    return { user: userResponse.data, mnemonic: mnemonic };
-  } catch (error) {
-    console.error(error);
-    return { error: error };
+    return { data: userResponse.data };
+  } catch (e) {
+    throw new Error(`Error creating new user. ${e}`);
   }
 }

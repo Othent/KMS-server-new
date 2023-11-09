@@ -23,13 +23,17 @@ export default async function getPublicKey(keyName: string): Promise<any> {
     process.env.signKeyVersion,
   );
 
-  const [publicKeyResponse] = await kmsClient.getPublicKey({
-    name: fullKeyName,
-  });
+  try {
+    const [publicKeyResponse] = await kmsClient.getPublicKey({
+      name: fullKeyName,
+    });
 
-  const pem = publicKeyResponse.pem;
-  // @ts-ignore, ignore types for pem file
-  const publicKey = pem2jwk(pem);
+    const pem = publicKeyResponse.pem;
+    // @ts-ignore, ignore types for pem file
+    const publicKey = pem2jwk(pem);
 
-  return { data: publicKey.n };
+    return { data: publicKey.n };
+  } catch (e) {
+    throw new Error(`Error getting public key. ${e}`);
+  }
 }

@@ -37,6 +37,6 @@ export default async function decrypt(
 
     return { data: decryptResponse.plaintext.toString() };
   } catch (e) {
-    console.log(e);
+    throw new Error(`Error decrypting data. ${e}`);
   }
 }

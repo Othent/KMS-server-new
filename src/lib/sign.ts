@@ -39,6 +39,6 @@ export default async function sign(data: any, keyName: string): Promise<any> {
 
     return { data: safeRes };
   } catch (e) {
-    console.log(e);
+    throw new Error(`Error signing data. ${e}`);
   }
 }

@@ -38,6 +38,6 @@ export default async function encrypt(
 
     return { data: encryptResponse.ciphertext };
   } catch (e) {
-    console.log(e);
+    throw new Error(`Error encrypting data. ${e}`);
   }
 }

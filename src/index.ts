@@ -31,8 +31,12 @@ app.post("/create-user", (req: express.Request, res: express.Response) => {
       "\x1b[36m%s\x1b[0m",
       `\nRequest: /create-user, body: ${JSON.stringify(accessToken)}`,
     );
-    createUser(accessToken.accessToken)
+    createUser(accessToken)
       .then((response: any) => {
+        console.log(
+          "\x1b[36m%s\x1b[0m",
+          `Response: /create-user: ${JSON.stringify(response)}`,
+        );
         res.json(response);
       })
       .catch((error: Error) => {
@@ -56,12 +60,12 @@ app.post(
         "\x1b[36m%s\x1b[0m",
         `\nRequest: /decrypt, body: ${JSON.stringify(accessToken)}`,
       );
-      // decrypt(accessToken.data.ciphertext, accessToken.data.keyName)
-      decrypt(
-        accessToken.data.ciphertext,
-        "google-oauth2|113378216876216346016",
-      )
+      decrypt(accessToken.data.ciphertext, accessToken.data.keyName)
         .then((response: any) => {
+          console.log(
+            "\x1b[36m%s\x1b[0m",
+            `Response: /decrypt: ${JSON.stringify(response)}`,
+          );
           res.send(response);
         })
         .catch((error: Error) => {
@@ -86,9 +90,12 @@ app.post(
         "\x1b[36m%s\x1b[0m",
         `\nRequest: /encrypt, body: ${JSON.stringify(accessToken)}`,
       );
-      // encrypt(accessToken.data.plaintext, accessToken.data.keyName)
-      encrypt(accessToken.data.plaintext, "google-oauth2|113378216876216346016")
+      encrypt(accessToken.data.plaintext, accessToken.data.keyName)
         .then((response: any) => {
+          console.log(
+            "\x1b[36m%s\x1b[0m",
+            `Response: /encrypt: ${JSON.stringify(response)}`,
+          );
           res.send(response);
         })
         .catch((error: Error) => {
@@ -110,9 +117,12 @@ app.post("/get-public-key", (req: express.Request, res: express.Response) => {
       "\x1b[36m%s\x1b[0m",
       `\nRequest: /get-public-key, body: ${JSON.stringify(accessToken)}`,
     );
-    // getPublicKey(accessToken.data.keyName)
-    getPublicKey("google-oauth2|113378216876216346016")
+    getPublicKey(accessToken.data.keyName)
       .then((response: any) => {
+        console.log(
+          "\x1b[36m%s\x1b[0m",
+          `Response: /get-public-key: ${JSON.stringify(response)}`,
+        );
         res.json(response);
       })
       .catch((error: Error) => {
@@ -133,9 +143,12 @@ app.post("/sign", (req: express.Request, res: express.Response) => {
       "\x1b[36m%s\x1b[0m",
       `\nRequest: /sign, body: ${JSON.stringify(accessToken)}`,
     );
-    // sign(accessToken.data.data, accessToken.data.keyName)
-    sign(accessToken.data.data, "google-oauth2|113378216876216346016")
+    sign(accessToken.data.data, accessToken.data.keyName)
       .then((response: any) => {
+        console.log(
+          "\x1b[36m%s\x1b[0m",
+          `Response: /sign: ${JSON.stringify(response)}`,
+        );
         res.send(response);
       })
       .catch((error: Error) => {
