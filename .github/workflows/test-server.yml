@@ -1,11 +1,11 @@
-name: Test SDK functions
+name: Test server functions
 
 on: [push]
 
 jobs:
   test:
     runs-on: macos-latest
-    name: 🚀 Test SDK functions
+    name: 🚀 Test server functions
     steps:
       - name: 📚 checkout
         uses: actions/checkout@v2.1.1
@@ -14,7 +14,14 @@ jobs:
         with:
           node-version: 20.5.0
           registry-url: https://registry.npmjs.org
-      - name: 📦 install dependencies
+      - name: 📦 Install dependencies
         run: npm install
-      - name: Run tests
-        run: npm test
+      - name: 🧪 Run tests
+        env:
+          auth0ClientId: ${{ secrets.AUTH0CLIENTID }}
+          auth0ClientSecret: ${{ secrets.AUTH0CLIENTSECRET }}
+          googleCredentials: ${{ secrets.GOOGLECREDENTIALS }}
+          kmsProjectId: ${{ secrets.KMSPROJECTID }}
+          PORT: ${{ secrets.PORT }}
+          signKeyVersion: ${{ secrets.SIGNKEYVERSION }}
+        run: npm run test
