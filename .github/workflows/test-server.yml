@@ -1,0 +1,27 @@
+name: Test server functions
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: macos-latest
+    name: 🚀 Test server functions
+    steps:
+      - name: 📚 checkout
+        uses: actions/checkout@v2.1.1
+      - name: 🟢 node
+        uses: actions/setup-node@v2.5.0
+        with:
+          node-version: 20.5.0
+          registry-url: https://registry.npmjs.org
+      - name: 📦 Install dependencies
+        run: npm install
+      - name: 🧪 Run tests
+        env:
+          auth0ClientId: ${{ secrets.AUTH0CLIENTID }}
+          auth0ClientSecret: ${{ secrets.AUTH0CLIENTSECRET }}
+          googleCredentials: ${{ secrets.GOOGLECREDENTIALS }}
+          kmsProjectId: ${{ secrets.KMSPROJECTID }}
+          PORT: ${{ secrets.PORT }}
+          signKeyVersion: ${{ secrets.SIGNKEYVERSION }}
+        run: npm run test
