@@ -1,7 +1,7 @@
 import { verify } from "jsonwebtoken";
 import { JwtPayload } from "jsonwebtoken";
 import { getLastNonce } from "./getLastNonce";
-import { updateJWTNonce } from './updateJWTNonce'
+import { updateJWTNonce } from "./updateJWTNonce";
 
 interface accessToken extends JwtPayload {
   data: {
@@ -38,15 +38,15 @@ export async function verifyJWT(JWT: string, OTHENT_PUBLIC_KEY: string) {
       algorithms: ["RS256"],
     }) as JwtPayload;
 
-    const lastNonce = await getLastNonce(JWT_decoded)
+    const lastNonce = await getLastNonce(JWT_decoded);
 
     if (JWT_decoded.iat) {
       if (JWT_decoded.iat <= lastNonce) {
-        return false
+        return false;
       } else {
-        const updateNonce = await updateJWTNonce(JWT_decoded)
+        const updateNonce = await updateJWTNonce(JWT_decoded);
         if (!updateNonce) {
-          return false
+          return false;
         }
       }
     } else {
