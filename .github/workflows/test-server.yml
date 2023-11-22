@@ -25,3 +25,5 @@ jobs:
           PORT: ${{ secrets.PORT }}
           signKeyVersion: ${{ secrets.SIGNKEYVERSION }}
         run: npm run test
+      - name: 💄 Run prettier
+        run: npm run prettier
