@@ -39,6 +39,7 @@ export default async function createUser(JWT: any): Promise<any> {
       data: {
         user_metadata: {
           authSystem: "KMS",
+          lastNonce: 1
         },
       },
     };

@@ -1,5 +1,7 @@
 import { verify } from "jsonwebtoken";
 import { JwtPayload } from "jsonwebtoken";
+import { getLastNonce } from "./getLastNonce";
+import { updateJWTNonce } from './updateJWTNonce'
 
 interface accessToken extends JwtPayload {
   data: {
@@ -30,11 +32,26 @@ lY/ACXm3UhY5UsRZXEzjoAL/ymM68b6B/85N4Xypve+bUk+Zwb9Ojmwb0pU9azQE
 XxRWPy8=
 -----END CERTIFICATE-----`;
 
-export default function verifyJWT(JWT: string, OTHENT_PUBLIC_KEY: string) {
+export async function verifyJWT(JWT: string, OTHENT_PUBLIC_KEY: string) {
   try {
     const JWT_decoded = verify(JWT, OTHENT_PUBLIC_KEY, {
       algorithms: ["RS256"],
     }) as JwtPayload;
+
+    const lastNonce = await getLastNonce(JWT_decoded)
+
+    if (JWT_decoded.iat) {
+      if (JWT_decoded.iat <= lastNonce) {
+        return false
+      } else {
+        const updateNonce = await updateJWTNonce(JWT_decoded)
+        if (!updateNonce) {
+          return false
+        }
+      }
+    } else {
+      throw new Error("Invalid token structure");
+    }
 
     delete JWT_decoded.given_name;
     delete JWT_decoded.family_name;
@@ -46,7 +63,6 @@ export default function verifyJWT(JWT: string, OTHENT_PUBLIC_KEY: string) {
     delete JWT_decoded.email_verified;
     delete JWT_decoded.iss;
     delete JWT_decoded.aud;
-    delete JWT_decoded.iat;
     delete JWT_decoded.sid;
     delete JWT_decoded.nonce;
     delete JWT_decoded.exp;

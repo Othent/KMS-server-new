@@ -13,7 +13,7 @@ app.use(bodyParser.json({ limit: "100mb" }));
 app.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
 import * as dotEnv from "dotenv";
 dotEnv.config();
-import verifyJWT from "./lib/utils/auth/verifyJWT";
+import { verifyJWT } from "./lib/utils/auth/verifyJWT";
 import { OTHENT_PUBLIC_KEY } from "./lib/utils/auth/verifyJWT";
 
 // Home (ping)
