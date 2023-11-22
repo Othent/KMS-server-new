@@ -10,11 +10,14 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 test("if verifyJWT() works", async () => {
-
-    if (!process.env.auth0ClientId || !process.env.auth0ClientSecret) {
-        console.log('Please specify a auth0ClientId and auth0ClientSecret in the env.')
-        throw new Error('Please specify a auth0ClientId and auth0ClientSecret in the env.')
-    }
+  if (!process.env.auth0ClientId || !process.env.auth0ClientSecret) {
+    console.log(
+      "Please specify a auth0ClientId and auth0ClientSecret in the env.",
+    );
+    throw new Error(
+      "Please specify a auth0ClientId and auth0ClientSecret in the env.",
+    );
+  }
 
   // update test account nonce
   const tokenResponse = await axios.post(
