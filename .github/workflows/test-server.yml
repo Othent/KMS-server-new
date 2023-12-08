@@ -20,10 +20,14 @@ jobs:
         env:
           auth0ClientId: ${{ secrets.AUTH0CLIENTID }}
           auth0ClientSecret: ${{ secrets.AUTH0CLIENTSECRET }}
-          googleCredentials: ${{ secrets.GOOGLECREDENTIALS }}
           kmsProjectId: ${{ secrets.KMSPROJECTID }}
-          PORT: ${{ secrets.PORT }}
+          googleCredentials: ${{ secrets.GOOGLECREDENTIALS }}
           signKeyVersion: ${{ secrets.SIGNKEYVERSION }}
+          PORT: ${{ secrets.PORT }}
+          mongoDBUsername: ${{ secrets.mongoDBUsername }}
+          mongoDBPassword: ${{ secrets.mongoDBPassword }}
+          mongoDBHost: ${{ secrets.mongoDBHost }}
+          mongoDBName: ${{ secrets.mongoDBName }}
         run: npm run test
       - name: 💄 Run prettier
         run: npm run prettier
