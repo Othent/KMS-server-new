@@ -17,7 +17,6 @@ const external = [
   "dotenv",
   "fast-crc32c",
   "crypto",
-  "mongodb",
 ];
 
 const plugins = [

@@ -1,6 +1,7 @@
 import { verify } from "jsonwebtoken";
 import { JwtPayload } from "jsonwebtoken";
-import { getLastNonce, updateJWTNonce } from "../database/DB";
+import { getLastNonce } from "./getLastNonce";
+import { updateJWTNonce } from "./updateJWTNonce";
 
 interface accessToken extends JwtPayload {
   data: {
@@ -37,25 +38,18 @@ export async function verifyJWT(JWT: string, OTHENT_PUBLIC_KEY: string) {
       algorithms: ["RS256"],
     }) as JwtPayload;
 
-    // @ts-ignore, there is always a sub on the jwt
-    const lastNonce = await getLastNonce(JWT_decoded.sub, JWT_decoded.iat);
+    const lastNonce = await getLastNonce(JWT_decoded);
 
     if (JWT_decoded.iat) {
       if (JWT_decoded.iat <= lastNonce) {
         return false;
       } else {
-        // @ts-ignore, there is always a sub on the jwt
-        const updateNonce = await updateJWTNonce(
-          // @ts-ignore
-          JWT_decoded.sub,
-          JWT_decoded.iat,
-        );
+        const updateNonce = await updateJWTNonce(JWT_decoded);
         if (!updateNonce) {
           return false;
         }
       }
     } else {
-      console.log("Invalid token structure");
       throw new Error("Invalid token structure");
     }
 
