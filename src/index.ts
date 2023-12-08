@@ -126,39 +126,6 @@ app.post("/encrypt", upload.single("plaintext"), async (req, res) => {
   }
 });
 
-// Get public key
-import getPublicKey from "./lib/getPublicKey";
-app.post("/get-public-key", async (req, res) => {
-  try {
-    const accessToken = await verifyJWT(
-      req.body.encodedData,
-      OTHENT_PUBLIC_KEY,
-    );
-
-    if (accessToken) {
-      console.log(
-        "\x1b[36m%s\x1b[0m",
-        `\nRequest: /get-public-key, body: ${JSON.stringify(accessToken)}`,
-      );
-
-      const response = await getPublicKey(accessToken.data.keyName);
-      console.log(
-        "\x1b[32m",
-        `Response: /get-public-key: ${JSON.stringify(response)}`,
-      );
-      res.json(response);
-    } else {
-      res.json({ success: false, error: "Invalid JWT" });
-    }
-  } catch (error) {
-    if (error instanceof Error) {
-      res.json({ success: false, error: error.message });
-    } else {
-      res.json({ success: false, error: "An unknown error occurred" });
-    }
-  }
-});
-
 // Sign
 import sign from "./lib/sign";
 app.post("/sign", async (req, res) => {
