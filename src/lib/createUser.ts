@@ -1,19 +1,24 @@
 import axios from "axios";
 import { createKMSUser } from "./utils/kms/createKMSUser";
 import { changeId } from "./utils/tools/changeId";
+import { getPublicKey } from "./getPublicKey";
+import { ownerToAddress } from "./utils/arweave/arweaveUtils";
 
-export default async function createUser(JWT: any): Promise<any> {
-  if (!JWT || !JWT.sub) {
+export default async function createUser(decoded_JWT: any): Promise<any> {
+  if (!decoded_JWT || !decoded_JWT.sub) {
     return { error: "invalid JWT" };
   }
 
-  const safeId = changeId(JWT.sub);
+  const safeId = changeId(decoded_JWT.sub);
 
   const initKMSUser = await createKMSUser(safeId);
 
   if (!initKMSUser) {
     throw new Error("Error initializing users KMS.");
   }
+
+  const owner = await getPublicKey(decoded_JWT.sub);
+  const walletAddress = ownerToAddress(owner);
 
   const tokenParams = {
     grant_type: "client_credentials",
@@ -31,7 +36,7 @@ export default async function createUser(JWT: any): Promise<any> {
 
     const options = {
       method: "PATCH",
-      url: `https://othent.us.auth0.com/api/v2/users/${JWT.sub}`,
+      url: `https://othent.us.auth0.com/api/v2/users/${decoded_JWT.sub}`,
       headers: {
         authorization: `Bearer ${accessToken}`,
         "content-type": "application/json",
@@ -39,7 +44,8 @@ export default async function createUser(JWT: any): Promise<any> {
       data: {
         user_metadata: {
           authSystem: "KMS",
-          lastNonce: 1,
+          owner: owner,
+          walletAddress: walletAddress,
         },
       },
     };
