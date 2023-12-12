@@ -130,10 +130,12 @@ app.post("/encrypt", upload.single("plaintext"), async (req, res) => {
 import sign from "./lib/sign";
 app.post("/sign", async (req, res) => {
   try {
-    const accessToken = await verifyJWT(
-      req.body.encodedData,
-      OTHENT_PUBLIC_KEY,
-    );
+    // const accessToken = await verifyJWT(
+    //   req.body.encodedData,
+    //   OTHENT_PUBLIC_KEY,
+    // );
+
+    const accessToken = req.body.accessToken
 
     if (accessToken) {
       console.log(
