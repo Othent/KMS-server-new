@@ -1,7 +1,7 @@
 import axios from "axios";
 import { createKMSUser } from "./utils/kms/createKMSUser";
 import { changeId } from "./utils/tools/changeId";
-import { waitFiveSeconds } from "./utils/tools/waitFiveSeconds";
+import { delay } from "./utils/tools/delay";
 import { getPublicKey } from "./getPublicKey";
 import { ownerToAddress } from "./utils/arweave/arweaveUtils";
 
@@ -15,26 +15,24 @@ export default async function createUser(decoded_JWT: any): Promise<any> {
   const initKMSUser = await createKMSUser(safeId);
 
   if (!initKMSUser) {
-    throw new Error("Error initializing users KMS.");
+    throw new Error("Error creating users KMS keys.");
   }
 
   // allow for the key to be generated
-  waitFiveSeconds()
+  await delay(5000);
 
   const owner = await getPublicKey(decoded_JWT.sub);
-  const walletAddress = ownerToAddress(owner);
-
-  const tokenParams = {
-    grant_type: "client_credentials",
-    client_id: process.env.auth0ClientId,
-    client_secret: process.env.auth0ClientSecret,
-    audience: "https://othent.us.auth0.com/api/v2/",
-  };
+  const walletAddress = await ownerToAddress(owner.data);
 
   try {
     const tokenResponse = await axios.post(
       "https://othent.us.auth0.com/oauth/token",
-      tokenParams,
+      {
+        grant_type: "client_credentials",
+        client_id: process.env.auth0ClientId,
+        client_secret: process.env.auth0ClientSecret,
+        audience: "https://othent.us.auth0.com/api/v2/",
+      },
     );
     const accessToken = tokenResponse.data.access_token;
 
