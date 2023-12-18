@@ -1,6 +1,7 @@
 import axios from "axios";
 import { createKMSUser } from "./utils/kms/createKMSUser";
 import { changeId } from "./utils/tools/changeId";
+import { waitFiveSeconds } from "./utils/tools/waitFiveSeconds";
 import { getPublicKey } from "./getPublicKey";
 import { ownerToAddress } from "./utils/arweave/arweaveUtils";
 
@@ -16,6 +17,9 @@ export default async function createUser(decoded_JWT: any): Promise<any> {
   if (!initKMSUser) {
     throw new Error("Error initializing users KMS.");
   }
+
+  // allow for the key to be generated
+  waitFiveSeconds()
 
   const owner = await getPublicKey(decoded_JWT.sub);
   const walletAddress = ownerToAddress(owner);
