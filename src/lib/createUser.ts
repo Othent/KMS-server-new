@@ -21,8 +21,8 @@ export default async function createUser(decoded_JWT: any): Promise<any> {
   // allow for the key to be generated
   await delay(5000);
 
-  const owner = await getPublicKey(decoded_JWT.sub);
-  const walletAddress = await ownerToAddress(owner.data);
+  const owner = (await getPublicKey(decoded_JWT.sub)).data;
+  const walletAddress = await ownerToAddress(owner);
 
   try {
     const tokenResponse = await axios.post(
