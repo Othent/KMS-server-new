@@ -19,7 +19,7 @@ export default async function createUser(decoded_JWT: any): Promise<any> {
   }
 
   // allow for the key to be generated
-  await delay(5000);
+  await delay(2000);
 
   const owner = (await getPublicKey(decoded_JWT.sub)).data;
   const walletAddress = await ownerToAddress(owner);
@@ -52,8 +52,9 @@ export default async function createUser(decoded_JWT: any): Promise<any> {
       },
     };
 
-    const userResponse = await axios.request(options);
-    return { data: userResponse.data };
+    await axios.request(options); // check
+
+    return { data: true };
   } catch (e) {
     throw new Error(`Error creating new user. ${e}`);
   }
