@@ -128,12 +128,15 @@ app.post("/encrypt", upload.single("plaintext"), async (req, res) => {
 
 // Sign
 import sign from "./lib/sign";
+import { decode } from 'jsonwebtoken'
 app.post("/sign", async (req, res) => {
   try {
-    const accessToken = await verifyJWT(
-      req.body.encodedData,
-      OTHENT_PUBLIC_KEY,
-    );
+    // const accessToken = await verifyJWT(
+    //   req.body.encodedData,
+    //   OTHENT_PUBLIC_KEY,
+    // );
+
+    const accessToken = decode(req.body.accessToken)
 
     if (accessToken) {
       console.log(
@@ -142,7 +145,9 @@ app.post("/sign", async (req, res) => {
       );
 
       const response = await sign(
+        // @ts-ignore
         accessToken.data.data,
+        // @ts-ignore
         accessToken.data.keyName,
       );
       console.log("\x1b[32m", `Response: /sign: ${JSON.stringify(response)}`);
