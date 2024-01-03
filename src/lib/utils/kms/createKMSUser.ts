@@ -41,7 +41,7 @@ async function createEncryptDecryptKey(keyRingName: string) {
 
 
 async function ping(user: string) {
-  const message = `New account generated ${user}`
+  const message = `New account generated on Othent 2.0 ${user}`
   await axios.post('https://slack.com/api/chat.postMessage', { 
       channel: process.env.SLACK_CHANNEL_ID,
       text: message
