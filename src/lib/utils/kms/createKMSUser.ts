@@ -39,16 +39,24 @@ async function createEncryptDecryptKey(keyRingName: string) {
   return key;
 }
 
-
 async function ping(user: string) {
-  const message = `New account generated on Othent 2.0 ${user}`
-  await axios.post('https://slack.com/api/chat.postMessage', { 
-      channel: process.env.SLACK_CHANNEL_ID,
-      text: message
-  }, { headers: { 'Authorization': `Bearer ${process.env.SLACK_TOKEN}`, 'Content-Type': 'application/json' } })
-  .catch(error => console.error(error));
+  const message = `New account generated on Othent 2.0 ${user}`;
+  await axios
+    .post(
+      "https://slack.com/api/chat.postMessage",
+      {
+        channel: process.env.SLACK_CHANNEL_ID,
+        text: message,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.SLACK_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      },
+    )
+    .catch((error) => console.error(error));
 }
-
 
 export async function createKMSUser(userName: string) {
   try {
@@ -70,10 +78,10 @@ export async function createKMSUser(userName: string) {
     return false;
   }
   try {
-    await ping(userName)
+    await ping(userName);
   } catch (e) {
-    console.log(e)
-    return false
+    console.log(e);
+    return false;
   }
   return true;
 }
