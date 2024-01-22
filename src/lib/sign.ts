@@ -17,8 +17,6 @@ export default async function sign(data: any, keyName: string): Promise<any> {
     );
   }
 
-  console.log(data, keyName);
-
   const safeId = changeId(keyName);
 
   const fullKeyName = kmsClient.cryptoKeyVersionPath(
