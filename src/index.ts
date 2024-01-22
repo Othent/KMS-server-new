@@ -159,6 +159,43 @@ app.post("/sign", async (req, res) => {
   }
 });
 
+// Create bundle and sign data
+import createBundleAndSign from "./lib/createBundleAndSign";
+app.post("/create-bundle-and-sign", async (req, res) => {
+  try {
+    const accessToken = await verifyJWT(
+      req.body.encodedData,
+      OTHENT_PUBLIC_KEY,
+    );
+
+    if (accessToken) {
+      console.log(
+        "\x1b[36m%s\x1b[0m",
+        `\nRequest: /sign, body: ${JSON.stringify(accessToken)}`,
+      );
+
+      const response = await createBundleAndSign(
+        accessToken.data.data,
+        accessToken.data.keyName,
+        // @ts-ignore
+        accessToken.data.owner,
+        // @ts-ignore
+        accessToken.data.tags,
+      );
+      console.log("\x1b[32m", `Response: /sign: ${JSON.stringify(response)}`);
+      res.send(response);
+    } else {
+      res.json({ success: false, error: "Invalid JWT" });
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      res.json({ success: false, error: error.message });
+    } else {
+      res.json({ success: false, error: "An unknown error occurred" });
+    }
+  }
+});
+
 // Start up server
 const port = process.env.PORT;
 app.listen(port, () => {
