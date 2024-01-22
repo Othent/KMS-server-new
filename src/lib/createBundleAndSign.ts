@@ -1,4 +1,4 @@
-import sign from "./sign";
+import signFunction from "./sign";
 import { createData, Signer } from "arbundles";
 import base64url from "base64url";
 
@@ -11,8 +11,9 @@ export default async function createBundleAndSign(
   try {
     const dataUint8Array = new Uint8Array(Object.values(data));
 
-    async function bundleSign(message: Uint8Array) {
-      return sign(message, keyName);
+    async function sign(message: Uint8Array) {
+      const signedData = await signFunction(message, keyName);
+      return signedData.data;
     }
 
     function getPublicKey() {
@@ -25,7 +26,7 @@ export default async function createBundleAndSign(
       signatureLength: 512,
       ownerLength: 512,
       // @ts-ignore
-      bundleSign,
+      sign,
       // @ts-ignore
       verify: null,
     };
