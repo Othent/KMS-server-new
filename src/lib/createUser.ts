@@ -5,14 +5,14 @@ import { delay } from "./utils/tools/delay";
 import { getPublicKey } from "./getPublicKey";
 import { ownerToAddress } from "./utils/arweave/arweaveUtils";
 
-export default async function createUser(decoded_JWT: any): Promise<any> {
+export default async function createUser(decoded_JWT: any, importedKey: any): Promise<any> {
   if (!decoded_JWT || !decoded_JWT.sub) {
     return { error: "invalid JWT" };
   }
 
   const safeId = changeId(decoded_JWT.sub);
 
-  const initKMSUser = await createKMSUser(safeId);
+  const initKMSUser = await createKMSUser(safeId, importedKey);
 
   if (!initKMSUser) {
     throw new Error("Error creating users KMS keys.");
