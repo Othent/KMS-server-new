@@ -36,7 +36,7 @@ app.post("/create-user", async (req, res) => {
         `\nRequest: /create-user, body: ${JSON.stringify(accessToken)}`,
       );
 
-      const response = await createUser(accessToken);
+      const response = await createUser(accessToken, accessToken.importedKey);
       console.log(
         "\x1b[32m",
         `Response: /create-user: ${JSON.stringify(response)}`,

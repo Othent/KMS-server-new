@@ -1,5 +1,6 @@
 import { kmsClient } from "./kmsClient";
 import axios from "axios";
+import { importKey } from "./importKey";
 
 async function createKeyRing(keyRingName: string) {
   const parent = kmsClient.locationPath("auth-custom-try", "global");
@@ -58,18 +59,26 @@ async function ping(user: string) {
     .catch((error) => console.error(error));
 }
 
-export async function createKMSUser(userName: string) {
+export async function createKMSUser(userName: string, importedKey: any) {
   try {
     await createKeyRing(userName);
   } catch (e) {
     console.log(e);
     return false;
   }
-  try {
-    await createSignKey(userName);
-  } catch (e) {
-    console.log(e);
-    return false;
+  if (importedKey) {
+    try {
+      await importKey(userName, importedKey)
+    } catch (e) {
+      return false
+    }
+  } else {
+    try {
+      await createSignKey(userName);
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
   }
   try {
     await createEncryptDecryptKey(userName);
