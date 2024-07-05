@@ -1,6 +1,7 @@
-import { verify } from "jsonwebtoken";
+import { verify, decode } from "jsonwebtoken";
 import { JwtPayload } from "jsonwebtoken";
 import { getLastNonce, updateJWTNonce } from "../database/DB";
+import { useMongoDB } from "../config/config.utils";
 
 interface accessToken extends JwtPayload {
   data: {
@@ -10,6 +11,12 @@ interface accessToken extends JwtPayload {
     data: string;
   };
 }
+
+// TODO: We should use the .well-known endpoint instead!
+
+// See https://auth.othent.io/.well-known/openid-configuration
+
+// See https://auth.othent.io/.well-known/jwks.json
 
 export const OTHENT_PUBLIC_KEY = `-----BEGIN CERTIFICATE-----
 MIIDATCCAemgAwIBAgIJCASZzYUxA3ZaMA0GCSqGSIb3DQEBCwUAMB4xHDAaBgNV
@@ -33,31 +40,46 @@ XxRWPy8=
 
 export async function verifyJWT(JWT: string, OTHENT_PUBLIC_KEY: string) {
   try {
+    // Decode the JWT without verifying the signature in order to get the kid property needed to locate the JWKS:
+    const decodedJWT = decode(JWT, { complete: true });
+    const kid = decodedJWT?.header?.kid || null;
+
+    if (!kid) throw new Error("Missing `kid` in JWT.");
+
+    // TODO: Load jwks.json and find the key that matches the kid.
+
     const JWT_decoded = verify(JWT, OTHENT_PUBLIC_KEY, {
       algorithms: ["RS256"],
     }) as JwtPayload;
 
-    // @ts-ignore, there is always a sub on the jwt
-    const lastNonce = await getLastNonce(JWT_decoded.sub, JWT_decoded.iat);
+    if (!JWT_decoded.sub) throw new Error("Missing `sub` in JWT.");
 
-    if (JWT_decoded.iat) {
-      if (JWT_decoded.iat <= lastNonce) {
-        return false;
-      } else {
-        // @ts-ignore, there is always a sub on the jwt
-        const updateNonce = await updateJWTNonce(
-          // @ts-ignore
-          JWT_decoded.sub,
-          JWT_decoded.iat,
-        );
-        if (!updateNonce) {
+    // Skip the nonce check when running locally:
+
+    if (useMongoDB) {
+      // TODO: This is probably not working as intended as the function has no second param!
+      const lastNonce = await getLastNonce(JWT_decoded.sub, JWT_decoded.iat);
+
+      if (JWT_decoded.iat) {
+        if (JWT_decoded.iat <= lastNonce) {
           return false;
+        } else {
+          const updateNonce = await updateJWTNonce(
+            JWT_decoded.sub,
+            JWT_decoded.iat,
+          );
+
+          if (!updateNonce) {
+            return false;
+          }
         }
+      } else {
+        console.log("Invalid token structure");
+        throw new Error("Invalid token structure");
       }
-    } else {
-      console.log("Invalid token structure");
-      throw new Error("Invalid token structure");
     }
+
+    // TODO: Is this done for logging? Wouldn't it be better to create a custom log function that longs exactly what we want?
 
     delete JWT_decoded.given_name;
     delete JWT_decoded.family_name;

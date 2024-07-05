@@ -4,6 +4,7 @@ import { changeId } from "./utils/tools/changeId";
 import { delay } from "./utils/tools/delay";
 import { getPublicKey } from "./getPublicKey";
 import { ownerToAddress } from "./utils/arweave/arweaveUtils";
+import { getAuth0URL } from "./utils/auth/auth0";
 
 export default async function createUser(decoded_JWT: any): Promise<any> {
   if (!decoded_JWT || !decoded_JWT.sub) {
@@ -25,20 +26,17 @@ export default async function createUser(decoded_JWT: any): Promise<any> {
   const walletAddress = await ownerToAddress(owner);
 
   try {
-    const tokenResponse = await axios.post(
-      "https://othent.us.auth0.com/oauth/token",
-      {
-        grant_type: "client_credentials",
-        client_id: process.env.auth0ClientId,
-        client_secret: process.env.auth0ClientSecret,
-        audience: "https://othent.us.auth0.com/api/v2/",
-      },
-    );
+    const tokenResponse = await axios.post(getAuth0URL("/oauth/token/"), {
+      grant_type: "client_credentials",
+      client_id: process.env.auth0ClientId,
+      client_secret: process.env.auth0ClientSecret,
+      audience: getAuth0URL("/api/v2/"),
+    });
     const accessToken = tokenResponse.data.access_token;
 
     const options = {
       method: "PATCH",
-      url: `https://othent.us.auth0.com/api/v2/users/${decoded_JWT.sub}`,
+      url: getAuth0URL(`/api/v2/users/${decoded_JWT.sub}/`),
       headers: {
         authorization: `Bearer ${accessToken}`,
         "content-type": "application/json",

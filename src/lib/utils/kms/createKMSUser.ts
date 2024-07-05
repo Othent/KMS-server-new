@@ -1,3 +1,4 @@
+import { useSlack } from "../config/config.utils";
 import { kmsClient } from "./kmsClient";
 import axios from "axios";
 
@@ -77,11 +78,17 @@ export async function createKMSUser(userName: string) {
     console.log(e);
     return false;
   }
-  try {
-    await ping(userName);
-  } catch (e) {
-    console.log(e);
-    return false;
+
+  // Skip the Slack ping when running locally:
+
+  if (useSlack) {
+    try {
+      await ping(userName);
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
   }
+
   return true;
 }

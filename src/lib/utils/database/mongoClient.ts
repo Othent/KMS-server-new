@@ -15,6 +15,8 @@ export async function mongo_client() {
     );
   }
 
+  // TODO: Probably easier to always call connect() from here and use with?
+  // See https://stackoverflow.com/questions/39599063/check-if-mongodb-is-connected, https://www.mongodb.com/community/forums/t/i-am-using-pymongo-do-i-have-to-close-a-mongoclient-after-use/213511
   return new MongoClient(
     `mongodb://${process.env.mongoDBUsername}:${encodeURIComponent(
       process.env.mongoDBPassword,

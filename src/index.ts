@@ -2,19 +2,32 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import multer from "multer";
+import * as dotEnv from "dotenv";
+import { verifyJWT } from "./lib/utils/auth/verifyJWT";
+import { OTHENT_PUBLIC_KEY } from "./lib/utils/auth/verifyJWT";
+import { verifyEnvironmentVariables } from "./lib/utils/config/config.utils";
+import createBundleAndSign from "./lib/createBundleAndSign";
+import sign from "./lib/sign";
+import encrypt from "./lib/encrypt";
+import createUser from "./lib/createUser";
+import decrypt from "./lib/decrypt";
+
+verifyEnvironmentVariables();
+
 const upload = multer();
 const app: express.Application = express();
+
 app.use(
   cors({
     origin: "*",
   }),
 );
+
 app.use(bodyParser.json({ limit: "100mb" }));
 app.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
-import * as dotEnv from "dotenv";
+
+// TODO: Not needed in Node.js 20:
 dotEnv.config();
-import { verifyJWT } from "./lib/utils/auth/verifyJWT";
-import { OTHENT_PUBLIC_KEY } from "./lib/utils/auth/verifyJWT";
 
 // Home (ping)
 app.get("/", (req: express.Request, res: express.Response) => {
@@ -22,7 +35,6 @@ app.get("/", (req: express.Request, res: express.Response) => {
 });
 
 // Create user
-import createUser from "./lib/createUser";
 app.post("/create-user", async (req, res) => {
   try {
     const accessToken = await verifyJWT(
@@ -55,7 +67,6 @@ app.post("/create-user", async (req, res) => {
 });
 
 // Decrypt
-import decrypt from "./lib/decrypt";
 app.post("/decrypt", upload.single("ciphertext"), async (req, res) => {
   try {
     const accessToken = await verifyJWT(
@@ -91,7 +102,6 @@ app.post("/decrypt", upload.single("ciphertext"), async (req, res) => {
 });
 
 // Encrypt
-import encrypt from "./lib/encrypt";
 app.post("/encrypt", upload.single("plaintext"), async (req, res) => {
   try {
     const accessToken = await verifyJWT(
@@ -127,7 +137,6 @@ app.post("/encrypt", upload.single("plaintext"), async (req, res) => {
 });
 
 // Sign
-import sign from "./lib/sign";
 app.post("/sign", async (req, res) => {
   try {
     const accessToken = await verifyJWT(
@@ -160,7 +169,7 @@ app.post("/sign", async (req, res) => {
 });
 
 // Create bundle and sign data
-import createBundleAndSign from "./lib/createBundleAndSign";
+
 app.post("/create-bundle-and-sign", async (req, res) => {
   try {
     const accessToken = await verifyJWT(

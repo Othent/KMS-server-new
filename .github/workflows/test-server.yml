@@ -18,6 +18,7 @@ jobs:
         run: npm install
       - name: 🧪 Run tests
         env:
+          auth0ClientDomain: ${{ secrets.AUTH0CLIENTDOMAIN }}
           auth0ClientId: ${{ secrets.AUTH0CLIENTID }}
           auth0ClientSecret: ${{ secrets.AUTH0CLIENTSECRET }}
           kmsProjectId: ${{ secrets.KMSPROJECTID }}
