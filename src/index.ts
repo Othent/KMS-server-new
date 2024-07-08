@@ -11,6 +11,7 @@ import sign from "./lib/sign";
 import encrypt from "./lib/encrypt";
 import createUser from "./lib/createUser";
 import decrypt from "./lib/decrypt";
+import { PORT } from "./lib/utils/config/config.constants";
 
 verifyEnvironmentVariables();
 
@@ -206,9 +207,9 @@ app.post("/create-bundle-and-sign", async (req, res) => {
 });
 
 // Start up server
-const port = process.env.PORT;
-app.listen(port, () => {
-  console.log("\x1b[32m", `Server **LIVE** listening on port ${port}`);
+
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}...\n`);
 });
 
 export default app;

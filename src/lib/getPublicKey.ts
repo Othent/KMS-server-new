@@ -28,8 +28,12 @@ export async function getPublicKey(keyName: string): Promise<any> {
       name: fullKeyName,
     });
 
-    const pem = publicKeyResponse.pem;
-    // @ts-ignore, ignore types for pem file
+    const { pem } = publicKeyResponse;
+
+    if (!pem) {
+      throw new Error("Missing PEM.");
+    }
+
     const publicKey = pem2jwk(pem);
 
     return { data: publicKey.n };
