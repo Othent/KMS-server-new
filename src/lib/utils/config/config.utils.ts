@@ -39,8 +39,6 @@ export const hasRequiredGoogleKMS = isProd
 const hasRequiredMongoDB = isProd ? useMongoDB : true;
 const hasRequiredSlack = isProd ? useSlack : true;
 
-// TODO: Validate port is number and googleCredentials is valid JSON / valid shape.
-
 export function verifyEnvironmentVariables() {
   console.log("");
   console.log("NODE / SERVER ENV:");
