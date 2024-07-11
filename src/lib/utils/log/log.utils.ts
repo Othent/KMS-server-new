@@ -50,8 +50,14 @@ export function logRequestStart<D>(route: Route, idToken: IdTokenWithData<D>) {
   );
 }
 
-export function logRequestSuccess<D>(route: Route, idToken: IdTokenWithData<D>) {
-  console.log(GREEN, `RES: ${route} => ${JSON.stringify(anonymiseIdToken(idToken))}`);
+export function logRequestSuccess<D>(
+  route: Route,
+  idToken: IdTokenWithData<D>,
+) {
+  console.log(
+    GREEN,
+    `RES: ${route} => ${JSON.stringify(anonymiseIdToken(idToken))}`,
+  );
 }
 
 export function logRequestError<R>(route: Route, errorMessage: string) {
