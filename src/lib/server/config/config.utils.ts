@@ -68,9 +68,11 @@ export function verifyEnvironmentVariables() {
   console.log("AUTH0:");
   console.log("");
   console.log(
-    `${!!process.env.auth0ClientDomain ? "✅" : "❌"}  auth0ClientDomain`,
+    `${!!process.env.auth0ClientDomain ? "✅" : "❌"}  auth0ClientDomain = ${process.env.auth0ClientDomain}`,
   );
-  console.log(`${!!process.env.auth0ClientId ? "✅" : "❌"}  auth0ClientId`);
+  console.log(
+    `${!!process.env.auth0ClientId ? "✅" : "❌"}  auth0ClientId = ${process.env.auth0ClientId}`,
+  );
   console.log(
     `${!!process.env.auth0ClientSecret ? "✅" : "❌"}  auth0ClientSecret`,
   );

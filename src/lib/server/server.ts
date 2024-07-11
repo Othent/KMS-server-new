@@ -23,6 +23,8 @@ export class OthentApp {
 
   constructor(config: Config) {
     this.config = config;
+
+    this.addRouteHandlers();
   }
 
   getExpressApp() {
@@ -41,13 +43,20 @@ export class OthentApp {
     app.use(cors({ origin: "*" }));
 
     app.use(bodyParser.json({ limit: config.UPLOAD_LIMIT }));
+
     app.use(
       bodyParser.urlencoded({ limit: config.UPLOAD_LIMIT, extended: true }),
     );
 
+    app.use((req, res, next) => {
+      console.log(req.method, req.path);
+
+      next();
+    });
+
     app.get(Route.HOME, jwtValidator, jwtUnused, pingHandlerFactory());
 
-    app.get(
+    app.post(
       Route.CREATE_USER,
       jwtValidator,
       jwtUnused,
@@ -86,6 +95,8 @@ export class OthentApp {
       jwtUnused,
       createBundleAndSignHandlerFactory() as unknown as express.Handler,
     );
+
+    this.app = app;
 
     // TODO: Add generic error handler:
   }

@@ -32,8 +32,9 @@ export function jwtValidatorFactory() {
 
     requestProperty: "idToken",
 
-    // Validate the audience and the issuer.
-    audience: "https://api.codehero.com/v1/",
+    // TODO: Validate both audience and issuer:
+    // audience: "",
+
     issuer: `https://${process.env.auth0ClientDomain}/`,
     algorithms: ["RS256"],
   }) as JWTValidatorMiddlewareFn;
