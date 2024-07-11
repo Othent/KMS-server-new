@@ -1,7 +1,7 @@
-import { kmsClient } from "./utils/kms/kmsClient";
-import { changeId } from "./utils/tools/changeId";
+import { kmsClient } from "../../utils/kms/kmsClient";
+import { changeId } from "../../utils/tools/changeId";
 
-export default async function sign(data: any, keyName: string): Promise<any> {
+export async function sign(data: string | Uint8Array, keyName: string) {
   if (
     !data ||
     !keyName ||
@@ -27,17 +27,18 @@ export default async function sign(data: any, keyName: string): Promise<any> {
     process.env.signKeyVersion,
   );
 
-  const uint8Array = new Uint8Array(Object.values(data));
-
   try {
     const [signResponse] = await kmsClient.asymmetricSign({
       name: fullKeyName,
-      data: uint8Array,
+      data,
     });
 
-    const safeRes = signResponse.signature;
+    if (!signResponse || !signResponse.signature) {
+      console.log("Signature failed or returned null/undefined signature");
+      throw new Error("Signature failed or returned null/undefined signature");
+    }
 
-    return { data: safeRes };
+    return signResponse.signature.toString();
   } catch (e) {
     throw new Error(`Error signing data. ${e}`);
   }

@@ -1,12 +1,12 @@
-import { kmsClient } from "./utils/kms/kmsClient";
-import { changeId } from "./utils/tools/changeId";
+import { kmsClient } from "../../utils/kms/kmsClient";
+import { changeId } from "../../utils/tools/changeId";
 
-export default async function decrypt(
-  ciphertextData: string,
+export async function decrypt(
+  ciphertext: string | Uint8Array,
   keyName: string,
-): Promise<any> {
-  if (!ciphertextData || !keyName || !process.env.kmsProjectId) {
-    console.log(ciphertextData, keyName, process.env.kmsProjectId);
+) {
+  if (!ciphertext || !keyName || !process.env.kmsProjectId) {
+    console.log(ciphertext, keyName, process.env.kmsProjectId);
     console.log(
       "Please specify both ciphertextData/keyName/process.env.kmsProjectId",
     );
@@ -27,7 +27,7 @@ export default async function decrypt(
   try {
     const [decryptResponse] = await kmsClient.decrypt({
       name,
-      ciphertext: Buffer.from(ciphertextData),
+      ciphertext,
     });
 
     if (!decryptResponse || !decryptResponse.plaintext) {
@@ -35,7 +35,7 @@ export default async function decrypt(
       throw new Error("Decryption failed or returned null/undefined plaintext");
     }
 
-    return { data: decryptResponse.plaintext.toString() };
+    return decryptResponse.plaintext.toString();
   } catch (e) {
     throw new Error(`Error decrypting data. ${e}`);
   }

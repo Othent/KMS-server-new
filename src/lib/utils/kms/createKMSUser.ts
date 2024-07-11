@@ -1,4 +1,4 @@
-import { useSlack } from "../config/config.utils";
+import { useSlack } from "../../server/config/config.utils";
 import { kmsClient } from "./kmsClient";
 import axios from "axios";
 

@@ -1,17 +1,14 @@
 import axios from "axios";
-import { createKMSUser } from "./utils/kms/createKMSUser";
-import { changeId } from "./utils/tools/changeId";
-import { delay } from "./utils/tools/delay";
-import { getPublicKey } from "./getPublicKey";
-import { ownerToAddress } from "./utils/arweave/arweaveUtils";
-import { getAuth0URL } from "./utils/auth/auth0";
+import { createKMSUser } from "../../utils/kms/createKMSUser";
+import { changeId } from "../../utils/tools/changeId";
+import { delay } from "../../utils/tools/delay";
+import { getPublicKey } from "../../utils/kms/getPublicKey";
+import { ownerToAddress } from "../../utils/arweave/arweaveUtils";
+import { getAuth0URL } from "../../utils/auth/auth0";
 
-export default async function createUser(decoded_JWT: any): Promise<any> {
-  if (!decoded_JWT || !decoded_JWT.sub) {
-    return { error: "invalid JWT" };
-  }
-
-  const safeId = changeId(decoded_JWT.sub);
+// TODO: Return the created user?
+export async function createUser(sub: string) {
+  const safeId = changeId(sub);
 
   const initKMSUser = await createKMSUser(safeId);
 
@@ -22,7 +19,7 @@ export default async function createUser(decoded_JWT: any): Promise<any> {
   // allow for the key to be generated
   await delay(2000);
 
-  const owner = (await getPublicKey(decoded_JWT.sub)).data;
+  const owner = await getPublicKey(sub);
   const walletAddress = await ownerToAddress(owner);
 
   try {
@@ -32,11 +29,12 @@ export default async function createUser(decoded_JWT: any): Promise<any> {
       client_secret: process.env.auth0ClientSecret,
       audience: getAuth0URL("/api/v2/"),
     });
+
     const accessToken = tokenResponse.data.access_token;
 
     const options = {
       method: "PATCH",
-      url: getAuth0URL(`/api/v2/users/${decoded_JWT.sub}/`),
+      url: getAuth0URL(`/api/v2/users/${sub}/`),
       headers: {
         authorization: `Bearer ${accessToken}`,
         "content-type": "application/json",
@@ -44,8 +42,8 @@ export default async function createUser(decoded_JWT: any): Promise<any> {
       data: {
         user_metadata: {
           authSystem: "KMS",
-          owner: owner,
-          walletAddress: walletAddress,
+          owner,
+          walletAddress,
         },
       },
     };

@@ -1,11 +1,8 @@
-import { kmsClient } from "./utils/kms/kmsClient";
-import { changeId } from "./utils/tools/changeId";
+import { kmsClient } from "../../utils/kms/kmsClient";
+import { changeId } from "../../utils/tools/changeId";
 
-export default async function encrypt(
-  plaintextData: string,
-  keyName: string,
-): Promise<any> {
-  if (!plaintextData || !keyName || !process.env.kmsProjectId) {
+export async function encrypt(plaintext: string | Uint8Array, keyName: string) {
+  if (!plaintext || !keyName || !process.env.kmsProjectId) {
     console.log(
       "Please specify both plaintextData/keyName/process.env.kmsProjectId",
     );
@@ -26,7 +23,7 @@ export default async function encrypt(
   try {
     const [encryptResponse] = await kmsClient.encrypt({
       name,
-      plaintext: Buffer.from(plaintextData),
+      plaintext,
     });
 
     if (!encryptResponse || !encryptResponse.ciphertext) {
@@ -36,7 +33,7 @@ export default async function encrypt(
       );
     }
 
-    return { data: encryptResponse.ciphertext };
+    return encryptResponse.ciphertext.toString();
   } catch (e) {
     throw new Error(`Error encrypting data. ${e}`);
   }

@@ -1,6 +1,6 @@
 import { KeyManagementServiceClient } from "@google-cloud/kms";
 import * as dotEnv from "dotenv";
-import { GOOGLE_CREDENTIALS } from "../config/config.constants";
+import { GOOGLE_CREDENTIALS } from "../../server/config/config.constants";
 import { LocalKeyManagementServiceClient } from "./localKeyManagementServiceClient";
 
 dotEnv.config();

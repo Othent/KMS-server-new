@@ -3,6 +3,18 @@ import { GOOGLE_CREDENTIALS, PORT } from "./config.constants";
 
 dotEnv.config();
 
+export class Config {
+  isValid = true;
+
+  UPLOAD_LIMIT = "100mb";
+
+  PORT = 3010;
+
+  log() {}
+}
+
+// TODO: Move inside class Config:
+
 const isProductionPort = PORT === 80;
 const isProd = process.env.NODE_ENV === "production";
 const isDev = process.env.NODE_ENV === "development";
