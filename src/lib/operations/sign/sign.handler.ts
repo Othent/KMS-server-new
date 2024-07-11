@@ -1,7 +1,6 @@
 import express from "express";
 import {
   ExpressRequestWithToken,
-  IdTokenWithData,
 } from "../../utils/auth/auth0";
 import { sign } from "./sign";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
