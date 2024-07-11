@@ -32,7 +32,7 @@ export function decryptHandlerFactory() {
 
       const plaintext = await decrypt(data.ciphertext, data.keyName);
 
-      logRequestSuccess(Route.DECRYPT);
+      logRequestSuccess(Route.DECRYPT, idToken);
 
       res.send(plaintext);
     } catch (error) {

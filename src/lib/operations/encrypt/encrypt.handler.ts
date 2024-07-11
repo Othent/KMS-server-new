@@ -27,8 +27,7 @@ export function encryptHandlerFactory() {
 
       const ciphertext = await encrypt(data.plaintext, data.keyName);
 
-      // TODO: Do not log this!
-      logRequestSuccess(Route.ENCRYPT);
+      logRequestSuccess(Route.ENCRYPT, idToken);
 
       res.send(ciphertext);
     } catch (error) {

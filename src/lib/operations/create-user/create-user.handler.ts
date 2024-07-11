@@ -18,7 +18,7 @@ export function createUserHandlerFactory() {
 
       const response = await createUser(idToken.sub);
 
-      logRequestSuccess(Route.CREATE_USER);
+      logRequestSuccess(Route.CREATE_USER, idToken);
 
       res.json(response);
     } catch (error) {

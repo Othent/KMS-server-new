@@ -41,7 +41,7 @@ export function createBundleAndSignHandlerFactory() {
         data.tags,
       );
 
-      logRequestSuccess(Route.CREATE_BUNDLE_AND_SIGN);
+      logRequestSuccess(Route.CREATE_BUNDLE_AND_SIGN, idToken);
 
       res.send(response);
     } catch (error) {

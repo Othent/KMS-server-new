@@ -30,7 +30,7 @@ export function signHandlerFactory() {
 
       const signature = await sign(data.data, data.keyName);
 
-      logRequestSuccess(Route.SIGN);
+      logRequestSuccess(Route.SIGN, idToken);
 
       res.send(signature);
     } catch (error) {
