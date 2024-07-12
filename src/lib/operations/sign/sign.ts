@@ -1,20 +1,15 @@
+import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { changeId } from "../../utils/tools/changeId";
 
 export async function sign(data: string | Uint8Array, keyName: string) {
-  if (
-    !data ||
-    !keyName ||
-    !process.env.kmsProjectId ||
-    !process.env.signKeyVersion
-  ) {
-    console.log(data, keyName, process.env.kmsProjectId);
-    console.log(
-      "Please specify both data/keyName/process.env.kmsProjectId/process.env.signKeyVersion",
-    );
-    throw new Error(
-      "Please specify both data/keyName/process.env.kmsProjectId/process.env.signKeyVersion",
-    );
+  // TODO: Pass as param:
+  if (!process.env.kmsProjectId) {
+    throw new OthentError(OthentErrorID.Signing, "No kmsProjectId");
+  }
+
+  if (!process.env.signKeyVersion) {
+    throw new OthentError(OthentErrorID.Signing, "No signKeyVersion");
   }
 
   const safeId = changeId(keyName);
@@ -27,19 +22,26 @@ export async function sign(data: string | Uint8Array, keyName: string) {
     process.env.signKeyVersion,
   );
 
+  let signature: string | Uint8Array | null | undefined;
+
   try {
     const [signResponse] = await kmsClient.asymmetricSign({
       name: fullKeyName,
       data,
     });
 
-    if (!signResponse || !signResponse.signature) {
-      console.log("Signature failed or returned null/undefined signature");
-      throw new Error("Signature failed or returned null/undefined signature");
-    }
-
-    return signResponse.signature.toString();
-  } catch (e) {
-    throw new Error(`Error signing data. ${e}`);
+    signature = signResponse.signature;
+  } catch (err) {
+    throw new OthentError(
+      OthentErrorID.Signing,
+      "Error calling KMS asymmetricSign",
+      err,
+    );
   }
+
+  if (!signature) {
+    throw new OthentError(OthentErrorID.Decryption, "No signature");
+  }
+
+  return signature.toString();
 }

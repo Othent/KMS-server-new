@@ -5,22 +5,23 @@ import { delay } from "../../utils/tools/delay";
 import { getPublicKey } from "../../utils/kms/getPublicKey";
 import { ownerToAddress } from "../../utils/arweave/arweaveUtils";
 import { getAuth0URL } from "../../utils/auth/auth0";
+import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
 
-// TODO: Return the created user?
 export async function createUser(sub: string) {
-  const safeId = changeId(sub);
-
-  const initKMSUser = await createKMSUser(safeId);
-
-  if (!initKMSUser) {
-    throw new Error("Error creating users KMS keys.");
+  try {
+    await createKMSUser(sub);
+  } catch (err) {
+    throw new OthentError(
+      OthentErrorID.UserCreation,
+      "Error creating KMS user",
+      err,
+    );
   }
-
-  // allow for the key to be generated
-  await delay(2000);
 
   const owner = await getPublicKey(sub);
   const walletAddress = await ownerToAddress(owner);
+
+  let accessToken = "";
 
   try {
     const tokenResponse = await axios.post(getAuth0URL("/oauth/token/"), {
@@ -30,9 +31,21 @@ export async function createUser(sub: string) {
       audience: getAuth0URL("/api/v2/"),
     });
 
-    const accessToken = tokenResponse.data.access_token;
+    accessToken = tokenResponse.data.access_token;
+  } catch (err) {
+    throw new OthentError(
+      OthentErrorID.UserCreation,
+      "Error requesting client_credentials",
+      err,
+    );
+  }
 
-    const options = {
+  if (!accessToken) {
+    throw new OthentError(OthentErrorID.UserCreation, "No accessToken");
+  }
+
+  try {
+    await axios.request({
       method: "PATCH",
       url: getAuth0URL(`/api/v2/users/${sub}/`),
       headers: {
@@ -46,12 +59,15 @@ export async function createUser(sub: string) {
           walletAddress,
         },
       },
-    };
-
-    await axios.request(options); // check
-
-    return { data: true };
-  } catch (e) {
-    throw new Error(`Error creating new user. ${e}`);
+    });
+  } catch (err) {
+    throw new OthentError(
+      OthentErrorID.UserCreation,
+      "Error patching user_metadata",
+      err,
+    );
   }
+
+  // TODO: Return the created user?
+  return true;
 }

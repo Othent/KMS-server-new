@@ -1,18 +1,16 @@
+import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { changeId } from "../../utils/tools/changeId";
 
 export async function encrypt(plaintext: string | Uint8Array, keyName: string) {
-  if (!plaintext || !keyName || !process.env.kmsProjectId) {
-    console.log(
-      "Please specify both plaintextData/keyName/process.env.kmsProjectId",
-    );
-    throw new Error(
-      "Please specify both plaintextData/keyName/process.env.kmsProjectId",
-    );
+  // TODO: Pass as param:
+  if (!process.env.kmsProjectId) {
+    throw new OthentError(OthentErrorID.Encryption, "No kmsProjectId");
   }
 
   const safeId = changeId(keyName);
 
+  // TODO: Create util function to get the key names:
   const name = kmsClient.cryptoKeyPath(
     process.env.kmsProjectId,
     "global",
@@ -20,21 +18,26 @@ export async function encrypt(plaintext: string | Uint8Array, keyName: string) {
     "encryptDecrypt",
   );
 
+  let ciphertext: string | Uint8Array | null | undefined;
+
   try {
     const [encryptResponse] = await kmsClient.encrypt({
       name,
       plaintext,
     });
 
-    if (!encryptResponse || !encryptResponse.ciphertext) {
-      console.log("Encryption failed or returned null/undefined ciphertext");
-      throw new Error(
-        "Encryption failed or returned null/undefined ciphertext",
-      );
-    }
-
-    return encryptResponse.ciphertext.toString();
-  } catch (e) {
-    throw new Error(`Error encrypting data. ${e}`);
+    ciphertext = encryptResponse.ciphertext;
+  } catch (err) {
+    throw new OthentError(
+      OthentErrorID.Encryption,
+      "Error calling KMS encrypt",
+      err,
+    );
   }
+
+  if (!ciphertext) {
+    throw new OthentError(OthentErrorID.Encryption, "No ciphertext");
+  }
+
+  return ciphertext.toString();
 }

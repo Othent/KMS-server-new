@@ -3,6 +3,10 @@ import { ExpressRequestWithToken, getAuth0URL } from "../../utils/auth/auth0";
 import { expressjwt } from "express-jwt";
 import express from "express";
 
+export const getToken = (req: express.Request) => {
+  return req.body.encodedData;
+};
+
 export type JWTValidatorMiddlewareFn = <D>(
   req: ExpressRequestWithToken<D>,
   res: express.Response,
@@ -17,10 +21,6 @@ export function jwtValidatorFactory() {
   // - https://github.com/auth0/express-jwt
   // - https://github.com/auth0/node-jwks-rsa
   // - https://github.com/sgmeyer/auth0-node-jwks-rs256
-
-  const getToken = (req: express.Request) => {
-    return req.body.encodedData;
-  };
 
   const secret = expressJwtSecret({
     jwksUri: getAuth0URL("/.well-known/jwks.json/"),

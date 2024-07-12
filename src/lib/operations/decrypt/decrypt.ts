@@ -1,3 +1,4 @@
+import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { changeId } from "../../utils/tools/changeId";
 
@@ -5,18 +6,14 @@ export async function decrypt(
   ciphertext: string | Uint8Array,
   keyName: string,
 ) {
-  if (!ciphertext || !keyName || !process.env.kmsProjectId) {
-    console.log(ciphertext, keyName, process.env.kmsProjectId);
-    console.log(
-      "Please specify both ciphertextData/keyName/process.env.kmsProjectId",
-    );
-    throw new Error(
-      "Please specify both ciphertextData/keyName/process.env.kmsProjectId",
-    );
+  // TODO: Pass as param:
+  if (!process.env.kmsProjectId) {
+    throw new OthentError(OthentErrorID.Encryption, "No kmsProjectId");
   }
 
   const safeId = changeId(keyName);
 
+  // TODO: Create util function to get the key names:
   const name = kmsClient.cryptoKeyPath(
     process.env.kmsProjectId,
     "global",
@@ -24,19 +21,26 @@ export async function decrypt(
     "encryptDecrypt",
   );
 
+  let plaintext: string | Uint8Array | null | undefined;
+
   try {
     const [decryptResponse] = await kmsClient.decrypt({
       name,
       ciphertext,
     });
 
-    if (!decryptResponse || !decryptResponse.plaintext) {
-      console.log("Decryption failed or returned null/undefined plaintext");
-      throw new Error("Decryption failed or returned null/undefined plaintext");
-    }
-
-    return decryptResponse.plaintext.toString();
-  } catch (e) {
-    throw new Error(`Error decrypting data. ${e}`);
+    plaintext = decryptResponse.plaintext;
+  } catch (err) {
+    throw new OthentError(
+      OthentErrorID.Decryption,
+      "Error calling KMS decrypt",
+      err,
+    );
   }
+
+  if (!plaintext) {
+    throw new OthentError(OthentErrorID.Decryption, "No plaintext");
+  }
+
+  return plaintext.toString();
 }

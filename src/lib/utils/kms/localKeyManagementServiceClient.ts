@@ -38,9 +38,10 @@ const { privateKey: PRIVATE_KEY, publicKey: PUBLIC_KEY } =
     modulusLength: 2048,
   });
 
-export class LocalKeyManagementServiceClient
-  implements KeyManagementServiceClient
-{
+// The `implements` part is commented out to avoid having to mock that massive class. If you need to add/update the current implementation, you can uncomment
+// it while you are working on the changes to get some help from autocompletion, and comment it again once you are done:
+
+export class LocalKeyManagementServiceClient /* implements KeyManagementServiceClient */ {
   constructor() {
     this.testLocalKeyManagementServiceClient();
   }

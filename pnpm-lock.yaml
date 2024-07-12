@@ -14,6 +14,9 @@ dependencies:
   arweave-mnemonic-keys:
     specifier: ^0.0.9
     version: 0.0.9
+  async-middleware:
+    specifier: ^1.2.1
+    version: 1.2.1
   axios:
     specifier: ^1.6.0
     version: 1.7.2
@@ -2626,6 +2629,13 @@ packages:
       inherits: 2.0.4
       minimalistic-assert: 1.0.1
       safer-buffer: 2.1.2
+    dev: false
+
+  /async-middleware@1.2.1:
+    resolution:
+      {
+        integrity: sha512-ZUdXtz7wn6zLLxlom4Q+qD0xi3pu6Bb9icCVHRzr8S3Gd7reGChEotlEZRQ/I/IUaMMVKFX3UeaZok+vDbmUAg==,
+      }
     dev: false
 
   /async-retry@1.3.3:

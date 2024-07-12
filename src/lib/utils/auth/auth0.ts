@@ -2,6 +2,8 @@ import { JwtPayload } from "jsonwebtoken";
 import express from "express";
 
 export interface IdTokenWithData<D = void> extends JwtPayload {
+  // TODO: This is missing user_metadata's authSystem, owner and walletAddress (except in createUserHandlerFactory)
+
   given_name: string;
   family_name: string;
   nickname: string;

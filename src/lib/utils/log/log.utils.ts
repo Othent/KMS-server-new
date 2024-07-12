@@ -60,6 +60,11 @@ export function logRequestSuccess<D>(
   );
 }
 
-export function logRequestError<R>(route: Route, errorMessage: string) {
-  console.log(RED, `RES: ${route} => ${errorMessage}`);
+export function logRequestError<R>(route: Route, error: Error | string) {
+  console.log(
+    RED,
+    `RES: ${route} => ${typeof error === "string" ? error : `${error.name}: ${error.message}`}`,
+  );
+
+  if (typeof error !== "string") console.log(error.stack);
 }
