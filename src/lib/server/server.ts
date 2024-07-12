@@ -14,7 +14,7 @@ import { jwtValidatorFactory } from "../middleware/jwt-validator/jwt-validator.m
 import { jwtUnusedFactory } from "../middleware/jwt-unused/jwt-unused.middleware";
 import { logRequestError } from "../utils/log/log.utils";
 import { getErrorResponse, OthentError } from "./errors/errors.utils";
-import { wrap } from "async-middleware";
+import { asyncHandler } from "../middleware/async-handler/async-handler.middleware";
 
 // TODO: Not needed in Node.js 20:
 dotEnv.config();
@@ -40,10 +40,13 @@ export class OthentApp {
     // TODO: Take a look at Multer's options:
     // const upload = multer({});
 
-    const jwtValidator = wrap(
+    const jwtValidator = asyncHandler(
       jwtValidatorFactory(),
     ) as unknown as express.Handler;
-    const jwtUnused = wrap(jwtUnusedFactory()) as unknown as express.Handler;
+
+    const jwtUnused = asyncHandler(
+      jwtUnusedFactory(),
+    ) as unknown as express.Handler;
 
     app.use(cors({ origin: "*" }));
 
@@ -65,7 +68,7 @@ export class OthentApp {
       Route.CREATE_USER,
       jwtValidator,
       jwtUnused,
-      wrap(createUserHandlerFactory()) as unknown as express.Handler,
+      asyncHandler(createUserHandlerFactory()) as unknown as express.Handler,
     );
 
     // TODO: Data from multer doesn't seem to be used at all, as that's coming from the JWT token:
@@ -75,7 +78,7 @@ export class OthentApp {
       jwtValidator,
       jwtUnused,
       // upload.single("ciphertext"),
-      wrap(decryptHandlerFactory()) as unknown as express.Handler,
+      asyncHandler(decryptHandlerFactory()) as unknown as express.Handler,
     );
 
     app.post(
@@ -83,7 +86,7 @@ export class OthentApp {
       jwtValidator,
       jwtUnused,
       // upload.single("plaintext"),
-      wrap(encryptHandlerFactory()) as unknown as express.Handler,
+      asyncHandler(encryptHandlerFactory()) as unknown as express.Handler,
     );
 
     // TODO: These should also use multer rather than relaying on body:
@@ -92,14 +95,16 @@ export class OthentApp {
       Route.SIGN,
       jwtValidator,
       jwtUnused,
-      wrap(signHandlerFactory()) as unknown as express.Handler,
+      asyncHandler(signHandlerFactory()) as unknown as express.Handler,
     );
 
     app.post(
       Route.CREATE_BUNDLE_AND_SIGN,
       jwtValidator,
       jwtUnused,
-      wrap(createBundleAndSignHandlerFactory()) as unknown as express.Handler,
+      asyncHandler(
+        createBundleAndSignHandlerFactory(),
+      ) as unknown as express.Handler,
     );
 
     // See https://expressjs.com/en/guide/error-handling.html
