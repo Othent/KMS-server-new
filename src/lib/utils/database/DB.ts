@@ -1,4 +1,4 @@
-import { mongo_client } from "./mongoClient";
+import { getMongoClient } from "./mongoClient";
 
 export interface KMSLastNoncesDocument {
   subs: {
@@ -7,14 +7,16 @@ export interface KMSLastNoncesDocument {
   }[];
 }
 
+// TODO: DB connections should be reused. See https://www.geeksforgeeks.org/how-to-properly-reuse-connection-to-mongodb-across-nodejs/.
+
 async function getSubsCollection() {
-  const mongoClient = await mongo_client();
+  const mongoClient = await getMongoClient();
   await mongoClient.connect();
   return mongoClient.db().collection<KMSLastNoncesDocument>("KMS_lastNonces");
 }
 
 export async function updateJWTNonce(sub: string, nonce: number) {
-  const mongoClient = await mongo_client();
+  const mongoClient = await getMongoClient();
   const collection = await getSubsCollection();
 
   // TODO: This can be done with a single updateOne().
@@ -44,7 +46,7 @@ export async function updateJWTNonce(sub: string, nonce: number) {
 }
 
 export async function getLastNonce(sub: string) {
-  const mongoClient = await mongo_client();
+  const mongoClient = await getMongoClient();
   const collection = await getSubsCollection();
   const document = await collection.findOne({ "subs.name": sub });
 

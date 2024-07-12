@@ -125,7 +125,7 @@ export class OthentApp {
     const { PORT } = CONFIG;
 
     this.app.listen(PORT, () => {
-      console.log(`Server listening on port ${PORT}...\n`);
+      console.log(`🤖  Server listening on port ${PORT}...\n`);
     });
   }
 }

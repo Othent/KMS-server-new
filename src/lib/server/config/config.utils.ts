@@ -33,7 +33,7 @@ export class Config {
   MONGODB_USERNAME = "";
   MONGODB_PASSWORD = "";
   MONGODB_HOST = "";
-  MONGODB_NAME = "";
+  MONGODB_DB_NAME = "";
   MONGODB_ENABLED = false;
 
   // SLACK:
@@ -89,13 +89,13 @@ export class Config {
     this.MONGODB_USERNAME = process.env.mongoDBUsername || "";
     this.MONGODB_PASSWORD = process.env.mongoDBPassword || "";
     this.MONGODB_HOST = process.env.mongoDBHost || "";
-    this.MONGODB_NAME = process.env.mongoDBName || "";
+    this.MONGODB_DB_NAME = process.env.mongoDBName || "";
 
     this.MONGODB_ENABLED = !!(
       this.MONGODB_USERNAME &&
       this.MONGODB_PASSWORD &&
       this.MONGODB_HOST &&
-      this.MONGODB_NAME
+      this.MONGODB_DB_NAME
     );
 
     // SLACK:
@@ -207,7 +207,7 @@ export class Config {
       ` ├ MONGODB_PASSWORD = ${!!this.MONGODB_PASSWORD ? "****" : ""}`,
     );
     console.log(` ├ MONGODB_HOST = ${!!this.MONGODB_HOST ? "****" : ""}`);
-    console.log(` └ MONGODB_NAME = ${!!this.MONGODB_NAME ? "****" : ""}`);
+    console.log(` └ MONGODB_DB_NAME = ${!!this.MONGODB_DB_NAME ? "****" : ""}`);
     console.log("");
     console.log(
       `${isSlackValid ? "✅" : "❌"}  SLACK${isSlackValid ? ":" : " - Slack must be configured in production"}`,
