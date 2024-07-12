@@ -2,27 +2,18 @@ import { kmsClient } from "./kmsClient";
 import { changeId } from "../tools/changeId";
 import { pem2jwk } from "pem-jwk";
 import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
+import { CONFIG } from "../../server/config/config.utils";
 
 export async function getPublicKey(sub: string) {
-  // TODO: Pass as param:
-  if (!process.env.kmsProjectId) {
-    throw new OthentError(OthentErrorID.PublicKey, "No kmsProjectId");
-  }
-
-  // TODO: Pass as param:
-  if (!process.env.signKeyVersion) {
-    throw new OthentError(OthentErrorID.PublicKey, "No signKeyVersion");
-  }
-
   const safeId = changeId(sub);
 
   // TODO: Create util function to get the key names:
   const fullKeyName = kmsClient.cryptoKeyVersionPath(
-    process.env.kmsProjectId,
+    CONFIG.KMS_PROJECT_ID,
     "global",
     safeId,
     "sign",
-    process.env.signKeyVersion,
+    CONFIG.SIGN_KEY_VERSION,
   );
 
   let pem = "";

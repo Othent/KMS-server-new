@@ -1,18 +1,14 @@
+import { CONFIG } from "../../server/config/config.utils";
 import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { changeId } from "../../utils/tools/changeId";
 
 export async function encrypt(plaintext: string | Uint8Array, keyName: string) {
-  // TODO: Pass as param:
-  if (!process.env.kmsProjectId) {
-    throw new OthentError(OthentErrorID.Encryption, "No kmsProjectId");
-  }
-
   const safeId = changeId(keyName);
 
   // TODO: Create util function to get the key names:
   const name = kmsClient.cryptoKeyPath(
-    process.env.kmsProjectId,
+    CONFIG.KMS_PROJECT_ID,
     "global",
     safeId,
     "encryptDecrypt",

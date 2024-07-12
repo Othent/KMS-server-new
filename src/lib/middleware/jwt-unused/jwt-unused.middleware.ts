@@ -1,8 +1,8 @@
 import express from "express";
-import { useMongoDB } from "../../server/config/config.utils";
 import { getLastNonce, updateJWTNonce } from "../../utils/database/DB";
 import { ExpressRequestWithToken } from "../../utils/auth/auth0";
 import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
+import { CONFIG } from "../../server/config/config.utils";
 
 export function jwtUnusedFactory() {
   return async (
@@ -10,7 +10,7 @@ export function jwtUnusedFactory() {
     res: express.Response,
     next: express.NextFunction,
   ) => {
-    if (!useMongoDB) {
+    if (!CONFIG.MONGODB_ENABLED) {
       // Skip the nonce check when running locally:
       return next();
     }

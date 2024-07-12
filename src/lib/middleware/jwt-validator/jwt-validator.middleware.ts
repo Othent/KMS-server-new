@@ -1,5 +1,9 @@
 import { expressJwtSecret, GetVerificationKey } from "jwks-rsa";
-import { ExpressRequestWithToken, getAuth0URL } from "../../utils/auth/auth0";
+import {
+  ExpressRequestWithToken,
+  getAuth0Issuer,
+  getAuth0URL,
+} from "../../utils/auth/auth0";
 import { expressjwt } from "express-jwt";
 import express from "express";
 
@@ -35,7 +39,7 @@ export function jwtValidatorFactory() {
     // TODO: Validate both audience and issuer:
     // audience: "",
 
-    issuer: `https://${process.env.auth0ClientDomain}/`,
+    issuer: getAuth0Issuer(),
     algorithms: ["RS256"],
   }) as JWTValidatorMiddlewareFn;
 }

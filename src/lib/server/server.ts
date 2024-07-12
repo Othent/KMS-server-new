@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import * as dotEnv from "dotenv";
 import { Route } from "./server.constants";
 import { pingHandlerFactory } from "../operations/ping/ping.handler";
 import { createUserHandlerFactory } from "../operations/create-user/create-user.handler";
@@ -9,24 +8,17 @@ import { decryptHandlerFactory } from "../operations/decrypt/decrypt.handler";
 import { encryptHandlerFactory } from "../operations/encrypt/encrypt.handler";
 import { signHandlerFactory } from "../operations/sign/sign.handler";
 import { createBundleAndSignHandlerFactory } from "../operations/create-bundle-and-sign/create-bundle-and-sign.handler";
-import { Config } from "./config/config.utils";
+import { CONFIG } from "./config/config.utils";
 import { jwtValidatorFactory } from "../middleware/jwt-validator/jwt-validator.middleware";
 import { jwtUnusedFactory } from "../middleware/jwt-unused/jwt-unused.middleware";
 import { logRequestError } from "../utils/log/log.utils";
 import { getErrorResponse, OthentError } from "./errors/errors.utils";
 import { asyncHandler } from "../middleware/async-handler/async-handler.middleware";
 
-// TODO: Not needed in Node.js 20:
-dotEnv.config();
-
 export class OthentApp {
   app: express.Application = express();
 
-  config: Config;
-
-  constructor(config: Config) {
-    this.config = config;
-
+  constructor() {
     this.addRouteHandlers();
   }
 
@@ -35,7 +27,7 @@ export class OthentApp {
   }
 
   addRouteHandlers() {
-    const { app, config } = this;
+    const { app } = this;
 
     // TODO: Take a look at Multer's options:
     // const upload = multer({});
@@ -50,10 +42,10 @@ export class OthentApp {
 
     app.use(cors({ origin: "*" }));
 
-    app.use(bodyParser.json({ limit: config.UPLOAD_LIMIT }));
+    app.use(bodyParser.json({ limit: CONFIG.UPLOAD_LIMIT }));
 
     app.use(
-      bodyParser.urlencoded({ limit: config.UPLOAD_LIMIT, extended: true }),
+      bodyParser.urlencoded({ limit: CONFIG.UPLOAD_LIMIT, extended: true }),
     );
 
     app.use((req, res, next) => {
@@ -130,7 +122,7 @@ export class OthentApp {
   }
 
   listen() {
-    const { PORT } = this.config;
+    const { PORT } = CONFIG;
 
     this.app.listen(PORT, () => {
       console.log(`Server listening on port ${PORT}...\n`);

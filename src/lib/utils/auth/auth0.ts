@@ -1,5 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
 import express from "express";
+import { CONFIG } from "../../server/config/config.utils";
 
 export interface IdTokenWithData<D = void> extends JwtPayload {
   // TODO: This is missing user_metadata's authSystem, owner and walletAddress (except in createUserHandlerFactory)
@@ -28,5 +29,9 @@ export type ValidAuth0Pathnames =
   | `/.well-known/jwks.json/`;
 
 export function getAuth0URL(pathname: ValidAuth0Pathnames) {
-  return `https://${process.env.auth0ClientDomain}${pathname}` as const;
+  return `https://${CONFIG.AUTH0_CLIENT_DOMAIN}${pathname}` as const;
+}
+
+export function getAuth0Issuer() {
+  return `https://${CONFIG.AUTH0_CLIENT_DOMAIN}/` as const;
 }

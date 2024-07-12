@@ -1,4 +1,4 @@
-import { useSlack } from "../../server/config/config.utils";
+import { CONFIG } from "../../server/config/config.utils";
 import { changeId } from "../tools/changeId";
 import { delay } from "../tools/delay";
 import { kmsClient } from "./kmsClient";
@@ -50,12 +50,12 @@ async function ping(safeId: string) {
   return axios.post(
     "https://slack.com/api/chat.postMessage",
     {
-      channel: process.env.SLACK_CHANNEL_ID,
+      channel: CONFIG.SLACK_CHANNEL_ID,
       text: message,
     },
     {
       headers: {
-        Authorization: `Bearer ${process.env.SLACK_TOKEN}`,
+        Authorization: `Bearer ${CONFIG.SLACK_TOKEN}`,
         "Content-Type": "application/json",
       },
     },
@@ -70,7 +70,7 @@ export async function createKMSUser(sub: string) {
   await Promise.all([createSignKey(safeId), createEncryptDecryptKey(safeId)]);
 
   // Skip the Slack ping when running locally:
-  if (useSlack) {
+  if (CONFIG.SLACK_ENABLED) {
     try {
       await ping(safeId);
     } catch (err) {

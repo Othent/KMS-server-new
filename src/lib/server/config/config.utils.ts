@@ -1,130 +1,224 @@
 import * as dotEnv from "dotenv";
-import { GOOGLE_CREDENTIALS, PORT } from "./config.constants";
+import { GoogleAuthOptions } from "google-auth-library";
 
+// TODO: Not needed in Node.js 20:
 dotEnv.config();
 
 export class Config {
-  isValid = true;
+  // NON-ENV:
 
   UPLOAD_LIMIT = "100mb";
 
-  PORT = 3010;
+  // NODE / SERVER ENV:
 
-  log() {}
-}
+  PORT = -1;
+  IS_PROD = false;
+  IS_DEV = false;
+  IS_TEST = false;
 
-// TODO: Move inside class Config:
+  // AUTH0:
 
-const isProductionPort = PORT === 80;
-const isProd = process.env.NODE_ENV === "production";
-const isDev = process.env.NODE_ENV === "development";
-const isTest = process.env.NODE_ENV === "test";
-const isPortValid = PORT > 0;
-const isNodeEnvValid =
-  (isProductionPort ? isProd : isDev || isTest) && isPortValid;
+  AUTH0_CLIENT_DOMAIN = "";
+  AUTH0_CLIENT_ID = "";
+  AUTH0_CLIENT_SECRET = "";
 
-export const useMongoDB = !!(
-  process.env.mongoDBUsername &&
-  process.env.mongoDBPassword &&
-  process.env.mongoDBHost &&
-  process.env.mongoDBName
-);
+  // GOOGLE KMS:
 
-export const useSlack = !!(
-  process.env.SLACK_CHANNEL_ID && process.env.SLACK_TOKEN
-);
+  KMS_PROJECT_ID = "";
+  GOOGLE_CREDENTIALS: NonNullable<GoogleAuthOptions["credentials"]> = {};
+  SIGN_KEY_VERSION = "";
 
-export const hasRequiredAuth0 = !!(
-  process.env.auth0ClientDomain &&
-  process.env.auth0ClientId &&
-  process.env.auth0ClientSecret
-);
+  // MONGO DB:
 
-export const hasRequiredGoogleKMS = isProd
-  ? !!(
-      process.env.kmsProjectId &&
-      GOOGLE_CREDENTIALS &&
-      process.env.signKeyVersion
-    )
-  : true;
+  MONGODB_USERNAME = "";
+  MONGODB_PASSWORD = "";
+  MONGODB_HOST = "";
+  MONGODB_NAME = "";
+  MONGODB_ENABLED = false;
 
-const hasRequiredMongoDB = isProd ? useMongoDB : true;
-const hasRequiredSlack = isProd ? useSlack : true;
+  // SLACK:
 
-export function verifyEnvironmentVariables() {
-  console.log("");
-  console.log("NODE / SERVER ENV:");
-  console.log("");
-  console.log(`PORT = ${PORT}`);
-  console.log(`process.env.NODE_ENV = ${process.env.NODE_ENV}`);
-  console.log(`isProd = ${isProd}`);
-  console.log(`isDev = ${isDev}`);
-  console.log(`isTest = ${isTest}`);
-  console.log("");
-  console.log(
-    `${isNodeEnvValid ? "✅  Valid environment." : "❌  Invalid environment."}`,
-  );
-  console.log("");
-  console.log("AUTH0:");
-  console.log("");
-  console.log(
-    `${!!process.env.auth0ClientDomain ? "✅" : "❌"}  auth0ClientDomain = ${process.env.auth0ClientDomain}`,
-  );
-  console.log(
-    `${!!process.env.auth0ClientId ? "✅" : "❌"}  auth0ClientId = ${process.env.auth0ClientId}`,
-  );
-  console.log(
-    `${!!process.env.auth0ClientSecret ? "✅" : "❌"}  auth0ClientSecret`,
-  );
-  console.log("");
-  console.log(
-    `${hasRequiredAuth0 ? "✅  Valid Auth0 config." : "❌  Auth0 must always be configured."}`,
-  );
-  console.log("");
-  console.log("GOOGLE KMS:");
-  console.log("");
-  console.log(`${!!process.env.kmsProjectId ? "✅" : "❌"}  kmsProjectId`);
-  console.log(`${!!GOOGLE_CREDENTIALS ? "✅" : "❌"}  googleCredentials`);
-  console.log(`${!!process.env.signKeyVersion ? "✅" : "❌"}  signKeyVersion`);
-  console.log("");
-  console.log(
-    `${hasRequiredGoogleKMS ? "✅  Valid GoogleKMS config." : "❌  GoogleKMS must be configured in production."}`,
-  );
-  console.log("");
-  console.log("MONGO DB:");
-  console.log("");
-  console.log(
-    `${!!process.env.mongoDBUsername ? "✅" : "❌"}  mongoDBUsername`,
-  );
-  console.log(
-    `${!!process.env.mongoDBPassword ? "✅" : "❌"}  mongoDBPassword`,
-  );
-  console.log(`${!!process.env.mongoDBHost ? "✅" : "❌"}  mongoDBHost`);
-  console.log(`${!!process.env.mongoDBName ? "✅" : "❌"}  mongoDBName`);
-  console.log("");
-  console.log(
-    `${hasRequiredMongoDB ? "✅  Valid MongoDB config." : "❌  MongoDB must be configured in production."}`,
-  );
-  console.log("");
-  console.log("SLACK:");
-  console.log("");
-  console.log(
-    `${!!process.env.SLACK_CHANNEL_ID ? "✅" : "❌"}  SLACK_CHANNEL_ID`,
-  );
-  console.log(`${!!process.env.SLACK_TOKEN ? "✅" : "❌"}  SLACK_TOKEN`);
-  console.log("");
-  console.log(
-    `${hasRequiredSlack ? "✅  Valid Slack config." : "❌  Slack must be configured in production."}`,
-  );
-  console.log("");
+  SLACK_CHANNEL_ID = "";
+  SLACK_TOKEN = "";
+  SLACK_ENABLED = false;
 
-  if (
-    !isNodeEnvValid ||
-    !hasRequiredAuth0 ||
-    !hasRequiredGoogleKMS ||
-    !hasRequiredMongoDB ||
-    !hasRequiredSlack
-  ) {
-    process.exit(1);
+  // VALIDATION:
+
+  constructor() {
+    this.init();
+  }
+
+  init() {
+    // NODE / SERVER ENV:
+
+    this.PORT = parseInt(process.env.PORT || "") || -1;
+    this.IS_PROD = process.env.NODE_ENV === "production";
+    this.IS_DEV = process.env.NODE_ENV === "development";
+    this.IS_TEST = process.env.NODE_ENV === "test";
+
+    // AUTH0:
+
+    this.AUTH0_CLIENT_DOMAIN = process.env.auth0ClientDomain || "";
+    this.AUTH0_CLIENT_ID = process.env.auth0ClientId || "";
+    this.AUTH0_CLIENT_SECRET = process.env.auth0ClientSecret || "";
+
+    // GOOGLE KMS:
+
+    let googleCredentials: GoogleAuthOptions["credentials"];
+
+    try {
+      googleCredentials = JSON.parse(
+        process.env.googleCredentials || "",
+      ) as GoogleAuthOptions["credentials"];
+
+      if (!googleCredentials || typeof googleCredentials !== "object") {
+        throw new Error("`process.env.googleCredentials` should be an object.");
+      }
+    } catch (err) {
+      console.log("Cannot parse `process.env.googleCredentials`: ", err);
+
+      process.exit(1);
+    }
+
+    this.KMS_PROJECT_ID = process.env.kmsProjectId || "";
+    this.GOOGLE_CREDENTIALS = googleCredentials || {};
+    this.SIGN_KEY_VERSION = process.env.signKeyVersion || "";
+
+    // MONGO DB:
+
+    this.MONGODB_USERNAME = process.env.mongoDBUsername || "";
+    this.MONGODB_PASSWORD = process.env.mongoDBPassword || "";
+    this.MONGODB_HOST = process.env.mongoDBHost || "";
+    this.MONGODB_NAME = process.env.mongoDBName || "";
+
+    this.MONGODB_ENABLED = !!(
+      this.MONGODB_USERNAME &&
+      this.MONGODB_PASSWORD &&
+      this.MONGODB_HOST &&
+      this.MONGODB_NAME
+    );
+
+    // SLACK:
+
+    this.SLACK_CHANNEL_ID = process.env.SLACK_CHANNEL_ID || "";
+    this.SLACK_TOKEN = process.env.SLACK_TOKEN || "";
+
+    this.SLACK_ENABLED = !!(this.SLACK_CHANNEL_ID && this.SLACK_TOKEN);
+  }
+
+  validate() {
+    const { PORT, IS_PROD, IS_DEV, IS_TEST } = this;
+
+    // NODE / SERVER ENV:
+
+    const isProductionPort = PORT === 80;
+    const isPortValid = PORT > 0;
+    const isNodeEnvValid =
+      (isProductionPort ? IS_PROD : IS_DEV || IS_TEST) && isPortValid;
+
+    // AUTH0:
+
+    const isAuth0Valid = !!(
+      this.AUTH0_CLIENT_DOMAIN &&
+      this.AUTH0_CLIENT_ID &&
+      this.AUTH0_CLIENT_SECRET
+    );
+
+    // GOOGLE KMS:
+
+    const isGoogleKMSValid = IS_PROD
+      ? !!(
+          this.KMS_PROJECT_ID &&
+          Object.keys(this.GOOGLE_CREDENTIALS).length > 0 &&
+          this.SIGN_KEY_VERSION
+        )
+      : true;
+
+    // MONGODB & SLACK:
+
+    const isMongoDBValid = IS_PROD ? this.MONGODB_ENABLED : true;
+    const isSlackValid = IS_PROD ? this.SLACK_ENABLED : true;
+
+    return {
+      isNodeEnvValid,
+      isAuth0Valid,
+      isGoogleKMSValid,
+      isMongoDBValid,
+      isSlackValid,
+    };
+  }
+
+  get isValid() {
+    return Object.values(this.validate()).every((isValid) => isValid);
+  }
+
+  log() {
+    const { PORT, IS_PROD, IS_DEV, IS_TEST } = this;
+
+    const {
+      isNodeEnvValid,
+      isAuth0Valid,
+      isGoogleKMSValid,
+      isMongoDBValid,
+      isSlackValid,
+    } = this.validate();
+
+    console.log("");
+    console.log(
+      `${isNodeEnvValid ? "✅" : "❌"}  NODE / SERVER ENV${isNodeEnvValid ? ":" : " - Invalid environment"}`,
+    );
+    console.log(" ╷");
+    console.log(` ├ PORT = ${PORT}`);
+    console.log(` ├ NODE_ENV = ${process.env.NODE_ENV}`);
+    console.log(` ├ IS_PROD = ${IS_PROD}`);
+    console.log(` ├ IS_DEV = ${IS_DEV}`);
+    console.log(` └ IS_TEST = ${IS_TEST}`);
+    console.log("");
+    console.log(
+      `${isAuth0Valid ? "✅" : "❌"}  AUTH0${isAuth0Valid ? ":" : " - Auth0 must always be configured"}`,
+    );
+    console.log(" ╷");
+    console.log(` ├ AUTH0_CLIENT_DOMAIN = ${this.AUTH0_CLIENT_DOMAIN}`);
+    console.log(` ├ AUTH0_CLIENT_ID = ${this.AUTH0_CLIENT_ID}`);
+    console.log(
+      ` └ AUTH0_CLIENT_SECRET = ${this.AUTH0_CLIENT_SECRET ? "****" : ""}  `,
+    );
+    console.log("");
+    console.log(
+      `${isGoogleKMSValid ? "✅" : "❌"}  GOOGLE KMS${isGoogleKMSValid ? ":" : " - GoogleKMS must be configured in production"}`,
+    );
+    console.log(" ╷");
+    console.log(` ├ KMS_PROJECT_ID = ${!!this.KMS_PROJECT_ID ? "****" : ""}`);
+    console.log(
+      ` ├ GOOGLE_CREDENTIALS = ${!!this.GOOGLE_CREDENTIALS ? "****" : ""}`,
+    );
+    console.log(
+      ` └ SIGN_KEY_VERSION = ${!!this.SIGN_KEY_VERSION ? "****" : ""}`,
+    );
+    console.log("");
+    console.log(
+      `${isMongoDBValid ? "✅" : "❌"}  MONGO DB${isMongoDBValid ? ":" : " - MongoDB must be configured in production"}`,
+    );
+    console.log(" ╷");
+    console.log(
+      ` ├ MONGODB_USERNAME = ${!!this.MONGODB_USERNAME ? "****" : ""}`,
+    );
+    console.log(
+      ` ├ MONGODB_PASSWORD = ${!!this.MONGODB_PASSWORD ? "****" : ""}`,
+    );
+    console.log(` ├ MONGODB_HOST = ${!!this.MONGODB_HOST ? "****" : ""}`);
+    console.log(` └ MONGODB_NAME = ${!!this.MONGODB_NAME ? "****" : ""}`);
+    console.log("");
+    console.log(
+      `${isSlackValid ? "✅" : "❌"}  SLACK${isSlackValid ? ":" : " - Slack must be configured in production"}`,
+    );
+    console.log(" ╷");
+    console.log(
+      ` ├ SLACK_CHANNEL_ID = ${!!process.env.SLACK_CHANNEL_ID ? "****" : ""}`,
+    );
+    console.log(` └ SLACK_TOKEN = ${!!process.env.SLACK_TOKEN ? "****" : ""}`);
+    console.log("");
   }
 }
+
+export const CONFIG = new Config();

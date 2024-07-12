@@ -1,11 +1,10 @@
 import axios from "axios";
 import { createKMSUser } from "../../utils/kms/createKMSUser";
-import { changeId } from "../../utils/tools/changeId";
-import { delay } from "../../utils/tools/delay";
 import { getPublicKey } from "../../utils/kms/getPublicKey";
 import { ownerToAddress } from "../../utils/arweave/arweaveUtils";
 import { getAuth0URL } from "../../utils/auth/auth0";
 import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
+import { CONFIG } from "../../server/config/config.utils";
 
 export async function createUser(sub: string) {
   try {
@@ -26,8 +25,8 @@ export async function createUser(sub: string) {
   try {
     const tokenResponse = await axios.post(getAuth0URL("/oauth/token/"), {
       grant_type: "client_credentials",
-      client_id: process.env.auth0ClientId,
-      client_secret: process.env.auth0ClientSecret,
+      client_id: CONFIG.AUTH0_CLIENT_ID,
+      client_secret: CONFIG.AUTH0_CLIENT_SECRET,
       audience: getAuth0URL("/api/v2/"),
     });
 

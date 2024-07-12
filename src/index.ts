@@ -1,22 +1,15 @@
 import { OthentApp } from "./lib/server/server";
-import {
-  Config,
-  verifyEnvironmentVariables,
-} from "./lib/server/config/config.utils";
+import { CONFIG } from "./lib/server/config/config.utils";
 import express from "express";
-
-verifyEnvironmentVariables();
 
 let app: express.Application | null = null;
 
 try {
-  const config = new Config();
+  CONFIG.log();
 
-  config.log();
+  if (!CONFIG.isValid) throw new Error("Invalid config.");
 
-  if (!config.isValid) throw new Error("Invalid config.");
-
-  const othentApp = new OthentApp(config);
+  const othentApp = new OthentApp();
 
   othentApp.listen();
 
