@@ -1,5 +1,5 @@
 import * as dotEnv from "dotenv";
-import { GoogleAuthOptions } from "google-auth-library";
+import type { GoogleAuthOptions } from "google-auth-library";
 
 // TODO: Not needed in Node.js 20:
 dotEnv.config();

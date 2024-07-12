@@ -1,4 +1,4 @@
-import { JwtPayload } from "jsonwebtoken";
+import type { JwtPayload } from "jsonwebtoken";
 import express from "express";
 import { CONFIG } from "../../server/config/config.utils";
 

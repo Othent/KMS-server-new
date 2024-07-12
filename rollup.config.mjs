@@ -2,15 +2,15 @@ import commonjs from "@rollup/plugin-commonjs";
 import typescript from "@rollup/plugin-typescript";
 import terser from "@rollup/plugin-terser";
 
+// TODO: Replace with https://www.npmjs.com/package/rollup-plugin-node-externals
+
 const external = [
   "@google-cloud/kms",
-  "arweave-mnemonic-keys",
   "axios",
   "base64-js",
   "cors",
   "express",
   "jsonwebtoken",
-  "jwk-to-pem",
   "multer",
   "pem-jwk",
   "body-parser",
