@@ -18,7 +18,7 @@ export interface IdTokenWithData<D = void> extends JwtPayload {
   // Custom from Auth0's Add User Metadata action:
   owner: string; // Public key derived from `sub`.
   walletAddress: string; // Wallet address derived from `owner`.
-  authSystem: 'KMS';
+  authSystem: "KMS";
 
   // Extra data also added to the token in Add User Metadata action when calling functions other than createUser:
   data: void extends D ? never : D;
