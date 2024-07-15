@@ -53,7 +53,7 @@ export async function createUser(sub: string) {
       },
       data: {
         user_metadata: {
-          authSystem: "KMS",
+          authSystem: CONFIG.AUTH_SYSTEM,
           owner,
           walletAddress,
         },

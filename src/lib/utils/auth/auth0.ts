@@ -3,8 +3,7 @@ import express from "express";
 import { CONFIG } from "../../server/config/config.utils";
 
 export interface IdTokenWithData<D = void> extends JwtPayload {
-  // TODO: This is missing user_metadata's authSystem, owner and walletAddress (except in createUserHandlerFactory)
-
+  // Default from Auth0:
   given_name: string;
   family_name: string;
   nickname: string;
@@ -15,6 +14,13 @@ export interface IdTokenWithData<D = void> extends JwtPayload {
   email_verified: string;
   nonce: string;
   name: string;
+
+  // Custom from Auth0's Add User Metadata action:
+  owner: string; // Public key derived from `sub`.
+  walletAddress: string; // Wallet address derived from `owner`.
+  authSystem: 'KMS';
+
+  // Extra data also added to the token in Add User Metadata action when calling functions other than createUser:
   data: void extends D ? never : D;
 }
 

@@ -4,7 +4,6 @@ Node.js/Express.js server to interact with Auth0 and Google KMS.
 
 <br />
 
-
 ## Running It Locally:
 
 First, you need to update `.env` with a valid `auth0ClientDomain`, `auth0ClientId` and `auth0ClientSecret` values pointing to an Auth0 application with the following params:
@@ -30,7 +29,6 @@ You don't need to configure the remaining 3 services:
 - Slack integration won't be used (this logic is skipped).
 
 <br />
-
 
 ## Running It In Production:
 

@@ -7,6 +7,7 @@ dotEnv.config();
 export class Config {
   // NON-ENV:
 
+  AUTH_SYSTEM = "KMS";
   UPLOAD_LIMIT = "100mb";
 
   // NODE / SERVER ENV:
