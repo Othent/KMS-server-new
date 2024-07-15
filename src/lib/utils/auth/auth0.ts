@@ -25,7 +25,7 @@ export interface ExpressRequestWithToken<D = void> extends express.Request {
 export type ValidAuth0Pathnames =
   | "/oauth/token/"
   | "/api/v2/"
-  | `/api/v2/users/${string}/`
+  | `/api/v2/users/${string}`
   | `/.well-known/jwks.json/`;
 
 export function getAuth0URL(pathname: ValidAuth0Pathnames) {

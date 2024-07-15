@@ -4,12 +4,13 @@ import { createBundleAndSign } from "./createBundleAndSign";
 import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
+import { Tag } from "arbundles";
 
 export interface CreateBundleAndSignIdTokenData {
   data: string;
   keyName: string;
   owner: string;
-  tags: string[];
+  tags: Tag[];
 }
 
 export function createBundleAndSignHandlerFactory() {

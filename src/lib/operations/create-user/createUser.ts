@@ -46,7 +46,7 @@ export async function createUser(sub: string) {
   try {
     await axios.request({
       method: "PATCH",
-      url: getAuth0URL(`/api/v2/users/${sub}/`),
+      url: getAuth0URL(`/api/v2/users/${sub}`),
       headers: {
         authorization: `Bearer ${accessToken}`,
         "content-type": "application/json",

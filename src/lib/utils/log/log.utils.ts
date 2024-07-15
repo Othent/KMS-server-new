@@ -61,6 +61,8 @@ export function logRequestSuccess<D>(
 }
 
 export function logRequestError<R>(route: Route, error: Error | string) {
+  // TODO: Update to properly log OthentError
+
   console.log(
     RED,
     `RES: ${route} => ${typeof error === "string" ? error : `${error.name}: ${error.message}`}`,
