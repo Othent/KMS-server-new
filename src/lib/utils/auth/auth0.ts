@@ -14,6 +14,7 @@ export interface IdTokenWithData<D = void> extends JwtPayload {
   email_verified: string;
   nonce: string;
   name: string;
+  sid: string;
 
   // Custom from Auth0's Add User Metadata action:
   owner: string; // Public key derived from `sub`.

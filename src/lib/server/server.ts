@@ -12,8 +12,11 @@ import { CONFIG } from "./config/config.utils";
 import { jwtValidatorFactory } from "../middleware/jwt-validator/jwt-validator.middleware";
 import { jwtUnusedFactory } from "../middleware/jwt-unused/jwt-unused.middleware";
 import { logRequestError } from "../utils/log/log.utils";
-import { getErrorResponse, OthentError } from "./errors/errors.utils";
+import { getErrorResponse } from "./errors/errors.utils";
 import { asyncHandler } from "../middleware/async-handler/async-handler.middleware";
+import { OthentServerError } from "./errors/error";
+import { ExpressRequestWithToken } from "../utils/auth/auth0";
+import { errorHandlerFactory } from "../middleware/error-handler/error-handler.middleware";
 
 export class OthentApp {
   app: express.Application = express();
@@ -101,22 +104,7 @@ export class OthentApp {
 
     // See https://expressjs.com/en/guide/error-handling.html
 
-    app.use(
-      (
-        err: Error | OthentError,
-        req: express.Request,
-        res: express.Response,
-        next: express.NextFunction,
-      ) => {
-        logRequestError(req.path as Route, err);
-
-        if (res.headersSent) {
-          return next(err);
-        }
-
-        res.status(500).json(getErrorResponse(err));
-      },
-    );
+    app.use(errorHandlerFactory() as unknown as express.Handler);
 
     this.app = app;
   }

@@ -2,7 +2,8 @@ import { sign } from "../sign/sign";
 import { createData, Signer, Tag } from "arbundles";
 import base64url from "base64url";
 import { stringToBuffer } from "../../utils/arweave/arweaveUtils";
-import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
+import { OthentErrorID } from "../../server/errors/error";
+import { createOrPropagateError } from "../../server/errors/errors.utils";
 
 export async function createBundleAndSign(
   data: string | Uint8Array,
@@ -34,8 +35,9 @@ export async function createBundleAndSign(
     // DataItem.sign() sets the DataItem's `id` property and returns its `rawId`:
     await dataItem.sign(signer);
   } catch (err) {
-    throw new OthentError(
+    throw createOrPropagateError(
       OthentErrorID.CreateBundleAndSign,
+      500,
       "Error signing DataItem",
       err,
     );

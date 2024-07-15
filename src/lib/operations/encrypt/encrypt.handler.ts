@@ -3,7 +3,8 @@ import { encrypt } from "./encrypt";
 import { ExpressRequestWithToken } from "../../utils/auth/auth0";
 import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
-import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
+import { createOrPropagateError } from "../../server/errors/errors.utils";
+import { OthentErrorID } from "../../server/errors/error";
 
 export interface EncryptIdTokenData {
   keyName: string;
@@ -20,7 +21,11 @@ export function encryptHandlerFactory() {
 
     // TODO: Replace with Joi.
     if (!idToken || !data || !data.keyName || !data.plaintext) {
-      throw new OthentError(OthentErrorID.Validation);
+      throw createOrPropagateError(
+        OthentErrorID.Validation,
+        400,
+        "Invalid token data",
+      );
     }
 
     logRequestStart(Route.ENCRYPT, idToken);

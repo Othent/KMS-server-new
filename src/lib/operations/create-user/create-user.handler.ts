@@ -3,7 +3,8 @@ import { createUser } from "./createUser";
 import { ExpressRequestWithToken } from "../../utils/auth/auth0";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { Route } from "../../server/server.constants";
-import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
+import { createOrPropagateError } from "../../server/errors/errors.utils";
+import { OthentErrorID } from "../../server/errors/error";
 
 export function createUserHandlerFactory() {
   return async (req: ExpressRequestWithToken, res: express.Response) => {
@@ -11,7 +12,11 @@ export function createUserHandlerFactory() {
 
     // TODO: Replace with Joi.
     if (!idToken || !idToken.sub) {
-      throw new OthentError(OthentErrorID.Validation);
+      throw createOrPropagateError(
+        OthentErrorID.Validation,
+        400,
+        "Invalid token data",
+      );
     }
 
     logRequestStart(Route.CREATE_USER, idToken);

@@ -3,15 +3,17 @@ import { createKMSUser } from "../../utils/kms/createKMSUser";
 import { getPublicKey } from "../../utils/kms/getPublicKey";
 import { ownerToAddress } from "../../utils/arweave/arweaveUtils";
 import { getAuth0URL } from "../../utils/auth/auth0";
-import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
 import { CONFIG } from "../../server/config/config.utils";
+import { OthentErrorID } from "../../server/errors/error";
+import { createOrPropagateError } from "../../server/errors/errors.utils";
 
 export async function createUser(sub: string) {
   try {
     await createKMSUser(sub);
   } catch (err) {
-    throw new OthentError(
+    throw createOrPropagateError(
       OthentErrorID.UserCreation,
+      500,
       "Error creating KMS user",
       err,
     );
@@ -32,15 +34,20 @@ export async function createUser(sub: string) {
 
     accessToken = tokenResponse.data.access_token;
   } catch (err) {
-    throw new OthentError(
+    throw createOrPropagateError(
       OthentErrorID.UserCreation,
+      500,
       "Error requesting client_credentials",
       err,
     );
   }
 
   if (!accessToken) {
-    throw new OthentError(OthentErrorID.UserCreation, "No accessToken");
+    throw createOrPropagateError(
+      OthentErrorID.UserCreation,
+      500,
+      "No accessToken",
+    );
   }
 
   try {
@@ -60,8 +67,9 @@ export async function createUser(sub: string) {
       },
     });
   } catch (err) {
-    throw new OthentError(
+    throw createOrPropagateError(
       OthentErrorID.UserCreation,
+      500,
       "Error patching user_metadata",
       err,
     );

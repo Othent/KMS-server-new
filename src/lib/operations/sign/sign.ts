@@ -1,5 +1,6 @@
 import { CONFIG } from "../../server/config/config.utils";
-import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
+import { OthentErrorID } from "../../server/errors/error";
+import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { changeId } from "../../utils/tools/changeId";
 
@@ -24,15 +25,16 @@ export async function sign(data: string | Uint8Array, keyName: string) {
 
     signature = signResponse.signature;
   } catch (err) {
-    throw new OthentError(
+    throw createOrPropagateError(
       OthentErrorID.Signing,
+      500,
       "Error calling KMS asymmetricSign",
       err,
     );
   }
 
   if (!signature) {
-    throw new OthentError(OthentErrorID.Decryption, "No signature");
+    throw createOrPropagateError(OthentErrorID.Decryption, 500, "No signature");
   }
 
   return signature.toString();

@@ -1,5 +1,6 @@
 import { CONFIG } from "../../server/config/config.utils";
-import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
+import { OthentErrorID } from "../../server/errors/error";
+import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { changeId } from "../../utils/tools/changeId";
 
@@ -24,15 +25,20 @@ export async function encrypt(plaintext: string | Uint8Array, keyName: string) {
 
     ciphertext = encryptResponse.ciphertext;
   } catch (err) {
-    throw new OthentError(
+    throw createOrPropagateError(
       OthentErrorID.Encryption,
+      500,
       "Error calling KMS encrypt",
       err,
     );
   }
 
   if (!ciphertext) {
-    throw new OthentError(OthentErrorID.Encryption, "No ciphertext");
+    throw createOrPropagateError(
+      OthentErrorID.Encryption,
+      500,
+      "No ciphertext",
+    );
   }
 
   return ciphertext.toString();

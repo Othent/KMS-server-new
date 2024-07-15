@@ -1,55 +1,41 @@
-export enum OthentErrorID {
-  Unexpected = "Unexpected",
-  Validation = "Validation",
-  UserCreation = "UserCreation",
-  Encryption = "Encryption",
-  Decryption = "Decryption",
-  Signing = "Signing",
-  CreateBundleAndSign = "CreateBundleAndSign",
-  PublicKey = "PublicKey",
-}
+import {
+  ErrorResponse,
+  ErrorStatusCode,
+  OthentErrorID,
+  OthentServerError,
+} from "./error";
 
-export function getErrorResponse(error: unknown) {
-  // TODO: if instance of OthentError add developer details in development, etc.
-
-  let errorID = "";
-  let errorMessage = "";
-  let developerMessage;
-
-  if (error instanceof OthentError) {
-    errorID = error.id;
-    errorMessage = error.message;
-    developerMessage = error.developerMessage;
-  } else if (error instanceof Error) {
-    errorID = error.name;
-    errorMessage = error.message;
-  } else {
-    errorID = OthentErrorID.Unexpected;
+export function getErrorResponse(error: unknown): ErrorResponse {
+  if (error instanceof OthentServerError) {
+    return error.getErrorResponse();
   }
 
-  // TODO: Only add `developerMessage` in development:
+  const unexpectedError: OthentServerError = new OthentServerError(
+    OthentErrorID.Unexpected,
+    500,
+    "",
+    error,
+  );
 
-  // TODO: Return different params to be able to re-throw the error on the frontend.
-
-  return {
-    success: false,
-    errorID,
-    errorMessage,
-    developerMessage,
-  };
+  return unexpectedError.getErrorResponse();
 }
 
-// Custom JWT error...
-
-export class OthentError extends Error {
-  id: OthentErrorID;
-  developerMessage?: string;
-
-  constructor(id: OthentErrorID, developerMessage?: string, error?: unknown) {
-    super();
-
-    this.id = id;
-    this.message = "";
-    this.developerMessage = developerMessage;
+export function createOrPropagateError(
+  id: OthentErrorID,
+  statusCode: ErrorStatusCode,
+  developerMessage: string,
+  error?: unknown,
+): OthentServerError {
+  if (error instanceof OthentServerError) {
+    return error;
   }
+
+  // Invalid JWT - This error came from jwt-validator.middleware.ts / express-jwt:
+  // See https://www.npmjs.com/package/express-jwt#error-handling
+
+  if (error instanceof Error && error.name === "UnauthorizedError") {
+    return new OthentServerError(id, 401, developerMessage, error);
+  }
+
+  return new OthentServerError(id, statusCode, developerMessage, error);
 }

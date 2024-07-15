@@ -1,5 +1,6 @@
 import { CONFIG } from "../../server/config/config.utils";
-import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
+import { OthentErrorID } from "../../server/errors/error";
+import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { changeId } from "../../utils/tools/changeId";
 
@@ -27,15 +28,16 @@ export async function decrypt(
 
     plaintext = decryptResponse.plaintext;
   } catch (err) {
-    throw new OthentError(
+    throw createOrPropagateError(
       OthentErrorID.Decryption,
+      500,
       "Error calling KMS decrypt",
       err,
     );
   }
 
   if (!plaintext) {
-    throw new OthentError(OthentErrorID.Decryption, "No plaintext");
+    throw createOrPropagateError(OthentErrorID.Decryption, 500, "No plaintext");
   }
 
   return plaintext.toString();

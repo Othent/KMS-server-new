@@ -1,8 +1,9 @@
 import { kmsClient } from "./kmsClient";
 import { changeId } from "../tools/changeId";
 import { pem2jwk } from "pem-jwk";
-import { OthentError, OthentErrorID } from "../../server/errors/errors.utils";
 import { CONFIG } from "../../server/config/config.utils";
+import { createOrPropagateError } from "../../server/errors/errors.utils";
+import { OthentErrorID } from "../../server/errors/error";
 
 export async function getPublicKey(sub: string) {
   const safeId = changeId(sub);
@@ -25,15 +26,16 @@ export async function getPublicKey(sub: string) {
 
     pem = publicKeyResponse.pem || "";
   } catch (err) {
-    throw new OthentError(
+    throw createOrPropagateError(
       OthentErrorID.PublicKey,
+      500,
       "Error calling KMS getPublicKey",
       err,
     );
   }
 
   if (!pem) {
-    throw new OthentError(OthentErrorID.PublicKey, "No PEM");
+    throw createOrPropagateError(OthentErrorID.PublicKey, 500, "No PEM");
   }
 
   return pem2jwk(pem).n;
