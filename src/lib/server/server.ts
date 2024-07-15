@@ -7,7 +7,6 @@ import { createUserHandlerFactory } from "../operations/create-user/create-user.
 import { decryptHandlerFactory } from "../operations/decrypt/decrypt.handler";
 import { encryptHandlerFactory } from "../operations/encrypt/encrypt.handler";
 import { signHandlerFactory } from "../operations/sign/sign.handler";
-import { createBundleAndSignHandlerFactory } from "../operations/create-bundle-and-sign/create-bundle-and-sign.handler";
 import { CONFIG } from "./config/config.utils";
 import { jwtValidatorFactory } from "../middleware/jwt-validator/jwt-validator.middleware";
 import { jwtUnusedFactory } from "../middleware/jwt-unused/jwt-unused.middleware";
@@ -91,15 +90,6 @@ export class OthentApp {
       jwtValidator,
       jwtUnused,
       asyncHandler(signHandlerFactory()) as unknown as express.Handler,
-    );
-
-    app.post(
-      Route.CREATE_BUNDLE_AND_SIGN,
-      jwtValidator,
-      jwtUnused,
-      asyncHandler(
-        createBundleAndSignHandlerFactory(),
-      ) as unknown as express.Handler,
     );
 
     // See https://expressjs.com/en/guide/error-handling.html

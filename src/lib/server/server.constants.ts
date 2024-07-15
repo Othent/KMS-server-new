@@ -4,5 +4,4 @@ export enum Route {
   DECRYPT = "/decrypt",
   ENCRYPT = "/encrypt",
   SIGN = "/sign",
-  CREATE_BUNDLE_AND_SIGN = "/create-bundle-and-sign",
 }

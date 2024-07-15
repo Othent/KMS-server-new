@@ -27,7 +27,6 @@ export enum OthentErrorID {
   Encryption = "Encryption",
   Decryption = "Decryption",
   Signing = "Signing",
-  CreateBundleAndSign = "CreateBundleAndSign",
   PublicKey = "PublicKey",
 }
 
