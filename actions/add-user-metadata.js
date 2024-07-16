@@ -4,18 +4,29 @@
  * @param {Event} event - Details about the user and the context in which they are logging in.
  * @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.
  */
-// @ts-ignore
 exports.onExecutePostLogin = async (event, api) => {
   if (event.authorization) {
-    console.log(event.request);
+    // Won't work without an extension. See https://auth0.com/docs/customize/extensions/real-time-webtask-logs
+    // ONLY USE LOGGING IN DEVELOPMENT!
+    // console.log(JSON.stringify(event.request, null, '  '));
 
-    let transaction_input = event.request.query.transaction_input;
+    const transaction_input = event.request.query.transaction_input || event.request.body.transaction_input;
 
-    transaction_input = JSON.parse(transaction_input);
+    let transactionInput = null;
 
-    if (transaction_input.othentFunction === "KMS") {
-      if (transaction_input.data) {
-        api.idToken.setCustomClaim(`data`, transaction_input.data);
+    try {
+      transactionInput = JSON.parse(transaction_input);
+
+      if (!transactionInput) throw new Error("Missing `transaction_input`");
+    } catch (err) {
+      console.log(err.name, err.message);
+
+      return;
+    }
+
+    if (transactionInput.othentFunction === "KMS") {
+      if (transactionInput.data) {
+        api.idToken.setCustomClaim(`data`, transactionInput.data);
       }
 
       if (event.user.user_metadata.owner) {

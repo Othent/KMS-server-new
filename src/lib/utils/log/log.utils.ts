@@ -3,9 +3,13 @@ import { OthentServerError } from "../../server/errors/error";
 import { Route } from "../../server/server.constants";
 import { IdTokenWithData } from "../auth/auth0";
 
-export function getDevelopmentOnlyTokenID<D>(idToken: IdTokenWithData<D>) {
+export function getDevelopmentOnlyTokenID<D>(
+  idToken: IdTokenWithData<D> | null,
+) {
   // Just in case...
   if (CONFIG.IS_PROD) return "<DEVELOPMENT_ONLY_ID_USED_IN_PRODUCTION>";
+
+  if (!idToken) return "ANONYMOUS";
 
   const {
     email,
@@ -45,7 +49,7 @@ export function logRequestSuccess<D>(
 
 export function logRequestError<D>(
   route: Route,
-  idToken: IdTokenWithData<D>,
+  idToken: IdTokenWithData<D> | null,
   error: unknown,
 ) {
   // TODO: This logger is for development only. Replace with Winston / Morgan in production.

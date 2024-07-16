@@ -8,8 +8,10 @@
 exports.onExecutePostLogin = async (event, api) => {
   const { user } = event;
 
-  console.log("user =", user);
-  console.log("user.private =", user.private);
+  // Won't work without an extension. See https://auth0.com/docs/customize/extensions/real-time-webtask-logs
+  // ONLY USE LOGGING IN DEVELOPMENT!
+  // console.log("user =", user);
+  // console.log("user.private =", user.private);
 
   if (user.private === true) {
     api.idToken.setCustomClaim("email", "");

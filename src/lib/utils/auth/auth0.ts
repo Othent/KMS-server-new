@@ -29,6 +29,14 @@ export interface ExpressRequestWithToken<D = void> extends express.Request {
   idToken: IdTokenWithData<D>;
 }
 
+export function isExpressRequestWithToken(
+  req: express.Request | ExpressRequestWithToken,
+): req is ExpressRequestWithToken {
+  return (
+    req.hasOwnProperty("idToken") && !!(req as ExpressRequestWithToken).idToken
+  );
+}
+
 export type ValidAuth0Pathnames =
   | "/oauth/token/"
   | "/api/v2/"

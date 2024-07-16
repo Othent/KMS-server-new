@@ -34,6 +34,8 @@ export async function createUser(sub: string) {
 
     accessToken = tokenResponse.data.access_token;
   } catch (err) {
+    // TODO: Include data.error, data.error_description and data.error_uri
+
     throw createOrPropagateError(
       OthentErrorID.UserCreation,
       500,

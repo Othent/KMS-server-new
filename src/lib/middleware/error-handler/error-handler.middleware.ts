@@ -1,17 +1,24 @@
 import { getErrorResponse } from "../../server/errors/errors.utils";
 import { Route } from "../../server/server.constants";
-import { ExpressRequestWithToken } from "../../utils/auth/auth0";
+import {
+  ExpressRequestWithToken,
+  isExpressRequestWithToken,
+} from "../../utils/auth/auth0";
 import express from "express";
 import { logRequestError } from "../../utils/log/log.utils";
 
 export function errorHandlerFactory() {
   return (
     err: unknown,
-    req: ExpressRequestWithToken,
+    req: express.Request | ExpressRequestWithToken,
     res: express.Response,
     next: express.NextFunction,
   ) => {
-    logRequestError(req.path as Route, req.idToken, err);
+    logRequestError(
+      req.path as Route,
+      isExpressRequestWithToken(req) ? req.idToken : null,
+      err,
+    );
 
     if (res.headersSent) {
       return next(err);

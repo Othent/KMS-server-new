@@ -11,7 +11,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "build": "bun run prettier && tsup src/index.ts --format cjs,esm --dts",
-    "dev": "bun run ./src/index.ts --watch",
+    "dev": "node --import=tsx --watch ./src/index.ts",
     "heroku-postbuild": "tsup src/index.ts --format cjs,esm --dts",
     "test": "jest tests/ --forceExit",
     "prettier": "prettier --write ."
@@ -69,6 +69,7 @@
     "ts-node": "^10.9.1",
     "tslib": "^2.6.2",
     "tsup": "^8.0.1",
+    "tsx": "^4.16.2",
     "typescript": "^5.2.2"
   }
 }
