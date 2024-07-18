@@ -1,10 +1,14 @@
 import { CONFIG } from "../../server/config/config.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
+import { stringOrUint8ArrayToUint8Array, VerifiedUTF16String } from "../../utils/arweave/arweaveUtils";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { changeId } from "../../utils/tools/changeId";
 
-export async function encrypt(plaintext: string | Uint8Array, keyName: string) {
+export async function encrypt(
+  plaintext: VerifiedUTF16String | Uint8Array,
+  keyName: string
+) {
   const safeId = changeId(keyName);
 
   // TODO: Create util function to get the key names:
@@ -41,5 +45,5 @@ export async function encrypt(plaintext: string | Uint8Array, keyName: string) {
     );
   }
 
-  return ciphertext.toString();
+  return stringOrUint8ArrayToUint8Array(ciphertext);
 }

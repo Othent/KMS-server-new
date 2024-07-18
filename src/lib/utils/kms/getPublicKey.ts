@@ -4,6 +4,7 @@ import { pem2jwk } from "pem-jwk";
 import { CONFIG } from "../../server/config/config.utils";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
+import { B64UrlString } from "../arweave/arweaveUtils";
 
 export async function getPublicKey(sub: string) {
   const safeId = changeId(sub);
@@ -38,5 +39,5 @@ export async function getPublicKey(sub: string) {
     throw createOrPropagateError(OthentErrorID.PublicKey, 500, "No PEM");
   }
 
-  return pem2jwk(pem).n;
+  return pem2jwk(pem).n as B64UrlString;
 }

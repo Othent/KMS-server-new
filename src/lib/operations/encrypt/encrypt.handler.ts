@@ -5,10 +5,11 @@ import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
+import { b64ToUint8Array, B64UrlString } from "../../utils/arweave/arweaveUtils";
 
 export interface EncryptIdTokenData {
   keyName: string;
-  plaintext: string;
+  plaintext: B64UrlString;
 }
 
 export function encryptHandlerFactory() {
@@ -30,10 +31,12 @@ export function encryptHandlerFactory() {
 
     logRequestStart(Route.ENCRYPT, idToken);
 
-    const ciphertext = await encrypt(data.plaintext, data.keyName);
+    const ciphertext = await encrypt(b64ToUint8Array(data.plaintext), data.keyName);
 
     logRequestSuccess(Route.ENCRYPT, idToken);
 
-    res.send(ciphertext);
+    // TODO: Ideally, we would just send the binary data back, but the old version of the server was sending strings, so
+    // we need to keep doing that until we the new API version:
+    res.send(ciphertext.toString());
   };
 }

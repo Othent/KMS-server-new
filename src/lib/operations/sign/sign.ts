@@ -1,10 +1,14 @@
 import { CONFIG } from "../../server/config/config.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
+import { stringOrUint8ArrayToUint8Array, VerifiedUTF16String } from "../../utils/arweave/arweaveUtils";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { changeId } from "../../utils/tools/changeId";
 
-export async function sign(data: string | Uint8Array, keyName: string) {
+export async function sign(
+  data: VerifiedUTF16String | Uint8Array,
+  keyName: string,
+) {
   const safeId = changeId(keyName);
 
   const fullKeyName = kmsClient.cryptoKeyVersionPath(
@@ -37,5 +41,5 @@ export async function sign(data: string | Uint8Array, keyName: string) {
     throw createOrPropagateError(OthentErrorID.Decryption, 500, "No signature");
   }
 
-  return signature.toString();
+  return stringOrUint8ArrayToUint8Array(signature);
 }

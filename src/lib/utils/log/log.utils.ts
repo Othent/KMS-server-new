@@ -43,7 +43,7 @@ export function logRequestSuccess<D>(
   if (CONFIG.IS_PROD) return;
 
   console.log(
-    `└ ${GREEN}RES: ${route} ${getDevelopmentOnlyTokenID(idToken)}${RESET}\n`,
+    `└ ${GREEN}RES ${route} ${getDevelopmentOnlyTokenID(idToken)}${RESET}\n`,
   );
 }
 

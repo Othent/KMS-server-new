@@ -2,6 +2,7 @@ import { KeyManagementServiceClient } from "@google-cloud/kms";
 import assert from "assert";
 import crypto from "crypto";
 import { delay } from "../tools/delay";
+import { b64ToUint8Array, binaryDataTypeOrStringTob64String, binaryDataTypeToString, stringToUint8Array } from "../arweave/arweaveUtils";
 
 type IKeyRing =
   import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.IKeyRing;
@@ -54,22 +55,55 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
     console.log(" ╷ ");
 
     const originalPlaintext = "Secret message.";
+    const originalPlaintextBuffer = b64ToUint8Array(binaryDataTypeOrStringTob64String(originalPlaintext));
 
     const encryptResponse = await this.encrypt({
       plaintext: originalPlaintext,
     });
 
+    const encryptResponseFromBuffer = await this.encrypt({
+      plaintext: originalPlaintextBuffer,
+    });
+
     const { ciphertext } = encryptResponse[0];
+    const { ciphertext: ciphertextFromBuffer } = encryptResponseFromBuffer[0];
 
     console.log(` ├ encrypt("${originalPlaintext}") => ${ciphertext}`);
+    console.log(` ├ encrypt("${originalPlaintext}") (b64) => ${ciphertextFromBuffer}`);
+
+    assert.equal(
+      ciphertext,
+      ciphertextFromBuffer,
+      "Encryption doesn't work consistently with UTF-16 and B64.",
+    );
 
     const decryptResponse = await this.decrypt({
       ciphertext,
     });
 
+    // const ciphertextBuffer = stringToUint8Array(ciphertextFromBuffer);
+
+    // const ciphertextBuffer = b64ToUint8Array(binaryDataTypeOrStringTob64String(ciphertextFromBuffer as string));
+    // console.log(binaryDataTypeToString(ciphertextBuffer) === ciphertextFromBuffer);
+
+    // const decryptResponseFromBuffer = await this.decrypt({
+    //   ciphertext: ciphertextBuffer,
+    // });
+
+    // const decryptResponseFromBuffer = [{ plaintext: originalPlaintext }];
+
     const { plaintext } = decryptResponse[0];
+    // const { plaintext: plaintextFromBuffer } = decryptResponseFromBuffer[0];
 
     console.log(` ├ decrypt("${ciphertext}") => ${plaintext}`);
+    // console.log(` ├ decrypt("${ciphertext}") (b64) => ${plaintextFromBuffer}`);
+    console.log(` ├ decrypt("${ciphertext}") (b64) => NOT IMPLEMENTED`);
+
+    // assert.equal(
+    //   plaintext,
+    //   plaintextFromBuffer,
+    //   "Decryption doesn't work consistently with UTF-16 and B64.",
+    // );
 
     assert.equal(
       originalPlaintext,
@@ -81,19 +115,29 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       data: originalPlaintext,
     });
 
-    const { signature } = asymmetricSignResponse[0];
+    const asymmetricSignResponseFromBuffer = await this.asymmetricSign({
+      data: originalPlaintextBuffer,
+    });
 
-    console.log(
-      ` ├ asymmetricSign("${originalPlaintext}") => ${typeof signature}`,
+    const { signature } = asymmetricSignResponse[0];
+    const { signature: signatureFromBuffer } = asymmetricSignResponseFromBuffer[0];
+
+    if (typeof signature !== 'string' || typeof signatureFromBuffer !== 'string') {
+      throw new Error("Not implemented.");
+    }
+
+    console.log(` ├ asymmetricSign("${originalPlaintext}") => ${signature.slice(0, 32)}...`);
+    console.log(` ├ asymmetricSign("${originalPlaintext}") (b64) => ${signatureFromBuffer.slice(0, 32)}...`);
+
+    assert.equal(
+      signature,
+      signatureFromBuffer,
+      "Signature doesn't work consistently with UTF-16 and B64.",
     );
 
     const publicKeyResponse = await this.getPublicKey();
     const { pem } = publicKeyResponse[0];
     const publicKey = crypto.createPublicKey(pem || "");
-
-    if (ArrayBuffer.isView(signature)) {
-      throw new Error("Not implemented.");
-    }
 
     const isSignatureValid = crypto.verify(
       ASYMMETRIC_ALGORITHM,
@@ -102,9 +146,18 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       Buffer.from(signature || "", "hex"),
     );
 
-    console.log(` └ isSignatureValid = ${isSignatureValid}`);
+    const isSignatureFromBufferValid = crypto.verify(
+      ASYMMETRIC_ALGORITHM,
+      originalPlaintextBuffer,
+      publicKey,
+      Buffer.from(signatureFromBuffer || "", "hex"),
+    );
+
+    console.log(` ├ isSignatureValid = ${isSignatureValid}`);
+    console.log(` └ isSignatureValid (b64) = ${isSignatureFromBufferValid}`);
 
     assert(isSignatureValid, "Invalid signature.");
+    assert(isSignatureFromBufferValid, "Invalid signature from buffer.");
 
     console.log("");
   }
@@ -158,13 +211,21 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
   encrypt(
     request?: IEncryptRequest,
   ): Promise<[IEncryptResponse, IEncryptRequest | undefined, {} | undefined]> {
+    if (!request || !request.plaintext) {
+      throw new Error("Not plaintext.");
+    }
+
     const cipher = crypto.createCipheriv(
       SYMMETRIC_ALGORITHM,
       KEY_BUFFER,
       IV_BUFFER,
     );
 
-    let ciphertextBuffer = cipher.update(request?.plaintext || "");
+    // const plaintextBuffer = typeof request.plaintext === 'string'
+    //   ? Buffer.from(request.plaintext || "")
+    //   : request.plaintext;
+
+    let ciphertextBuffer = cipher.update(request.plaintext);
 
     ciphertextBuffer = Buffer.concat([ciphertextBuffer, cipher.final()]);
 
@@ -182,8 +243,8 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
   decrypt(
     request?: IDecryptRequest,
   ): Promise<[IDecryptResponse, IDecryptRequest | undefined, {} | undefined]> {
-    if (ArrayBuffer.isView(request?.ciphertext)) {
-      throw new Error("Not implemented.");
+    if (!request || !request.ciphertext) {
+      throw new Error("Not ciphertext.");
     }
 
     const decipher = crypto.createDecipheriv(
@@ -192,13 +253,16 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       IV_BUFFER,
     );
 
-    const encryptedText = Buffer.from(request?.ciphertext || "", "hex");
+    const ciphertextBuffer = typeof request.ciphertext === 'string'
+      ? Buffer.from(request.ciphertext, "hex")
+      : request.ciphertext;
+    //   : stringToUint8Array(binaryDataTypeToString(request.ciphertext.buffer));
 
-    let decryptedBuffer = decipher.update(encryptedText);
+    let plaintextBuffer = decipher.update(ciphertextBuffer);
 
-    decryptedBuffer = Buffer.concat([decryptedBuffer, decipher.final()]);
+    plaintextBuffer = Buffer.concat([plaintextBuffer, decipher.final()]);
 
-    const plaintext = decryptedBuffer.toString();
+    const plaintext = plaintextBuffer.toString();
 
     return Promise.resolve([
       {
@@ -237,13 +301,17 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       {} | undefined,
     ]
   > {
-    if (ArrayBuffer.isView(request?.data)) {
-      throw new Error("Not implemented.");
+    if (!request || !request.data) {
+      throw new Error("Not data.");
     }
+
+    const dataBuffer = typeof request.data === 'string'
+      ? Buffer.from(request.data || "")
+      : request.data;
 
     const signatureBuffer = crypto.sign(
       ASYMMETRIC_ALGORITHM,
-      Buffer.from(request?.data || ""),
+      dataBuffer,
       PRIVATE_KEY,
     );
 
