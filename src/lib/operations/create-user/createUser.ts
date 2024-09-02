@@ -19,6 +19,9 @@ export async function createUser(sub: string) {
     );
   }
 
+  // TODO: In the import version, this cannot be done here. Auth0's user must
+  // be updated AFTER the keys have been imported. Move all this to a separated
+  // updateAuth0User function:
   const owner = await getPublicKey(sub);
   const walletAddress = await ownerToAddress(owner);
 

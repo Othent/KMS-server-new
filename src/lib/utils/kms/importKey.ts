@@ -3,43 +3,8 @@
 // import { generateKey } from "../arweave/generateKey.js";
 // import { ownerToAddress } from "../arweave/arweaveUtils.js";
 
-// const JobPEM = `-----BEGIN PUBLIC KEY-----
-// MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA49RpJabPsIkTLApbA7eU
-// NMjX5cEH+quOBSy2PjKucsJEdUE7GvFkGy/RSuFurdMcTNwana4CMavcfARH+AC5
-// PTTO3+hJ46DoeRyCALpl3y8jBDWiCoBdrPqIbNTXLy6yqF/FwmEzXhwX3/TylPFp
-// 7xmtu2IyAndOXEPrMBHhdaAJnTss3jFNgelAQoD+5WOGYzjc40kLwdC7oMAiDZl4
-// NNiDtA8N5CKY9icdVjCvF8eF+TyUc65E552xyss7QeucSGaYAhoIs5bn8mfY2gee
-// 5v9JtwtWVLFAeHMbsYTeYYu2O6UXe6DSzkatgA9vfvOb90K4udOgQPmep1d+z00l
-// nxevhoUBIuDfKGminL2BenQVOEhwV2xQO4n5Zp3JHWuPWm0TPFTjVL+VoTD8TfT3
-// NFzc6Ny8li1WZebEJdmlOLX5GQLrL8NgoxNVSMRvqv4EC6BUeCxN5o0P1Bd3kqd0
-// mWRB6Oz/Dq57QzseOi0X6wvcI4lMj25dOypL2kL3pOV7y0yOJlUi4s+kVZjY5i1h
-// wqVq1NaFvIp779phyewnEZjTO42I+ZgYor09ncoL5f4SA3dG/Uyz+eGUYfhzm6+p
-// kIqIQWJNSzoeGw3fbO8SujYtWKHFaLcvpGwG6TMqvB51d3f5acLGsOlmrjinFcrD
-// ATkPvTqcglVzb+dOEMLkGFcCAwEAAQ==
-// -----END PUBLIC KEY-----
-// `;
-
-// async function createImportJob(importJobId: string) {
-//   return await kmsClient.createImportJob({
-//     parent: "projects/auth-custom-try/locations/global/keyRings/Canada-Dry",
-//     importJobId: importJobId,
-//     importJob: {
-//       importMethod: "RSA_OAEP_4096_SHA1_AES_256",
-//       protectionLevel: "SOFTWARE",
-//       // publicKey: { pem: PublicPemJWK }
-//     },
-//   });
-// }
-
-// // async function importTheKey(importJobId, cryptoKeyId, rsaAesWrappedKey) {
-// //     const kmsClient = new KeyManagementServiceClient();
-// //     return await kmsClient.importCryptoKeyVersion({
-// //       parent: `projects/auth-custom-try/locations/global/keyRings/Canada-Dry/cryptoKeys/${cryptoKeyId}`,
-// //       algorithm: 'RSA_SIGN_PSS_4096_SHA256',
-// //       importJob: `projects/auth-custom-try/locations/global/keyRings/Canada-Dry/importJobs/${importJobId}`,
-// //       // wrappedKey: rsaAesWrappedKey
-// //     });
-// //   }
+import { changeId } from "../tools/changeId";
+import { kmsClient, PROJECT_LOCATION, PROJECT_NAME } from "./kmsClient";
 
 // //   async function prepareKeyForImport(JWK) {
 
@@ -75,3 +40,84 @@
 
 //   return { mnemonic, walletAddress };
 // }
+
+export async function fetchKMSImportJob(sub: string) {
+  const safeId = changeId(sub);
+
+  const importJobName = kmsClient.importJobPath(
+    PROJECT_NAME,
+    PROJECT_LOCATION,
+    safeId,
+    "importJob",
+  );
+
+  const [importJob] = await kmsClient.getImportJob({
+    name: importJobName,
+  });
+
+  return importJob;
+}
+
+export async function importKMSKeys(
+  sub: string,
+  wrappedSignKey: string | Uint8Array,
+  wrappedEncryptDecryptKey: string | Uint8Array,
+) {
+  const safeId = changeId(sub);
+
+  // const kmsClient = new KeyManagementServiceClient();
+  // return await kmsClient.importCryptoKeyVersion({
+  //   parent: `projects/auth-custom-try/locations/global/keyRings/Canada-Dry/cryptoKeys/${cryptoKeyId}`,
+  //   algorithm: 'RSA_SIGN_PSS_4096_SHA256',
+  //   importJob: `projects/auth-custom-try/locations/global/keyRings/Canada-Dry/importJobs/${importJobId}`,
+  //   // wrappedKey: rsaAesWrappedKey
+  // });
+
+  const importJobName = kmsClient.importJobPath(
+    PROJECT_NAME,
+    PROJECT_LOCATION,
+    safeId,
+    "importJob"
+  );
+
+  const signCryptoKeyName = kmsClient.cryptoKeyPath(
+    PROJECT_NAME,
+    PROJECT_LOCATION,
+    safeId,
+    "sign"
+  );
+
+  const encryptDecryptCryptoKeyName = kmsClient.cryptoKeyPath(
+    PROJECT_NAME,
+    PROJECT_LOCATION,
+    safeId,
+    "encryptDecrypt"
+  );
+
+  const signKeyImportPromise = kmsClient.importCryptoKeyVersion({
+    parent: signCryptoKeyName,
+    importJob: importJobName,
+    algorithm: 'RSA_SIGN_PSS_4096_SHA256',
+    wrappedKey: wrappedSignKey,
+  });
+
+  const encryptDecryptKeyImportPromise = kmsClient.importCryptoKeyVersion({
+    parent: encryptDecryptCryptoKeyName,
+    importJob: importJobName,
+    algorithm: 'GOOGLE_SYMMETRIC_ENCRYPTION',
+    wrappedKey: wrappedEncryptDecryptKey,
+  });
+
+  const [
+    [signKeyVersion],
+    [encryptDecryptVersion]
+  ] = await Promise.all([
+    signKeyImportPromise,
+    encryptDecryptKeyImportPromise,
+  ]);
+
+  return {
+    signKeyVersion,
+    encryptDecryptVersion,
+  }
+}

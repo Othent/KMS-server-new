@@ -12,6 +12,8 @@ import { jwtValidatorFactory } from "../middleware/jwt-validator/jwt-validator.m
 import { jwtUnusedFactory } from "../middleware/jwt-unused/jwt-unused.middleware";
 import { asyncHandler } from "../middleware/async-handler/async-handler.middleware";
 import { errorHandlerFactory } from "../middleware/error-handler/error-handler.middleware";
+import { importKeysHandlerFactory } from "../operations/import-keys/import-keys.handler";
+import { fetchImportJobHandlerFactory } from "../operations/fetch-import-job/fetch-import-job.handler";
 
 export class OthentApp {
   app: express.Application = express();
@@ -59,6 +61,20 @@ export class OthentApp {
       jwtValidator,
       jwtUnused,
       asyncHandler(createUserHandlerFactory()) as unknown as express.Handler,
+    );
+
+    app.get(
+      Route.FETCH_IMPORT_JOB,
+      jwtValidator,
+      jwtUnused,
+      asyncHandler(fetchImportJobHandlerFactory()) as unknown as express.Handler,
+    );
+
+    app.get(
+      Route.IMPORT_KEYS,
+      jwtValidator,
+      jwtUnused,
+      asyncHandler(importKeysHandlerFactory()) as unknown as express.Handler,
     );
 
     // TODO: Data from multer doesn't seem to be used at all, as that's coming from the JWT token:
