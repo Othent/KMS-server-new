@@ -6,6 +6,10 @@ import { Route } from "../../server/server.constants";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
 
+export interface CreateUserResponseData {
+  data: boolean;
+};
+
 export function createUserHandlerFactory() {
   return async (req: ExpressRequestWithToken, res: express.Response) => {
     const { idToken } = req;
@@ -21,10 +25,10 @@ export function createUserHandlerFactory() {
 
     logRequestStart(Route.CREATE_USER, idToken);
 
-    const response = await createUser(idToken.sub);
+    const success = await createUser(idToken.sub);
 
     logRequestSuccess(Route.CREATE_USER, idToken);
 
-    res.json(response);
+    res.json({ data: success } satisfies CreateUserResponseData);
   };
 }

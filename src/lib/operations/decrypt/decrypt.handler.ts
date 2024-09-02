@@ -5,12 +5,17 @@ import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
-import { b64ToUint8Array, B64UrlString } from "../../utils/arweave/arweaveUtils";
+import { JSONSerializedBuffer } from "../common.types";
 
 export interface DecryptIdTokenData {
   keyName: string;
-  ciphertext: B64UrlString;
+  // ciphertext: B64UrlString;
+  ciphertext: string | JSONSerializedBuffer;
 }
+
+export interface DecryptResponseData {
+  data: Uint8Array;
+};
 
 export function decryptHandlerFactory() {
   return async (
@@ -31,12 +36,13 @@ export function decryptHandlerFactory() {
 
     logRequestStart(Route.DECRYPT, idToken);
 
-    const plaintext = await decrypt(b64ToUint8Array(data.ciphertext), data.keyName);
+    const { ciphertext } = data;
+    const ciphertextParam = typeof ciphertext === 'string' ? ciphertext : new Uint8Array(Object.values(ciphertext));
+
+    const plaintext = await decrypt(ciphertextParam, data.keyName);
 
     logRequestSuccess(Route.DECRYPT, idToken);
 
-    // TODO: Ideally, we would just send the binary data back, but the old version of the server was sending strings, so
-    // we need to keep doing that until we the new API version:
-    res.send(plaintext.toString());
+    res.send({ data: plaintext } satisfies DecryptResponseData);
   };
 }

@@ -25,6 +25,15 @@ export async function createUser(sub: string) {
   let accessToken = "";
 
   try {
+    // TODO: M2M token limit is rather low and they are rather expensive, so this might be worth caching at some point:
+    //
+    // - Free / Essential = 1000 / month = 33 / day
+    // - Professional / Enterprise = 5000 / month = 167 / day
+    //
+    // If once we are in Professional due to active users our M2M token usage exceeds the limits, it would be worth
+    // considering caching them in Redis. However, it would be really important to protect that Redis DB / cluster and
+    // the key stored in it. It might be worth also using Google KMS to store that key encrypted.
+
     const tokenResponse = await axios.post(getAuth0URL("/oauth/token/"), {
       grant_type: "client_credentials",
       client_id: CONFIG.AUTH0_CLIENT_ID,

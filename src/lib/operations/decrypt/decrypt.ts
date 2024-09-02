@@ -1,12 +1,12 @@
 import { CONFIG } from "../../server/config/config.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
-import { stringOrUint8ArrayToUint8Array, VerifiedUTF16String } from "../../utils/arweave/arweaveUtils";
+import { stringOrUint8ArrayToUint8Array } from "../../utils/arweave/arweaveUtils";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { changeId } from "../../utils/tools/changeId";
 
 export async function decrypt(
-  ciphertext: VerifiedUTF16String | Uint8Array,
+  ciphertext: string | Uint8Array,
   keyName: string,
 ) {
   const safeId = changeId(keyName);

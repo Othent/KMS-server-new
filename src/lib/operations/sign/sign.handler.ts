@@ -5,12 +5,17 @@ import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { Route } from "../../server/server.constants";
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
-import { b64ToUint8Array, B64UrlString } from "../../utils/arweave/arweaveUtils";
+import { JSONSerializedBuffer } from "../common.types";
 
 export interface SignIdTokenData {
   keyName: string;
-  data: B64UrlString;
+  // data: B64UrlString;
+  data: string | JSONSerializedBuffer;
 }
+
+export interface SignResponseData {
+  data: Uint8Array;
+};
 
 export function signHandlerFactory() {
   return async (
@@ -31,12 +36,13 @@ export function signHandlerFactory() {
 
     logRequestStart(Route.SIGN, idToken);
 
-    const signature = await sign(b64ToUint8Array(data.data), data.keyName);
+    const { data: dataToSign } = data;
+    const dataToSignParam = typeof dataToSign === 'string' ? dataToSign : new Uint8Array(Object.values(dataToSign));
+
+    const signature = await sign(dataToSignParam, data.keyName);
 
     logRequestSuccess(Route.SIGN, idToken);
 
-    // TODO: Ideally, we would just send the binary data back, but the old version of the server was sending strings, so
-    // we need to keep doing that until we the new API version:
-    res.send(signature.toString());
+    res.send({ data: signature } satisfies SignResponseData);
   };
 }
