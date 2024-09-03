@@ -12,10 +12,10 @@ export async function getPublicKey(sub: string) {
   // TODO: Create util function to get the key names:
   const fullKeyName = kmsClient.cryptoKeyVersionPath(
     CONFIG.KMS_PROJECT_ID,
-    "global",
+    CONFIG.KMS_PROJECT_LOCATION,
     safeId,
-    "sign",
-    CONFIG.SIGN_KEY_VERSION,
+    CONFIG.KMS_SIGN_KEY_ID,
+    CONFIG.KMS_SIGN_KEY_VERSION,
   );
 
   let pem = "";

@@ -12,11 +12,12 @@ export async function encrypt(
   const safeId = changeId(keyName);
 
   // TODO: Create util function to get the key names:
+  // TODO: Why cryptoKeyPath and not cryptoKeyVersionPath?
   const name = kmsClient.cryptoKeyPath(
     CONFIG.KMS_PROJECT_ID,
-    "global",
+    CONFIG.KMS_PROJECT_LOCATION,
     safeId,
-    "encryptDecrypt",
+    CONFIG.KMS_ENCRYPT_DECRYPT_KEY_ID,
   );
 
   let ciphertext: string | Uint8Array | null | undefined;

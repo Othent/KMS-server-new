@@ -24,12 +24,13 @@ export function fetchImportJobHandlerFactory() {
       );
     }
 
-    logRequestStart(Route.CREATE_USER, idToken);
+    logRequestStart(Route.FETCH_IMPORT_JOB, idToken);
 
     const importJob = await fetchImportJob(idToken.sub);
 
-    logRequestSuccess(Route.CREATE_USER, idToken);
+    logRequestSuccess(Route.FETCH_IMPORT_JOB, idToken);
 
+    // TODO: Return only the state if the rest is not needed:
     res.json({ data: importJob } satisfies FetchImportJobResponseData);
   };
 }

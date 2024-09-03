@@ -22,6 +22,7 @@ jobs:
           auth0ClientId: ${{ secrets.AUTH0CLIENTID }}
           auth0ClientSecret: ${{ secrets.AUTH0CLIENTSECRET }}
           kmsProjectId: ${{ secrets.KMSPROJECTID }}
+          kmsProjectLocation: ${{ secrets.KMSPROJECTLOCATION }}
           googleCredentials: ${{ secrets.GOOGLECREDENTIALS }}
           signKeyVersion: ${{ secrets.SIGNKEYVERSION }}
           PORT: ${{ secrets.PORT }}

@@ -1,54 +1,15 @@
-// import { kmsClient } from "./kmsClient.js";
-// import jwkToPem from "jwk-to-pem";
-// import { generateKey } from "../arweave/generateKey.js";
-// import { ownerToAddress } from "../arweave/arweaveUtils.js";
-
+import { CONFIG } from "../../server/config/config.utils";
 import { changeId } from "../tools/changeId";
-import { kmsClient, PROJECT_LOCATION, PROJECT_NAME } from "./kmsClient";
-
-// //   async function prepareKeyForImport(JWK) {
-
-// //     const stringJWK = JSON.stringify(JWK)
-// //     const bufferStuff = Buffer.from(stringJWK, 'utf-8')
-
-// //     const encryptedKey = crypto.publicEncrypt({
-// //       key: heloop,
-// //       padding: constants.RSA_PKCS1_OAEP_PADDING,
-// //       oaepHash: 'sha256',
-// //   }, bufferStuff);
-
-// //     return bufferStuff;
-// //   }
-
-// export default async function importKey(): Promise<any> {
-//   await createImportJob("Job3");
-
-//   const { mnemonic, JWK } = await generateKey();
-
-//   delete JWK.d;
-//   delete JWK.p;
-//   delete JWK.q;
-//   delete JWK.dp;
-//   delete JWK.dq;
-//   delete JWK.qi;
-
-//   // const processedKey = await prepareKeyForImport(JWK)
-
-//   // const res = await importTheKey('Job3', 'Key', processedKey)
-
-//   const walletAddress = await ownerToAddress(JWK.n);
-
-//   return { mnemonic, walletAddress };
-// }
+import { kmsClient } from "./kmsClient";
 
 export async function fetchKMSImportJob(sub: string) {
   const safeId = changeId(sub);
 
   const importJobName = kmsClient.importJobPath(
-    PROJECT_NAME,
-    PROJECT_LOCATION,
+    CONFIG.KMS_PROJECT_ID,
+    CONFIG.KMS_PROJECT_LOCATION,
     safeId,
-    "importJob",
+    CONFIG.KMS_IMPORT_JOB_ID,
   );
 
   const [importJob] = await kmsClient.getImportJob({
@@ -65,6 +26,27 @@ export async function importKMSKeys(
 ) {
   const safeId = changeId(sub);
 
+  const importJobName = kmsClient.importJobPath(
+    CONFIG.KMS_PROJECT_ID,
+    CONFIG.KMS_PROJECT_LOCATION,
+    safeId,
+    CONFIG.KMS_IMPORT_JOB_ID
+  );
+
+  const signCryptoKeyName = kmsClient.cryptoKeyPath(
+    CONFIG.KMS_PROJECT_ID,
+    CONFIG.KMS_PROJECT_LOCATION,
+    safeId,
+    CONFIG.KMS_SIGN_KEY_ID,
+  );
+
+  const encryptDecryptCryptoKeyName = kmsClient.cryptoKeyPath(
+    CONFIG.KMS_PROJECT_ID,
+    CONFIG.KMS_PROJECT_LOCATION,
+    safeId,
+    CONFIG.KMS_ENCRYPT_DECRYPT_KEY_ID,
+  );
+
   // const kmsClient = new KeyManagementServiceClient();
   // return await kmsClient.importCryptoKeyVersion({
   //   parent: `projects/auth-custom-try/locations/global/keyRings/Canada-Dry/cryptoKeys/${cryptoKeyId}`,
@@ -73,38 +55,17 @@ export async function importKMSKeys(
   //   // wrappedKey: rsaAesWrappedKey
   // });
 
-  const importJobName = kmsClient.importJobPath(
-    PROJECT_NAME,
-    PROJECT_LOCATION,
-    safeId,
-    "importJob"
-  );
-
-  const signCryptoKeyName = kmsClient.cryptoKeyPath(
-    PROJECT_NAME,
-    PROJECT_LOCATION,
-    safeId,
-    "sign"
-  );
-
-  const encryptDecryptCryptoKeyName = kmsClient.cryptoKeyPath(
-    PROJECT_NAME,
-    PROJECT_LOCATION,
-    safeId,
-    "encryptDecrypt"
-  );
-
   const signKeyImportPromise = kmsClient.importCryptoKeyVersion({
     parent: signCryptoKeyName,
     importJob: importJobName,
-    algorithm: 'RSA_SIGN_PSS_4096_SHA256',
+    algorithm: CONFIG.KMS_SIGN_KEY_ALGORITHM,
     wrappedKey: wrappedSignKey,
   });
 
   const encryptDecryptKeyImportPromise = kmsClient.importCryptoKeyVersion({
     parent: encryptDecryptCryptoKeyName,
     importJob: importJobName,
-    algorithm: 'GOOGLE_SYMMETRIC_ENCRYPTION',
+    algorithm: CONFIG.KMS_ENCRYPT_DECRYPT_KEY_ALGORITHM,
     wrappedKey: wrappedEncryptDecryptKey,
   });
 
@@ -119,5 +80,5 @@ export async function importKMSKeys(
   return {
     signKeyVersion,
     encryptDecryptVersion,
-  }
+  };
 }

@@ -1,5 +1,6 @@
 import * as dotEnv from "dotenv";
 import type { GoogleAuthOptions } from "google-auth-library";
+import { google } from "@google-cloud/kms/build/protos/protos";
 
 // TODO: Not needed in Node.js 20:
 dotEnv.config();
@@ -25,9 +26,21 @@ export class Config {
 
   // GOOGLE KMS:
 
-  KMS_PROJECT_ID = "";
   GOOGLE_CREDENTIALS: NonNullable<GoogleAuthOptions["credentials"]> = {};
-  SIGN_KEY_VERSION = "";
+
+  // Paths:
+  // Changing these will prevent all users from accessing their keys!
+  KMS_PROJECT_ID = "";
+  KMS_PROJECT_LOCATION = "";
+  KMS_IMPORT_JOB_ID = "importJob";
+  KMS_SIGN_KEY_ID = "sign";
+  KMS_SIGN_KEY_VERSION = "";
+  KMS_ENCRYPT_DECRYPT_KEY_ID = "encryptDecrypt";
+  KMS_ENCRYPT_DECRYPT_KEY_VERSION = ""; // TODO: This one not used. Why?
+
+  // Algorithms:
+  KMS_SIGN_KEY_ALGORITHM = google.cloud.kms.v1.CryptoKeyVersion.CryptoKeyVersionAlgorithm.RSA_SIGN_PSS_4096_SHA256;
+  KMS_ENCRYPT_DECRYPT_KEY_ALGORITHM = google.cloud.kms.v1.CryptoKeyVersion.CryptoKeyVersionAlgorithm.GOOGLE_SYMMETRIC_ENCRYPTION;
 
   // MONGO DB:
 
@@ -82,8 +95,9 @@ export class Config {
     }
 
     this.KMS_PROJECT_ID = process.env.kmsProjectId || "";
+    this.KMS_PROJECT_LOCATION = process.env.kmsProjectLocation || "";
+    this.KMS_SIGN_KEY_VERSION = process.env.signKeyVersion || "";
     this.GOOGLE_CREDENTIALS = googleCredentials || {};
-    this.SIGN_KEY_VERSION = process.env.signKeyVersion || "";
 
     // MONGO DB:
 
@@ -130,8 +144,9 @@ export class Config {
     const isGoogleKMSValid = IS_PROD
       ? !!(
           this.KMS_PROJECT_ID &&
-          Object.keys(this.GOOGLE_CREDENTIALS).length > 0 &&
-          this.SIGN_KEY_VERSION
+          this.KMS_PROJECT_LOCATION &&
+          this.KMS_SIGN_KEY_VERSION &&
+          Object.keys(this.GOOGLE_CREDENTIALS).length > 0
         )
       : true;
 
@@ -189,13 +204,16 @@ export class Config {
       `${isGoogleKMSValid ? "✅" : "❌"}  GOOGLE KMS${isGoogleKMSValid ? ":" : " - GoogleKMS must be configured in production"}`,
     );
     console.log(" ╷");
+    console.log(` ├ GOOGLE_CREDENTIALS = ${!!this.GOOGLE_CREDENTIALS ? "****" : ""}`);
     console.log(` ├ KMS_PROJECT_ID = ${!!this.KMS_PROJECT_ID ? "****" : ""}`);
-    console.log(
-      ` ├ GOOGLE_CREDENTIALS = ${!!this.GOOGLE_CREDENTIALS ? "****" : ""}`,
-    );
-    console.log(
-      ` └ SIGN_KEY_VERSION = ${!!this.SIGN_KEY_VERSION ? "****" : ""}`,
-    );
+    console.log(` ├ KMS_PROJECT_LOCATION = ${!!this.KMS_PROJECT_LOCATION ? "****" : ""}`);
+    console.log(` ├ KMS_IMPORT_JOB_ID = ${!!this.KMS_IMPORT_JOB_ID ? "****" : ""}`);
+    console.log(` ├ KMS_SIGN_KEY_ID = ${!!this.KMS_SIGN_KEY_ID ? "****" : ""}`);
+    console.log(` ├ KMS_SIGN_KEY_VERSION = ${!!this.KMS_SIGN_KEY_VERSION ? "****" : ""}`);
+    console.log(` ├ KMS_SIGN_KEY_ALGORITHM = ${!!this.KMS_SIGN_KEY_ALGORITHM ? "****" : ""}`);
+    console.log(` ├ KMS_ENCRYPT_DECRYPT_KEY_ID = ${!!this.KMS_ENCRYPT_DECRYPT_KEY_ID ? "****" : ""}`);
+    console.log(` ├ KMS_ENCRYPT_DECRYPT_KEY_VERSION = ${!!this.KMS_ENCRYPT_DECRYPT_KEY_VERSION ? "****" : ""}`);
+    console.log(` └ KMS_ENCRYPT_DECRYPT_KEY_ALGORITHM = ${!!this.KMS_ENCRYPT_DECRYPT_KEY_ALGORITHM ? "****" : ""}`);
     console.log("");
     console.log(
       `${isMongoDBValid ? "✅" : "❌"}  MONGO DB${isMongoDBValid ? ":" : " - MongoDB must be configured in production"}`,

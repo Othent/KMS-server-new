@@ -1,52 +1,64 @@
 import { CONFIG } from "../../server/config/config.utils";
 import { changeId } from "../tools/changeId";
 import { delay } from "../tools/delay";
-import { kmsClient, PROJECT_LOCATION, PROJECT_NAME } from "./kmsClient";
+import { kmsClient } from "./kmsClient";
 import axios from "axios";
 
 async function createKeyRing(safeId: string) {
-  const parent = kmsClient.locationPath(PROJECT_NAME, PROJECT_LOCATION);
+  const locationPath = kmsClient.locationPath(
+    CONFIG.KMS_PROJECT_ID,
+    CONFIG.KMS_PROJECT_LOCATION,
+  );
 
   const [keyRing] = await kmsClient.createKeyRing({
-    parent: parent,
+    parent: locationPath,
     keyRingId: safeId,
   });
-
-  // TODO: Better this way?
-  // const keyRingName = kmsClient.keyRingPath(PROJECT_NAME, PROJECT_LOCATION, safeId);
 
   return keyRing;
 }
 
-async function createSignKey(safeId: string) {
+async function createSignKey(safeId: string, importOnly = false) {
+  const keyRingPath = kmsClient.keyRingPath(
+    CONFIG.KMS_PROJECT_ID,
+    CONFIG.KMS_PROJECT_LOCATION,
+    safeId
+  );
+
   const [key] = await kmsClient.createCryptoKey({
-    parent: `projects/${ PROJECT_NAME }/locations/${ PROJECT_LOCATION }/keyRings/${safeId}`,
-    cryptoKeyId: "sign",
+    parent: keyRingPath,
+    cryptoKeyId: CONFIG.KMS_SIGN_KEY_ID,
     cryptoKey: {
       purpose: "ASYMMETRIC_SIGN",
       versionTemplate: {
-        algorithm: "RSA_SIGN_PSS_4096_SHA256",
+        algorithm: CONFIG.KMS_SIGN_KEY_ALGORITHM,
       },
-      importOnly: true,
+      importOnly,
     },
-    skipInitialVersionCreation: true,
+    skipInitialVersionCreation: importOnly,
   });
 
   return key;
 }
 
-async function createEncryptDecryptKey(safeId: string) {
+async function createEncryptDecryptKey(safeId: string, importOnly = false) {
+  const keyRingPath = kmsClient.keyRingPath(
+    CONFIG.KMS_PROJECT_ID,
+    CONFIG.KMS_PROJECT_LOCATION,
+    safeId
+  );
+
   const [key] = await kmsClient.createCryptoKey({
-    parent: `projects/${ PROJECT_NAME }/locations/${ PROJECT_LOCATION }/keyRings/${safeId}`,
-    cryptoKeyId: "encryptDecrypt",
+    parent: keyRingPath,
+    cryptoKeyId: CONFIG.KMS_ENCRYPT_DECRYPT_KEY_ID,
     cryptoKey: {
       purpose: "ENCRYPT_DECRYPT",
       versionTemplate: {
-        algorithm: "GOOGLE_SYMMETRIC_ENCRYPTION",
+        algorithm: CONFIG.KMS_ENCRYPT_DECRYPT_KEY_ALGORITHM,
       },
-      importOnly: true,
+      importOnly,
     },
-    skipInitialVersionCreation: true,
+    skipInitialVersionCreation: importOnly,
   });
 
   return key;
@@ -67,9 +79,15 @@ async function createEncryptDecryptKey(safeId: string) {
 
 // New PoC:
 async function createImportJob(safeId: string) {
+  const keyRingPath = kmsClient.keyRingPath(
+    CONFIG.KMS_PROJECT_ID,
+    CONFIG.KMS_PROJECT_LOCATION,
+    safeId
+  );
+
   const [importJob] = await kmsClient.createImportJob({
-    parent: `projects/${ PROJECT_NAME }/locations/${ PROJECT_LOCATION }/keyRings/${safeId}`,
-    importJobId: "importJob",
+    parent: keyRingPath,
+    importJobId: CONFIG.KMS_IMPORT_JOB_ID,
     importJob: {
       protectionLevel: 'HSM',
       importMethod: 'RSA_OAEP_3072_SHA256',
@@ -98,15 +116,15 @@ async function ping(safeId: string) {
   );
 }
 
-export async function createKMSUser(sub: string) {
+export async function createKMSUser(sub: string, importOnly = false) {
   const safeId = changeId(sub);
 
   await createKeyRing(safeId);
 
   await Promise.all([
-    createSignKey(safeId),
-    createEncryptDecryptKey(safeId),
-    createImportJob(safeId),
+    createSignKey(safeId, importOnly),
+    createEncryptDecryptKey(safeId, importOnly),
+    importOnly ? createImportJob(safeId) : undefined,
   ]);
 
   // Skip the Slack ping when running locally:

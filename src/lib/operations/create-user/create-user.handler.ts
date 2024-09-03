@@ -6,12 +6,16 @@ import { Route } from "../../server/server.constants";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
 
+export interface CreateUserIdTokenData {
+  importOnly?: boolean;
+}
+
 export interface CreateUserResponseData {
   data: boolean;
 };
 
 export function createUserHandlerFactory() {
-  return async (req: ExpressRequestWithToken, res: express.Response) => {
+  return async (req: ExpressRequestWithToken<CreateUserIdTokenData>, res: express.Response) => {
     const { idToken } = req;
 
     // TODO: Replace with Joi.
@@ -25,7 +29,7 @@ export function createUserHandlerFactory() {
 
     logRequestStart(Route.CREATE_USER, idToken);
 
-    const success = await createUser(idToken.sub);
+    const success = await createUser(idToken.sub, idToken.data?.importOnly);
 
     logRequestSuccess(Route.CREATE_USER, idToken);
 

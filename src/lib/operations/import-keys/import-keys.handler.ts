@@ -35,7 +35,7 @@ export function importKeysHandlerFactory() {
       );
     }
 
-    logRequestStart(Route.CREATE_USER, idToken);
+    logRequestStart(Route.IMPORT_KEYS, idToken);
 
     const { wrappedSignKey, wrappedEncryptDecryptKey } = data;
     const wrappedSignKeyParam = typeof wrappedSignKey === 'string' ? wrappedSignKey : new Uint8Array(Object.values(wrappedSignKey));
@@ -47,7 +47,7 @@ export function importKeysHandlerFactory() {
       wrappedEncryptDecryptKeyParam,
     );
 
-    logRequestSuccess(Route.CREATE_USER, idToken);
+    logRequestSuccess(Route.IMPORT_KEYS, idToken);
 
     res.json({ data: importKeysResult } satisfies ImportKeysResponseData);
   };

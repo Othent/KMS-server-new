@@ -7,9 +7,9 @@ import { CONFIG } from "../../server/config/config.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 
-export async function createUser(sub: string) {
+export async function createUser(sub: string, importOnly = false) {
   try {
-    await createKMSUser(sub);
+    await createKMSUser(sub, importOnly);
   } catch (err) {
     throw createOrPropagateError(
       OthentErrorID.UserCreation,
@@ -17,6 +17,10 @@ export async function createUser(sub: string) {
       "Error creating KMS user",
       err,
     );
+  }
+
+  if (!importOnly) {
+    // await updateAuth0User(sub);
   }
 
   // TODO: In the import version, this cannot be done here. Auth0's user must
