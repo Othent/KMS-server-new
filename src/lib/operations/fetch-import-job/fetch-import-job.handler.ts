@@ -5,10 +5,10 @@ import { Route } from "../../server/server.constants";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { fetchImportJob } from "./fetch-import-job";
-import { google } from "@google-cloud/kms/build/protos/protos";
+import { ImportJob } from "../../utils/kms/google-kms.types";
 
 export interface FetchImportJobResponseData {
-  data: google.cloud.kms.v1.IImportJob;
+  importJob: ImportJob;
 };
 
 export function fetchImportJobHandlerFactory() {
@@ -30,7 +30,11 @@ export function fetchImportJobHandlerFactory() {
 
     logRequestSuccess(Route.FETCH_IMPORT_JOB, idToken);
 
-    // TODO: Return only the state if the rest is not needed:
-    res.json({ data: importJob } satisfies FetchImportJobResponseData);
+    res.json({
+      importJob: {
+        state: importJob.state,
+        publicKey: importJob.publicKey,
+      },
+    } satisfies FetchImportJobResponseData);
   };
 }

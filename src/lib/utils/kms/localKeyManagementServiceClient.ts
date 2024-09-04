@@ -3,27 +3,64 @@ import assert from "assert";
 import crypto from "crypto";
 import { delay } from "../tools/delay";
 import { b64ToUint8Array, binaryDataTypeOrStringTob64String, binaryDataTypeToString, stringToUint8Array } from "../arweave/arweaveUtils";
+import { CryptoKeyVersionState } from "./google-kms.types";
+
+// KeyRing:
 
 type IKeyRing =
   import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.IKeyRing;
 type ICreateKeyRingRequest =
   import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.ICreateKeyRingRequest;
-type ICryptoKey =
-  import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.ICryptoKey;
 type ICreateCryptoKeyRequest =
   import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.ICreateCryptoKeyRequest;
+
+// CryptoKey:
+
+type ICryptoKey =
+  import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.ICryptoKey;
+type ICryptoKeyVersion =
+  import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.ICryptoKeyVersion;
+type IGetCryptoKeyRequest =
+  import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.IGetCryptoKeyRequest;
+type IGetCryptoKeyVersionRequest =
+  import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.IGetCryptoKeyVersionRequest;
+type IImportCryptoKeyVersionRequest =
+  import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.IImportCryptoKeyVersionRequest;
+type IUpdateCryptoKeyPrimaryVersionRequest =
+  import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.IUpdateCryptoKeyPrimaryVersionRequest;
+
+  // Import:
+
+type IImportJob =
+  import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.IImportJob;
+type IGetImportJobRequest =
+  import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.IGetImportJobRequest;
+type ICreateImportJobRequest =
+  import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.ICreateImportJobRequest;
+
+// Encrypt:
+
 type IEncryptRequest =
   import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.IEncryptRequest;
 type IEncryptResponse =
   import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.IEncryptResponse;
+
+// Decrypt:
+
 type IDecryptRequest =
   import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.IDecryptRequest;
 type IDecryptResponse =
   import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.IDecryptResponse;
+
+// Public Key:
+
 type IPublicKey =
   import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.IPublicKey;
 type IGetPublicKeyRequest =
   import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.IGetPublicKeyRequest;
+
+// Sign:
+
 type IAsymmetricSignRequest =
   import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.IAsymmetricSignRequest;
 type IAsymmetricSignResponse =
@@ -162,6 +199,14 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
     console.log("");
   }
 
+  locationPath(...args: string[]) {
+    return args.join("#");
+  }
+
+  keyRingPath(...args: string[]) {
+    return args.join("#");
+  }
+
   cryptoKeyPath(...args: string[]) {
     return args.join("#");
   }
@@ -170,7 +215,7 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
     return args.join("#");
   }
 
-  locationPath(...args: string[]) {
+  importJobPath(...args: string[]) {
     return args.join("#");
   }
 
@@ -203,6 +248,92 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
         name: `${request?.parent || "<PARENT>"}#${request?.cryptoKeyId || "<CRYPTO_KEY_ID>"}`,
         createTime: null,
       } satisfies ICryptoKey,
+      request,
+      undefined,
+    ]);
+  }
+
+  getCryptoKey(
+    request?: IGetCryptoKeyRequest
+  ): Promise<[ICryptoKey, IGetCryptoKeyRequest | undefined, {} | undefined]> {
+    return Promise.resolve([
+      {
+        name: request?.name,
+        createTime: null,
+        primary: {
+          name: "<PRIMARY>",
+          state: CryptoKeyVersionState.CRYPTO_KEY_VERSION_STATE_UNSPECIFIED,
+        },
+      } satisfies ICryptoKey,
+      request,
+      undefined,
+    ]);
+  }
+
+  getCryptoKeyVersion(
+    request?: IGetCryptoKeyVersionRequest
+  ): Promise<[ICryptoKeyVersion, IGetCryptoKeyVersionRequest | undefined, {} | undefined]> {
+    return Promise.resolve([
+      {
+        name: request?.name || "<CRYPTO_KEY_VERSION>",
+        createTime: null,
+        state: CryptoKeyVersionState.CRYPTO_KEY_VERSION_STATE_UNSPECIFIED,
+      } satisfies ICryptoKeyVersion,
+      request,
+      undefined,
+    ]);
+  }
+
+  updateCryptoKeyPrimaryVersion(
+    request?: IUpdateCryptoKeyPrimaryVersionRequest
+  ): Promise<[ICryptoKey, IUpdateCryptoKeyPrimaryVersionRequest | undefined, {} | undefined]> {
+    return Promise.resolve([
+      {
+        name: request?.name || "<CRYPTO_KEY_VERSION>",
+        createTime: null,
+        primary: {
+          name: "<PRIMARY>",
+          state: CryptoKeyVersionState.CRYPTO_KEY_VERSION_STATE_UNSPECIFIED,
+        },
+      } satisfies ICryptoKey,
+      request,
+      undefined,
+    ]);
+  }
+
+  createImportJob(
+    request?: ICreateImportJobRequest
+  ): Promise<[IImportJob, ICreateImportJobRequest | undefined, {} | undefined]> {
+    return Promise.resolve([
+      {
+        state: "ACTIVE"
+      } satisfies IImportJob,
+      request,
+      undefined,
+    ]);
+  }
+
+  getImportJob(
+    request?: IImportJob
+  ): Promise<[IImportJob, IGetImportJobRequest | undefined, {} | undefined]> {
+    return Promise.resolve([
+      {
+        state: "ACTIVE"
+      } satisfies IImportJob,
+      request,
+      undefined,
+    ]);
+  }
+
+  importCryptoKeyVersion(
+    request?: IImportCryptoKeyVersionRequest
+  ): Promise<[ICryptoKeyVersion, IImportCryptoKeyVersionRequest | undefined, {} | undefined]> {
+    return Promise.resolve([
+      {
+        name: "<CRYPTO_KEY_VERSION>",
+        createTime: null,
+        state: CryptoKeyVersionState.CRYPTO_KEY_VERSION_STATE_UNSPECIFIED,
+      } satisfies ICryptoKeyVersion,
       request,
       undefined,
     ]);

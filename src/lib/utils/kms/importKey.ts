@@ -1,5 +1,6 @@
 import { CONFIG } from "../../server/config/config.utils";
 import { changeId } from "../tools/changeId";
+import { normalizeCryptoKeyVersionState } from "./google-kms.types";
 import { kmsClient } from "./kmsClient";
 
 export async function fetchKMSImportJob(sub: string) {
@@ -21,8 +22,8 @@ export async function fetchKMSImportJob(sub: string) {
 
 export async function importKMSKeys(
   sub: string,
-  wrappedSignKey: string | Uint8Array,
-  wrappedEncryptDecryptKey: string | Uint8Array,
+  wrappedSignKey: null | string | Uint8Array,
+  wrappedEncryptDecryptKey: null | string | Uint8Array,
 ) {
   const safeId = changeId(sub);
 
@@ -55,30 +56,71 @@ export async function importKMSKeys(
   //   // wrappedKey: rsaAesWrappedKey
   // });
 
-  const signKeyImportPromise = kmsClient.importCryptoKeyVersion({
+  const signKeyImportPromise = wrappedSignKey ? kmsClient.importCryptoKeyVersion({
     parent: signCryptoKeyName,
     importJob: importJobName,
     algorithm: CONFIG.KMS_SIGN_KEY_ALGORITHM,
     wrappedKey: wrappedSignKey,
-  });
+  }) : [null];
 
-  const encryptDecryptKeyImportPromise = kmsClient.importCryptoKeyVersion({
+  const encryptDecryptKeyImportPromise = wrappedEncryptDecryptKey ? kmsClient.importCryptoKeyVersion({
     parent: encryptDecryptCryptoKeyName,
     importJob: importJobName,
     algorithm: CONFIG.KMS_ENCRYPT_DECRYPT_KEY_ALGORITHM,
     wrappedKey: wrappedEncryptDecryptKey,
-  });
+  }) : [null];
 
   const [
     [signKeyVersion],
-    [encryptDecryptVersion]
+    [encryptDecryptKeyVersion]
   ] = await Promise.all([
     signKeyImportPromise,
     encryptDecryptKeyImportPromise,
   ]);
 
   return {
-    signKeyVersion,
-    encryptDecryptVersion,
+    signKeyState: signKeyVersion ? normalizeCryptoKeyVersionState(signKeyVersion) : null,
+    encryptDecryptKeyState: encryptDecryptKeyVersion ? normalizeCryptoKeyVersionState(encryptDecryptKeyVersion) : null,
+  };
+}
+
+export async function fetchKMSKeysState(sub: string) {
+  const signCryptoKeyName = kmsClient.cryptoKeyVersionPath(
+    CONFIG.KMS_PROJECT_ID,
+    CONFIG.KMS_PROJECT_LOCATION,
+    changeId(sub),
+    CONFIG.KMS_SIGN_KEY_ID,
+    CONFIG.KMS_SIGN_KEY_VERSION,
+  );
+
+  const encryptDecryptCryptoKeyName = kmsClient.cryptoKeyVersionPath(
+    CONFIG.KMS_PROJECT_ID,
+    CONFIG.KMS_PROJECT_LOCATION,
+    changeId(sub),
+    CONFIG.KMS_ENCRYPT_DECRYPT_KEY_ID,
+    CONFIG.KMS_ENCRYPT_DECRYPT_KEY_VERSION,
+  );
+
+  const signKeyVersionPromise = kmsClient.getCryptoKeyVersion({
+    name: signCryptoKeyName,
+  });
+
+  const encryptDecryptKeyVersionPromise = kmsClient.getCryptoKeyVersion({
+    name: encryptDecryptCryptoKeyName,
+  });
+
+  const [
+    [signKeyVersion],
+    [encryptDecryptKeyVersion]
+  ] = await Promise.all([
+    signKeyVersionPromise,
+    encryptDecryptKeyVersionPromise,
+  ]);
+
+  return {
+    signCryptoKeyName,
+    encryptDecryptCryptoKeyName,
+    signKeyState: normalizeCryptoKeyVersionState(signKeyVersion),
+    encryptDecryptKeyState: normalizeCryptoKeyVersionState(encryptDecryptKeyVersion),
   };
 }

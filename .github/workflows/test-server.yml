@@ -25,6 +25,7 @@ jobs:
           kmsProjectLocation: ${{ secrets.KMSPROJECTLOCATION }}
           googleCredentials: ${{ secrets.GOOGLECREDENTIALS }}
           signKeyVersion: ${{ secrets.SIGNKEYVERSION }}
+          encryptDecryptKeyVersion: ${{ secrets.ENCRYPTDECRYPTKEYVERSION }}
           PORT: ${{ secrets.PORT }}
           mongoDBUsername: ${{ secrets.mongoDBUsername }}
           mongoDBPassword: ${{ secrets.mongoDBPassword }}

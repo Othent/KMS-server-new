@@ -5,8 +5,8 @@ import { Route } from "../../server/server.constants";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { importKeys } from "./import-keys";
-import { google } from "@google-cloud/kms/build/protos/protos";
 import { JSONSerializedBuffer } from "../common.types";
+import { CryptoKeyVersionState } from "../../utils/kms/google-kms.types";
 
 export interface ImportKeysIdTokenData {
   keyName: string;
@@ -14,11 +14,13 @@ export interface ImportKeysIdTokenData {
   wrappedEncryptDecryptKey: string | JSONSerializedBuffer;
 }
 
+interface ImportKeysResult {
+  signKeyState: null | CryptoKeyVersionState;
+  encryptDecryptKeyState: null | CryptoKeyVersionState;
+}
+
 export interface ImportKeysResponseData {
-  data: {
-    signKeyVersion: google.cloud.kms.v1.ICryptoKeyVersion;
-    encryptDecryptVersion: google.cloud.kms.v1.ICryptoKeyVersion;
-  };
+  importKeysResult: ImportKeysResult;
 };
 
 export function importKeysHandlerFactory() {
@@ -27,7 +29,7 @@ export function importKeysHandlerFactory() {
     const { data } = idToken;
 
     // TODO: Replace with Joi.
-    if (!idToken || !idToken.sub || !data.wrappedSignKey || !data.wrappedEncryptDecryptKey) {
+    if (!idToken || !idToken.sub/* || !data.wrappedSignKey || !data.wrappedEncryptDecryptKey*/) {
       throw createOrPropagateError(
         OthentErrorID.Validation,
         400,
@@ -38,8 +40,16 @@ export function importKeysHandlerFactory() {
     logRequestStart(Route.IMPORT_KEYS, idToken);
 
     const { wrappedSignKey, wrappedEncryptDecryptKey } = data;
-    const wrappedSignKeyParam = typeof wrappedSignKey === 'string' ? wrappedSignKey : new Uint8Array(Object.values(wrappedSignKey));
-    const wrappedEncryptDecryptKeyParam = typeof wrappedEncryptDecryptKey === 'string' ? wrappedEncryptDecryptKey : new Uint8Array(Object.values(wrappedEncryptDecryptKey));
+    let wrappedSignKeyParam: null | string | Uint8Array = null;
+    let wrappedEncryptDecryptKeyParam: null | string | Uint8Array = null;
+
+    if (wrappedSignKey) {
+      wrappedSignKeyParam = typeof wrappedSignKey === 'string' ? wrappedSignKey : new Uint8Array(Object.values(wrappedSignKey));
+    }
+
+    if (wrappedEncryptDecryptKey) {
+      wrappedEncryptDecryptKeyParam = typeof wrappedEncryptDecryptKey === 'string' ? wrappedEncryptDecryptKey : new Uint8Array(Object.values(wrappedEncryptDecryptKey));
+    }
 
     const importKeysResult = await importKeys(
       idToken.sub,
@@ -49,6 +59,6 @@ export function importKeysHandlerFactory() {
 
     logRequestSuccess(Route.IMPORT_KEYS, idToken);
 
-    res.json({ data: importKeysResult } satisfies ImportKeysResponseData);
+    res.json({ importKeysResult } satisfies ImportKeysResponseData);
   };
 }

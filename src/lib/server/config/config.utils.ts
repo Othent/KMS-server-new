@@ -97,6 +97,7 @@ export class Config {
     this.KMS_PROJECT_ID = process.env.kmsProjectId || "";
     this.KMS_PROJECT_LOCATION = process.env.kmsProjectLocation || "";
     this.KMS_SIGN_KEY_VERSION = process.env.signKeyVersion || "";
+    this.KMS_ENCRYPT_DECRYPT_KEY_VERSION = process.env.encryptDecryptKeyVersion || "";
     this.GOOGLE_CREDENTIALS = googleCredentials || {};
 
     // MONGO DB:

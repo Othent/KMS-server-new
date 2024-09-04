@@ -6,4 +6,4 @@ export const kmsClient = CONFIG.IS_PROD
   ? new KeyManagementServiceClient({
       credentials: CONFIG.GOOGLE_CREDENTIALS,
     })
-  : new LocalKeyManagementServiceClient() as unknown as KeyManagementServiceClient;
+  : new LocalKeyManagementServiceClient();

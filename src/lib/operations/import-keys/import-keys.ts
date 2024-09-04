@@ -4,8 +4,8 @@ import { importKMSKeys } from "../../utils/kms/importKey";
 
 export async function importKeys(
   sub: string,
-  wrappedSignKey: string | Uint8Array,
-  wrappedEncryptDecryptKey: string | Uint8Array,
+  wrappedSignKey: null | string | Uint8Array,
+  wrappedEncryptDecryptKey: null | string | Uint8Array,
 ) {
   try {
     return importKMSKeys(sub, wrappedSignKey, wrappedEncryptDecryptKey);

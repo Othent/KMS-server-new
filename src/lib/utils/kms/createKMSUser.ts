@@ -119,6 +119,8 @@ async function ping(safeId: string) {
 export async function createKMSUser(sub: string, importOnly = false) {
   const safeId = changeId(sub);
 
+  // TODO: Check if the user already exists?
+
   await createKeyRing(safeId);
 
   await Promise.all([
