@@ -5,7 +5,11 @@ import { Route } from "../../server/server.constants";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { activateKeys } from "./activate-keys";
-import { CryptoKeyVersionState } from "../../utils/kms/google-kms.types";
+import { CryptoKeyVersionState } from "../../utils/kms/google-kms.utils";
+
+export interface ActivateKeysIdTokenData {
+  fn: "activateKeys";
+}
 
 export interface ActivateKeysResult {
   signKeyState: CryptoKeyVersionState;
@@ -15,16 +19,17 @@ export interface ActivateKeysResult {
   userDetails: null /* | UserDetails */;
 }
 
-export interface ImportKeysResponseData {
+export interface ActivateKeysResponseData {
   activateKeysResult: ActivateKeysResult;
 };
 
 export function activateKeysHandlerFactory() {
-  return async (req: ExpressRequestWithToken, res: express.Response) => {
+  return async (req: ExpressRequestWithToken<ActivateKeysIdTokenData>, res: express.Response) => {
     const { idToken } = req;
+    const { data } = idToken;
 
     // TODO: Replace with Joi.
-    if (!idToken || !idToken.sub) {
+    if (!idToken || !idToken.sub || !data || data.fn !== "activateKeys") {
       throw createOrPropagateError(
         OthentErrorID.Validation,
         400,
@@ -34,10 +39,10 @@ export function activateKeysHandlerFactory() {
 
     logRequestStart(Route.ACTIVATE_KEYS, idToken);
 
-    const activateKeysResult = await activateKeys(idToken.sub);
+    const activateKeysResult = await activateKeys(idToken);
 
     logRequestSuccess(Route.ACTIVATE_KEYS, idToken);
 
-    res.json({ activateKeysResult } satisfies ImportKeysResponseData);
+    res.json({ activateKeysResult } satisfies ActivateKeysResponseData);
   };
 }

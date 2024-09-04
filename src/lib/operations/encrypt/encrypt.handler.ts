@@ -8,7 +8,11 @@ import { OthentErrorID } from "../../server/errors/error";
 import { JSONSerializedBuffer } from "../common.types";
 
 export interface EncryptIdTokenData {
+  /**
+   * @deprecated
+   */
   keyName: string;
+  fn: "encrypt";
   // plaintext: B64UrlString;
   plaintext: string | JSONSerializedBuffer;
 }
@@ -25,8 +29,11 @@ export function encryptHandlerFactory() {
     const { idToken } = req;
     const { data } = idToken;
 
+    // TODO: Only in the new version (old one didn't have fn in data, but had keyName):
+    // || data.fn !== "encrypt"
+
     // TODO: Replace with Joi.
-    if (!idToken || !data || !data.keyName || !data.plaintext) {
+    if (!idToken || !idToken.sub || !data || !data.plaintext) {
       throw createOrPropagateError(
         OthentErrorID.Validation,
         400,
@@ -39,7 +46,7 @@ export function encryptHandlerFactory() {
     const { plaintext } = data;
     const plaintextParam = typeof plaintext === 'string' ? plaintext : new Uint8Array(Object.values(plaintext));
 
-    const ciphertext = await encrypt(plaintextParam, data.keyName);
+    const ciphertext = await encrypt(idToken, plaintextParam);
 
     logRequestSuccess(Route.ENCRYPT, idToken);
 

@@ -1,16 +1,14 @@
-import { OthentErrorID } from "../../server/errors/error";
-import { createOrPropagateError } from "../../server/errors/errors.utils";
-import { fetchKMSImportJob } from "../../utils/kms/importKey";
+import { IdTokenWithData } from "../../utils/auth/auth0";
+import { kmsClient } from "../../utils/kms/kmsClient";
+import { getImportJobPath } from "../../utils/kms/google-kms.utils";
+import { FetchImportJobIdTokenData } from "./fetch-import-job.handler";
 
-export async function fetchImportJob(sub: string) {
-  try {
-    return fetchKMSImportJob(sub);
-  } catch (err) {
-    throw createOrPropagateError(
-      OthentErrorID.UserCreation,
-      500,
-      "Error creating KMS user",
-      err,
-    );
-  }
+export async function fetchImportJob(idToken: IdTokenWithData<FetchImportJobIdTokenData>) {
+  const { importJobPath } = getImportJobPath(idToken);
+
+  const [importJob] = await kmsClient.getImportJob({
+    name: importJobPath,
+  });
+
+  return importJob;
 }

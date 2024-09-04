@@ -6,10 +6,10 @@ import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { importKeys } from "./import-keys";
 import { JSONSerializedBuffer } from "../common.types";
-import { CryptoKeyVersionState } from "../../utils/kms/google-kms.types";
+import { CryptoKeyVersionState } from "../../utils/kms/google-kms.utils";
 
 export interface ImportKeysIdTokenData {
-  keyName: string;
+  fn: "importKeys";
   wrappedSignKey: string | JSONSerializedBuffer;
   wrappedEncryptDecryptKey: string | JSONSerializedBuffer;
 }
@@ -29,7 +29,7 @@ export function importKeysHandlerFactory() {
     const { data } = idToken;
 
     // TODO: Replace with Joi.
-    if (!idToken || !idToken.sub/* || !data.wrappedSignKey || !data.wrappedEncryptDecryptKey*/) {
+    if (!idToken || !idToken.sub || !data || data.fn !== "importKeys" || (!data.wrappedSignKey && !data.wrappedEncryptDecryptKey)) {
       throw createOrPropagateError(
         OthentErrorID.Validation,
         400,
@@ -52,10 +52,12 @@ export function importKeysHandlerFactory() {
     }
 
     const importKeysResult = await importKeys(
-      idToken.sub,
+      idToken,
       wrappedSignKeyParam,
       wrappedEncryptDecryptKeyParam,
     );
+
+    // TODO: Try to activate the key here if it happens in less than X seconds.
 
     logRequestSuccess(Route.IMPORT_KEYS, idToken);
 

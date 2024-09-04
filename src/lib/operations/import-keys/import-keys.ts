@@ -1,20 +1,44 @@
-import { OthentErrorID } from "../../server/errors/error";
-import { createOrPropagateError } from "../../server/errors/errors.utils";
-import { importKMSKeys } from "../../utils/kms/importKey";
+import { CONFIG } from "../../server/config/config.utils";
+import { IdTokenWithData } from "../../utils/auth/auth0";
+import { kmsClient } from "../../utils/kms/kmsClient";
+import { getImportJobPath, getSignKeyPath, getEncryptDecryptKeyPath, normalizeCryptoKeyVersionState } from "../../utils/kms/google-kms.utils";
+import { ImportKeysIdTokenData } from "./import-keys.handler";
+
+// TODO: What if a malicious dApp tries to upload their own key?
 
 export async function importKeys(
-  sub: string,
+  idToken: IdTokenWithData<ImportKeysIdTokenData>,
   wrappedSignKey: null | string | Uint8Array,
   wrappedEncryptDecryptKey: null | string | Uint8Array,
 ) {
-  try {
-    return importKMSKeys(sub, wrappedSignKey, wrappedEncryptDecryptKey);
-  } catch (err) {
-    throw createOrPropagateError(
-      OthentErrorID.UserCreation,
-      500,
-      "Error creating KMS user",
-      err,
-    );
-  }
+  const { importJobPath } = getImportJobPath(idToken);
+  const { signKeyPath } = getSignKeyPath(idToken);
+  const { encryptDecryptKeyPath  } = getEncryptDecryptKeyPath(idToken);
+
+  const signKeyImportPromise = wrappedSignKey ? kmsClient.importCryptoKeyVersion({
+    parent: signKeyPath,
+    importJob: importJobPath,
+    algorithm: CONFIG.KMS_SIGN_KEY_ALGORITHM,
+    wrappedKey: wrappedSignKey,
+  }) : [null];
+
+  const encryptDecryptKeyImportPromise = wrappedEncryptDecryptKey ? kmsClient.importCryptoKeyVersion({
+    parent: encryptDecryptKeyPath,
+    importJob: importJobPath,
+    algorithm: CONFIG.KMS_ENCRYPT_DECRYPT_KEY_ALGORITHM,
+    wrappedKey: wrappedEncryptDecryptKey,
+  }) : [null];
+
+  const [
+    [signKeyVersion],
+    [encryptDecryptKeyVersion]
+  ] = await Promise.all([
+    signKeyImportPromise,
+    encryptDecryptKeyImportPromise,
+  ]);
+
+  return {
+    signKeyState: signKeyVersion ? normalizeCryptoKeyVersionState(signKeyVersion) : null,
+    encryptDecryptKeyState: encryptDecryptKeyVersion ? normalizeCryptoKeyVersionState(encryptDecryptKeyVersion) : null,
+  };
 }

@@ -5,7 +5,12 @@ import { google } from "@google-cloud/kms/build/protos/protos";
 // TODO: Not needed in Node.js 20:
 dotEnv.config();
 
+type KMSEnvironment = "DEVELOPMENT_SERVER" | "PRODUCTION_SERVER" | "LOCAL_MOCK" | "";
+
 export class Config {
+
+  static KMS_DEV_PROJECT_ID = "othent-kms-dev";
+
   // NON-ENV:
 
   AUTH_SYSTEM = "KMS";
@@ -27,6 +32,7 @@ export class Config {
   // GOOGLE KMS:
 
   GOOGLE_CREDENTIALS: NonNullable<GoogleAuthOptions["credentials"]> = {};
+  KMS_ENVIRONMENT: KMSEnvironment = "";
 
   // Paths:
   // Changing these will prevent all users from accessing their keys!
@@ -78,6 +84,8 @@ export class Config {
 
     // GOOGLE KMS:
 
+    // Credentials:
+
     let googleCredentials: GoogleAuthOptions["credentials"];
 
     try {
@@ -94,11 +102,46 @@ export class Config {
       process.exit(1);
     }
 
+    this.GOOGLE_CREDENTIALS = googleCredentials || {};
+
+    // Other KMS properties:
+
     this.KMS_PROJECT_ID = process.env.kmsProjectId || "";
     this.KMS_PROJECT_LOCATION = process.env.kmsProjectLocation || "";
     this.KMS_SIGN_KEY_VERSION = process.env.signKeyVersion || "";
     this.KMS_ENCRYPT_DECRYPT_KEY_VERSION = process.env.encryptDecryptKeyVersion || "";
-    this.GOOGLE_CREDENTIALS = googleCredentials || {};
+
+    // Environment:
+
+    const isGoogleKMSValidForLocal = (
+      (this.IS_DEV || this.IS_TEST)
+        && (this.KMS_PROJECT_ID === "")
+        && (Object.keys(this.GOOGLE_CREDENTIALS).length === 0)
+    );
+
+    const isGoogleKMSValidForDev = (
+      (this.IS_DEV || this.IS_TEST)
+        && (this.KMS_PROJECT_ID === Config.KMS_DEV_PROJECT_ID)
+        && (this.GOOGLE_CREDENTIALS.project_id === Config.KMS_DEV_PROJECT_ID)
+    );
+
+    const isGoogleKMSValidForProd = (
+      this.IS_PROD
+        && Object.keys(this.GOOGLE_CREDENTIALS).length > 0
+        && this.GOOGLE_CREDENTIALS.project_id !== Config.KMS_DEV_PROJECT_ID
+    );
+
+    let kmsEnvironment: KMSEnvironment = "";
+
+    if (isGoogleKMSValidForProd) {
+      kmsEnvironment = "PRODUCTION_SERVER";
+    } else if (isGoogleKMSValidForDev) {
+      kmsEnvironment = "DEVELOPMENT_SERVER";
+    } else if (isGoogleKMSValidForLocal) {
+      kmsEnvironment = "LOCAL_MOCK";
+    }
+
+    this.KMS_ENVIRONMENT = kmsEnvironment;
 
     // MONGO DB:
 
@@ -142,14 +185,18 @@ export class Config {
 
     // GOOGLE KMS:
 
-    const isGoogleKMSValid = IS_PROD
-      ? !!(
-          this.KMS_PROJECT_ID &&
-          this.KMS_PROJECT_LOCATION &&
-          this.KMS_SIGN_KEY_VERSION &&
-          Object.keys(this.GOOGLE_CREDENTIALS).length > 0
-        )
-      : true;
+    const isGoogleKMSValid = !!(
+      this.KMS_ENVIRONMENT &&
+      this.KMS_PROJECT_ID &&
+      this.KMS_PROJECT_LOCATION &&
+      this.KMS_IMPORT_JOB_ID &&
+      this.KMS_SIGN_KEY_ID &&
+      this.KMS_SIGN_KEY_VERSION &&
+      this.KMS_ENCRYPT_DECRYPT_KEY_ID &&
+      this.KMS_ENCRYPT_DECRYPT_KEY_VERSION &&
+      this.KMS_SIGN_KEY_ALGORITHM &&
+      this.KMS_ENCRYPT_DECRYPT_KEY_ALGORITHM
+    );
 
     // MONGODB & SLACK:
 
@@ -170,7 +217,7 @@ export class Config {
   }
 
   log() {
-    const { PORT, IS_PROD, IS_DEV, IS_TEST } = this;
+    const { PORT, IS_PROD, IS_DEV, IS_TEST, KMS_ENVIRONMENT } = this;
 
     const {
       isNodeEnvValid,
@@ -202,10 +249,10 @@ export class Config {
     );
     console.log("");
     console.log(
-      `${isGoogleKMSValid ? "✅" : "❌"}  GOOGLE KMS${isGoogleKMSValid ? ":" : " - GoogleKMS must be configured in production"}`,
+      `${isGoogleKMSValid ? "✅" : "❌"}  GOOGLE KMS (${ KMS_ENVIRONMENT })${isGoogleKMSValid ? ":" : " - GoogleKMS must be configured in production"}`,
     );
     console.log(" ╷");
-    console.log(` ├ GOOGLE_CREDENTIALS = ${!!this.GOOGLE_CREDENTIALS ? "****" : ""}`);
+    console.log(` ├ GOOGLE_CREDENTIALS = ${Object.keys(this.GOOGLE_CREDENTIALS).length > 0 ? "{ **** }" : "{}"}`);
     console.log(` ├ KMS_PROJECT_ID = ${!!this.KMS_PROJECT_ID ? "****" : ""}`);
     console.log(` ├ KMS_PROJECT_LOCATION = ${!!this.KMS_PROJECT_LOCATION ? "****" : ""}`);
     console.log(` ├ KMS_IMPORT_JOB_ID = ${!!this.KMS_IMPORT_JOB_ID ? "****" : ""}`);

@@ -1,17 +1,33 @@
-import { fetchKMSKeysState } from "../../utils/kms/importKey";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { CONFIG } from "../../server/config/config.utils";
-import { CryptoKeyVersionState } from "../../utils/kms/google-kms.types";
+import { IdTokenWithData, updateAuth0User } from "../../utils/auth/auth0";
+import { ActivateKeysIdTokenData } from "./activate-keys.handler";
+import { CryptoKeyVersionState, getEncryptDecryptKeyPath, getEncryptDecryptKeyVersionPath, getSignKeyPath, getSignKeyVersionPath, normalizeCryptoKeyVersionState } from "../../utils/kms/google-kms.utils";
 
 export async function activateKeys(
-  sub: string,
+  idToken: IdTokenWithData<ActivateKeysIdTokenData>,
 ) {
-  const {
-    signCryptoKeyName,
-    encryptDecryptCryptoKeyName,
-    signKeyState,
-    encryptDecryptKeyState,
-  } = await fetchKMSKeysState(sub);
+  const { signKeyVersionPath } = getSignKeyVersionPath(idToken);
+  const { encryptDecryptKeyVersionPath } = getEncryptDecryptKeyVersionPath(idToken);
+
+  const signKeyVersionPromise = kmsClient.getCryptoKeyVersion({
+    name: signKeyVersionPath,
+  });
+
+  const encryptDecryptKeyVersionPromise = kmsClient.getCryptoKeyVersion({
+    name: encryptDecryptKeyVersionPath,
+  });
+
+  const [
+    [signKeyVersion],
+    [encryptDecryptKeyVersion]
+  ] = await Promise.all([
+    signKeyVersionPromise,
+    encryptDecryptKeyVersionPromise,
+  ]);
+
+  const signKeyState = normalizeCryptoKeyVersionState(signKeyVersion);
+  const encryptDecryptKeyState = normalizeCryptoKeyVersionState(encryptDecryptKeyVersion);
 
   // Only symmetric keys need to be activated:
 
@@ -20,19 +36,19 @@ export async function activateKeys(
     // See https://cloud.google.com/kms/docs/samples/kms-update-key-set-primary
 
     await kmsClient.updateCryptoKeyPrimaryVersion({
-      name: encryptDecryptCryptoKeyName,
+      name: encryptDecryptKeyVersionPath,
       cryptoKeyVersionId: CONFIG.KMS_ENCRYPT_DECRYPT_KEY_VERSION,
     });
-
-    // TODO: What if a malicious dApp tries to upload their own key?
   }
+  const { signKeyPath } = getSignKeyPath(idToken);
+  const { encryptDecryptKeyPath } = getEncryptDecryptKeyPath(idToken);
 
   const signCryptoKeyPromise = await kmsClient.getCryptoKey({
-    name: signCryptoKeyName,
+    name: signKeyPath,
   });
 
   const encryptDecryptCryptoKeyPromise = await kmsClient.getCryptoKey({
-    name: encryptDecryptCryptoKeyName,
+    name: encryptDecryptKeyPath,
   });
 
   const [
@@ -44,15 +60,17 @@ export async function activateKeys(
   ]);
 
   // Once both keys are set, we can add the public key and wallet address to the user:
-  // const userDetails = await updateAuth0User(sub);
+  // const userDetails = await updateAuth0User(idToken);
 
   return {
     // State:
     signKeyState,
     encryptDecryptKeyState,
+
     // Versions (TODO: can be improved with more/better info):
     signKeyVersion: signKey.primary?.name || `${ signKey.name || "" } (default)`.trim(),
     encryptDecryptKeyVersion: encryptDecryptKey.primary?.name || `${ encryptDecryptKey.name || "" } (default)`.trim(),
+
     // User:
     userDetails: null,
   };

@@ -1,9 +1,9 @@
-import { KeyManagementServiceClient } from "@google-cloud/kms";
 import assert from "assert";
 import crypto from "crypto";
 import { delay } from "../tools/delay";
-import { b64ToUint8Array, binaryDataTypeOrStringTob64String, binaryDataTypeToString, stringToUint8Array } from "../arweave/arweaveUtils";
-import { CryptoKeyVersionState } from "./google-kms.types";
+import { b64ToUint8Array, binaryDataTypeOrStringTob64String } from "../arweave/arweaveUtils";
+import { CryptoKeyVersionState } from "./google-kms.utils";
+// import { KeyManagementServiceClient } from "@google-cloud/kms";
 
 // KeyRing:
 
@@ -76,14 +76,25 @@ const { privateKey: PRIVATE_KEY, publicKey: PUBLIC_KEY } =
     modulusLength: 2048,
   });
 
+const IMPORT_JOB_PEM = crypto.generateKeyPairSync("rsa", {
+  modulusLength: 3072,
+  // publicExponent: new Uint8Array([1,0,1]),
+  publicKeyEncoding: {
+    type: 'spki',
+    format: 'pem',
+  },
+  privateKeyEncoding: {
+    type: 'pkcs8',
+    format: 'pem',
+    cipher: 'aes-256-cbc',
+    passphrase: 'top secret'
+  }
+}).publicKey;
+
 // The `implements` part is commented out to avoid having to mock that massive class. If you need to add/update the current implementation, you can uncomment
 // it while you are working on the changes to get some help from autocompletion, and comment it again once you are done:
 
 export class LocalKeyManagementServiceClient /* implements KeyManagementServiceClient */ {
-  constructor() {
-    this.testLocalKeyManagementServiceClient();
-  }
-
   async testLocalKeyManagementServiceClient() {
     // Give the server some time to start:
     await delay(1000);
@@ -306,7 +317,10 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
   ): Promise<[IImportJob, ICreateImportJobRequest | undefined, {} | undefined]> {
     return Promise.resolve([
       {
-        state: "ACTIVE"
+        state: "ACTIVE",
+        publicKey: {
+          pem: IMPORT_JOB_PEM,
+        },
       } satisfies IImportJob,
       request,
       undefined,
@@ -318,7 +332,10 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
   ): Promise<[IImportJob, IGetImportJobRequest | undefined, {} | undefined]> {
     return Promise.resolve([
       {
-        state: "ACTIVE"
+        state: "ACTIVE",
+        publicKey: {
+          pem: IMPORT_JOB_PEM,
+        },
       } satisfies IImportJob,
       request,
       undefined,

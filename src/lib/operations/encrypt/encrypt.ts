@@ -2,29 +2,22 @@ import { CONFIG } from "../../server/config/config.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { stringOrUint8ArrayToUint8Array } from "../../utils/arweave/arweaveUtils";
+import { IdTokenWithData } from "../../utils/auth/auth0";
 import { kmsClient } from "../../utils/kms/kmsClient";
-import { changeId } from "../../utils/tools/changeId";
+import { getEncryptDecryptKeyPath } from "../../utils/kms/google-kms.utils";
+import { EncryptIdTokenData } from "./encrypt.handler";
 
 export async function encrypt(
+  idToken: IdTokenWithData<EncryptIdTokenData>,
   plaintext: string | Uint8Array,
-  keyName: string
 ) {
-  const safeId = changeId(keyName);
-
-  // TODO: Create util function to get the key names:
-  // TODO: Why cryptoKeyPath and not cryptoKeyVersionPath?
-  const name = kmsClient.cryptoKeyPath(
-    CONFIG.KMS_PROJECT_ID,
-    CONFIG.KMS_PROJECT_LOCATION,
-    safeId,
-    CONFIG.KMS_ENCRYPT_DECRYPT_KEY_ID,
-  );
+  const { encryptDecryptKeyPath } = getEncryptDecryptKeyPath(idToken);
 
   let ciphertext: string | Uint8Array | null | undefined;
 
   try {
     const [encryptResponse] = await kmsClient.encrypt({
-      name,
+      name: encryptDecryptKeyPath,
       plaintext,
     });
 
