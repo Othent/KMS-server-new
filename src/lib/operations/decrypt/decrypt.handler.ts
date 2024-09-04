@@ -5,7 +5,7 @@ import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
-import { JSONSerializedBuffer } from "../common.types";
+import { LegacyBufferData, normalizeBufferData } from "../common.types";
 
 export interface DecryptIdTokenData {
   /**
@@ -13,8 +13,8 @@ export interface DecryptIdTokenData {
    */
   keyName: string;
   fn: "decrypt";
-  // ciphertext: B64UrlString;
-  ciphertext: string | JSONSerializedBuffer;
+  // ciphertext: B64UrlString | LegacyBufferData;
+  ciphertext: LegacyBufferData;
 }
 
 export interface DecryptResponseData {
@@ -37,16 +37,18 @@ export function decryptHandlerFactory() {
       throw createOrPropagateError(
         OthentErrorID.Validation,
         400,
-        "Invalid token data",
+        "Invalid token data for decrypt()",
       );
     }
 
     logRequestStart(Route.DECRYPT, idToken);
 
-    const { ciphertext } = data;
-    const ciphertextParam = typeof ciphertext === 'string' ? ciphertext : new Uint8Array(Object.values(ciphertext));
+    const ciphertextBuffer = normalizeBufferData(data.ciphertext);
 
-    const plaintext = await decrypt(idToken, ciphertextParam);
+    console.log(data.ciphertext);
+    console.log(ciphertextBuffer);
+
+    const plaintext = await decrypt(idToken, ciphertextBuffer);
 
     logRequestSuccess(Route.DECRYPT, idToken);
 

@@ -5,7 +5,7 @@ import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { Route } from "../../server/server.constants";
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
-import { JSONSerializedBuffer } from "../common.types";
+import { LegacyBufferData, normalizeBufferData } from "../common.types";
 
 export interface SignIdTokenData {
   /**
@@ -13,8 +13,8 @@ export interface SignIdTokenData {
    */
   keyName: string;
   fn: "sign";
-  // data: B64UrlString;
-  data: string | JSONSerializedBuffer;
+  // data: B64UrlString | LegacyBufferData;
+  data: LegacyBufferData;
 }
 
 export interface SignResponseData {
@@ -37,16 +37,18 @@ export function signHandlerFactory() {
       throw createOrPropagateError(
         OthentErrorID.Validation,
         400,
-        "Invalid token data",
+        "Invalid token data for sign()",
       );
     }
 
     logRequestStart(Route.SIGN, idToken);
 
-    const { data: dataToSign } = data;
-    const dataToSignParam = typeof dataToSign === 'string' ? dataToSign : new Uint8Array(Object.values(dataToSign));
+    const dataToSignBuffer = normalizeBufferData(data.data);
 
-    const signature = await sign(idToken, dataToSignParam);
+    console.log(data.data);
+    console.log(dataToSignBuffer);
+
+    const signature = await sign(idToken, dataToSignBuffer);
 
     logRequestSuccess(Route.SIGN, idToken);
 

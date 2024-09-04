@@ -27,7 +27,7 @@ export function createUserHandlerFactory() {
       throw createOrPropagateError(
         OthentErrorID.Validation,
         400,
-        "Invalid token data",
+        "Invalid token data for createUser()",
       );
     }
 

@@ -5,13 +5,13 @@ import { Route } from "../../server/server.constants";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { importKeys } from "./import-keys";
-import { JSONSerializedBuffer } from "../common.types";
 import { CryptoKeyVersionState } from "../../utils/kms/google-kms.utils";
+import { LegacyBufferData } from "../common.types";
 
 export interface ImportKeysIdTokenData {
   fn: "importKeys";
-  wrappedSignKey: string | JSONSerializedBuffer;
-  wrappedEncryptDecryptKey: string | JSONSerializedBuffer;
+  wrappedSignKey: string | LegacyBufferData;
+  wrappedEncryptDecryptKey: string | LegacyBufferData;
 }
 
 interface ImportKeysResult {
@@ -33,7 +33,7 @@ export function importKeysHandlerFactory() {
       throw createOrPropagateError(
         OthentErrorID.Validation,
         400,
-        "Invalid token data",
+        "Invalid token data for importKeys()",
       );
     }
 

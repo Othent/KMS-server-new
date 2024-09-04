@@ -5,7 +5,7 @@ import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
-import { JSONSerializedBuffer } from "../common.types";
+import { LegacyBufferData, normalizeBufferData } from "../common.types";
 
 export interface EncryptIdTokenData {
   /**
@@ -13,8 +13,8 @@ export interface EncryptIdTokenData {
    */
   keyName: string;
   fn: "encrypt";
-  // plaintext: B64UrlString;
-  plaintext: string | JSONSerializedBuffer;
+  // plaintext: B64UrlString | LegacyBufferData;
+  plaintext: LegacyBufferData;
 }
 
 export interface EncryptResponseData {
@@ -37,16 +37,18 @@ export function encryptHandlerFactory() {
       throw createOrPropagateError(
         OthentErrorID.Validation,
         400,
-        "Invalid token data",
+        "Invalid token data for encrypt()",
       );
     }
 
     logRequestStart(Route.ENCRYPT, idToken);
 
-    const { plaintext } = data;
-    const plaintextParam = typeof plaintext === 'string' ? plaintext : new Uint8Array(Object.values(plaintext));
+    const plaintextBuffer = normalizeBufferData(data.plaintext);
 
-    const ciphertext = await encrypt(idToken, plaintextParam);
+    console.log(data.plaintext);
+    console.log(plaintextBuffer);
+
+    const ciphertext = await encrypt(idToken, plaintextBuffer);
 
     logRequestSuccess(Route.ENCRYPT, idToken);
 

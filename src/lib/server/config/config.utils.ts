@@ -9,6 +9,8 @@ type KMSEnvironment = "DEVELOPMENT_SERVER" | "PRODUCTION_SERVER" | "LOCAL_MOCK" 
 
 export class Config {
 
+  static KMS_LOCAL_PROJECT_ID = "othent-kms-local";
+
   static KMS_DEV_PROJECT_ID = "othent-kms-dev";
 
   // NON-ENV:
@@ -115,7 +117,7 @@ export class Config {
 
     const isGoogleKMSValidForLocal = (
       (this.IS_DEV || this.IS_TEST)
-        && (this.KMS_PROJECT_ID === "")
+        && (this.KMS_PROJECT_ID === Config.KMS_LOCAL_PROJECT_ID)
         && (Object.keys(this.GOOGLE_CREDENTIALS).length === 0)
     );
 
