@@ -18,7 +18,7 @@ export function getDevelopmentOnlyTokenID<D>(
     jti, // JWT ID
   } = idToken;
 
-  return `${email || sub} (${jti || iat})`;
+  return `${email || sub} (${jti || iat})${ idToken.data ? ` | data = ${ Object.keys(idToken.data).join(", ") }` : "" }`;
 }
 
 const CYAN = "\x1b[36m";

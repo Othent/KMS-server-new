@@ -5,16 +5,20 @@ import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
-import { JSONSerializedBuffer } from "../common.types";
+import { LegacyBufferData, normalizeBufferData, toLegacyBufferObject } from "../common.types";
 
 export interface EncryptIdTokenData {
+  /**
+   * @deprecated
+   */
   keyName: string;
-  // plaintext: B64UrlString;
-  plaintext: string | JSONSerializedBuffer;
+  fn: "encrypt";
+  // plaintext: B64UrlString | LegacyBufferData;
+  plaintext: LegacyBufferData;
 }
 
 export interface EncryptResponseData {
-  data: Uint8Array;
+  data: LegacyBufferData;
 };
 
 export function encryptHandlerFactory() {
@@ -25,24 +29,31 @@ export function encryptHandlerFactory() {
     const { idToken } = req;
     const { data } = idToken;
 
+    // TODO: Only in the new version (old one didn't have fn in data, but had keyName):
+    // || data.fn !== "encrypt"
+
     // TODO: Replace with Joi.
-    if (!idToken || !data || !data.keyName || !data.plaintext) {
+    if (!idToken || !idToken.sub || !data || !data.plaintext) {
       throw createOrPropagateError(
         OthentErrorID.Validation,
         400,
-        "Invalid token data",
+        "Invalid token data for encrypt()",
       );
     }
 
     logRequestStart(Route.ENCRYPT, idToken);
 
-    const { plaintext } = data;
-    const plaintextParam = typeof plaintext === 'string' ? plaintext : new Uint8Array(Object.values(plaintext));
+    const plaintextBuffer = normalizeBufferData(data.plaintext);
 
-    const ciphertext = await encrypt(plaintextParam, data.keyName);
+    // console.log(data.plaintext);
+    // console.log(plaintextBuffer);
+
+    const ciphertext = await encrypt(idToken, plaintextBuffer);
+
+    // console.log(ciphertext.length);
 
     logRequestSuccess(Route.ENCRYPT, idToken);
 
-    res.send({ data: ciphertext } satisfies EncryptResponseData);
+    res.send({ data: toLegacyBufferObject(ciphertext) } satisfies EncryptResponseData);
   };
 }

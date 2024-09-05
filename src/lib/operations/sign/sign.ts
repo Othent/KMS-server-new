@@ -2,28 +2,22 @@ import { CONFIG } from "../../server/config/config.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { stringOrUint8ArrayToUint8Array } from "../../utils/arweave/arweaveUtils";
+import { IdTokenWithData } from "../../utils/auth/auth0";
 import { kmsClient } from "../../utils/kms/kmsClient";
-import { changeId } from "../../utils/tools/changeId";
+import { getSignKeyVersionPath } from "../../utils/kms/google-kms.utils";
+import { SignIdTokenData } from "./sign.handler";
 
 export async function sign(
+  idToken: IdTokenWithData<SignIdTokenData>,
   data: string | Uint8Array,
-  keyName: string,
 ) {
-  const safeId = changeId(keyName);
-
-  const fullKeyName = kmsClient.cryptoKeyVersionPath(
-    CONFIG.KMS_PROJECT_ID,
-    "global",
-    safeId,
-    "sign",
-    CONFIG.SIGN_KEY_VERSION,
-  );
+  const { signKeyVersionPath } = getSignKeyVersionPath(idToken);
 
   let signature: string | Uint8Array | null | undefined;
 
   try {
     const [signResponse] = await kmsClient.asymmetricSign({
-      name: fullKeyName,
+      name: signKeyVersionPath,
       data,
     });
 

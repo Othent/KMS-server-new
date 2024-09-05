@@ -5,16 +5,20 @@ import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { Route } from "../../server/server.constants";
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
-import { JSONSerializedBuffer } from "../common.types";
+import { LegacyBufferData, LegacyBufferObject, normalizeBufferData, toLegacyBufferObject } from "../common.types";
 
 export interface SignIdTokenData {
+  /**
+   * @deprecated
+   */
   keyName: string;
-  // data: B64UrlString;
-  data: string | JSONSerializedBuffer;
+  fn: "sign";
+  // data: B64UrlString | LegacyBufferData;
+  data: LegacyBufferData;
 }
 
 export interface SignResponseData {
-  data: Uint8Array;
+  data: LegacyBufferObject;
 };
 
 export function signHandlerFactory() {
@@ -25,24 +29,29 @@ export function signHandlerFactory() {
     const { idToken } = req;
     const { data } = idToken;
 
+    // TODO: Only in the new version (old one didn't have fn in data, but had keyName):
+    // || data.fn !== "sign"
+
     // TODO: Replace with Joi.
-    if (!idToken || !data || !data.keyName || !data.data) {
+    if (!idToken || !idToken.sub || !data || !data.data) {
       throw createOrPropagateError(
         OthentErrorID.Validation,
         400,
-        "Invalid token data",
+        "Invalid token data for sign()",
       );
     }
 
     logRequestStart(Route.SIGN, idToken);
 
-    const { data: dataToSign } = data;
-    const dataToSignParam = typeof dataToSign === 'string' ? dataToSign : new Uint8Array(Object.values(dataToSign));
+    const dataToSignBuffer = normalizeBufferData(data.data);
 
-    const signature = await sign(dataToSignParam, data.keyName);
+    // console.log(data.data);
+    // console.log(dataToSignBuffer);
+
+    const signature = await sign(idToken, dataToSignBuffer);
 
     logRequestSuccess(Route.SIGN, idToken);
 
-    res.send({ data: signature } satisfies SignResponseData);
+    res.send({ data: toLegacyBufferObject(signature) } satisfies SignResponseData);
   };
 }

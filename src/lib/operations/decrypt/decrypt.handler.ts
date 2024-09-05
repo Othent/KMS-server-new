@@ -5,16 +5,20 @@ import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
-import { JSONSerializedBuffer } from "../common.types";
+import { LegacyBufferData, LegacyBufferObject, normalizeBufferData, toLegacyBufferObject } from "../common.types";
 
 export interface DecryptIdTokenData {
+  /**
+   * @deprecated
+   */
   keyName: string;
-  // ciphertext: B64UrlString;
-  ciphertext: string | JSONSerializedBuffer;
+  fn: "decrypt";
+  // ciphertext: B64UrlString | LegacyBufferData;
+  ciphertext: LegacyBufferData;
 }
 
 export interface DecryptResponseData {
-  data: Uint8Array;
+  data: LegacyBufferObject;
 };
 
 export function decryptHandlerFactory() {
@@ -25,24 +29,29 @@ export function decryptHandlerFactory() {
     const { idToken } = req;
     const { data } = idToken;
 
+    // TODO: Only in the new version (old one didn't have fn in data, but had keyName):
+    // || data.fn !== "decrypt"
+
     // TODO: Replace with Joi.
-    if (!idToken || !data || !data.keyName || !data.ciphertext) {
+    if (!idToken || !idToken.sub || !data || !data.ciphertext) {
       throw createOrPropagateError(
         OthentErrorID.Validation,
         400,
-        "Invalid token data",
+        "Invalid token data for decrypt()",
       );
     }
 
     logRequestStart(Route.DECRYPT, idToken);
 
-    const { ciphertext } = data;
-    const ciphertextParam = typeof ciphertext === 'string' ? ciphertext : new Uint8Array(Object.values(ciphertext));
+    const ciphertextBuffer = normalizeBufferData(data.ciphertext);
 
-    const plaintext = await decrypt(ciphertextParam, data.keyName);
+    // console.log(data.ciphertext);
+    // console.log(ciphertextBuffer);
+
+    const plaintext = await decrypt(idToken, ciphertextBuffer);
 
     logRequestSuccess(Route.DECRYPT, idToken);
 
-    res.send({ data: plaintext } satisfies DecryptResponseData);
+    res.send({ data: toLegacyBufferObject(plaintext) } satisfies DecryptResponseData);
   };
 }

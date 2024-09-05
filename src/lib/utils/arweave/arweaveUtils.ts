@@ -63,7 +63,7 @@ export function stringToUint8Array(str: string): Uint8Array {
 }
 
 export function stringOrUint8ArrayToUint8Array(str: string | Uint8Array): Uint8Array {
-  return typeof str === 'string' ? new TextEncoder().encode(str) : str;
+  return typeof str === 'string' ? b64ToUint8Array(str as any) : str;
 }
 
 // export function bufferToUint8Array(buffer: Buffer): Uint8Array {
