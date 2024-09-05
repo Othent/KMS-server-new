@@ -29,11 +29,11 @@ function isLegacyBufferObject(legacyBufferData: LegacyBufferData): legacyBufferD
   */
 }
 
-// TODO: Check if the old server version can receive `string` directly.
-
 export function normalizeBufferData(
-  data: LegacyBufferRecord | LegacyBufferObject | B64String | B64UrlString,
+  data: LegacyBufferRecord | LegacyBufferObject /* | B64String | B64UrlString, */
 ) {
+  // TODO: Check if this can be the case in the old version, or only if the new one. If it's only for the new one,
+  // this is probably B64String, not a regular string (once the SDK is also updated to do that).
   if (typeof data === "string") {
     return b64ToUint8Array(data);
   }
