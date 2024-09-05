@@ -5,7 +5,7 @@ import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { Route } from "../../server/server.constants";
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
-import { LegacyBufferData, normalizeBufferData } from "../common.types";
+import { LegacyBufferData, LegacyBufferObject, normalizeBufferData, toLegacyBufferObject } from "../common.types";
 
 export interface SignIdTokenData {
   /**
@@ -18,7 +18,7 @@ export interface SignIdTokenData {
 }
 
 export interface SignResponseData {
-  data: Uint8Array;
+  data: LegacyBufferObject;
 };
 
 export function signHandlerFactory() {
@@ -52,6 +52,6 @@ export function signHandlerFactory() {
 
     logRequestSuccess(Route.SIGN, idToken);
 
-    res.send({ data: signature } satisfies SignResponseData);
+    res.send({ data: toLegacyBufferObject(signature) } satisfies SignResponseData);
   };
 }

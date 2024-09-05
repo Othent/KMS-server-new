@@ -5,7 +5,7 @@ import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
-import { LegacyBufferData, normalizeBufferData } from "../common.types";
+import { LegacyBufferData, normalizeBufferData, toLegacyBufferObject } from "../common.types";
 
 export interface EncryptIdTokenData {
   /**
@@ -18,7 +18,7 @@ export interface EncryptIdTokenData {
 }
 
 export interface EncryptResponseData {
-  data: Uint8Array;
+  data: LegacyBufferData;
 };
 
 export function encryptHandlerFactory() {
@@ -50,8 +50,10 @@ export function encryptHandlerFactory() {
 
     const ciphertext = await encrypt(idToken, plaintextBuffer);
 
+    console.log(ciphertext.length);
+
     logRequestSuccess(Route.ENCRYPT, idToken);
 
-    res.send({ data: ciphertext } satisfies EncryptResponseData);
+    res.send({ data: toLegacyBufferObject(ciphertext) } satisfies EncryptResponseData);
   };
 }

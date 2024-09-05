@@ -5,7 +5,7 @@ import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
-import { LegacyBufferData, normalizeBufferData } from "../common.types";
+import { LegacyBufferData, LegacyBufferObject, normalizeBufferData, toLegacyBufferObject } from "../common.types";
 
 export interface DecryptIdTokenData {
   /**
@@ -18,7 +18,7 @@ export interface DecryptIdTokenData {
 }
 
 export interface DecryptResponseData {
-  data: Uint8Array;
+  data: LegacyBufferObject;
 };
 
 export function decryptHandlerFactory() {
@@ -52,6 +52,6 @@ export function decryptHandlerFactory() {
 
     logRequestSuccess(Route.DECRYPT, idToken);
 
-    res.send({ data: plaintext } satisfies DecryptResponseData);
+    res.send({ data: toLegacyBufferObject(plaintext) } satisfies DecryptResponseData);
   };
 }

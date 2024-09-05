@@ -8,7 +8,7 @@ type LegacyBufferRecord = Record<number, number>;
 /**
  * @deprecated
  */
-interface LegacyBufferObject {
+export interface LegacyBufferObject {
   type: "Buffer";
   data: number[];
 }
@@ -43,4 +43,11 @@ export function normalizeBufferData(
   }
 
   return new Uint8Array(Object.values(data));
+}
+
+export function toLegacyBufferObject(buffer: Uint8Array): LegacyBufferObject {
+  return {
+    type: "Buffer",
+    data: Array.from(buffer),
+  }
 }

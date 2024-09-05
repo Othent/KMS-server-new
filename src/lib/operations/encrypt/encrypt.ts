@@ -1,4 +1,3 @@
-import { CONFIG } from "../../server/config/config.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { stringOrUint8ArrayToUint8Array } from "../../utils/arweave/arweaveUtils";
