@@ -116,20 +116,20 @@ export class Config {
     // Environment:
 
     const isGoogleKMSValidForLocal = (
-      (this.IS_DEV || this.IS_TEST)
-        && (this.KMS_PROJECT_ID === Config.KMS_LOCAL_PROJECT_ID)
+      // (this.IS_DEV || this.IS_TEST)
+        (this.KMS_PROJECT_ID === Config.KMS_LOCAL_PROJECT_ID)
         && (Object.keys(this.GOOGLE_CREDENTIALS).length === 0)
     );
 
     const isGoogleKMSValidForDev = (
-      (this.IS_DEV || this.IS_TEST)
-        && (this.KMS_PROJECT_ID === Config.KMS_DEV_PROJECT_ID)
+      // (this.IS_DEV || this.IS_TEST)
+        (this.KMS_PROJECT_ID === Config.KMS_DEV_PROJECT_ID)
         && (this.GOOGLE_CREDENTIALS.project_id === Config.KMS_DEV_PROJECT_ID)
     );
 
     const isGoogleKMSValidForProd = (
-      this.IS_PROD
-        && Object.keys(this.GOOGLE_CREDENTIALS).length > 0
+      // this.IS_PROD
+        Object.keys(this.GOOGLE_CREDENTIALS).length > 0
         && this.GOOGLE_CREDENTIALS.project_id !== Config.KMS_DEV_PROJECT_ID
     );
 
