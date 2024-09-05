@@ -45,8 +45,8 @@ export function signHandlerFactory() {
 
     const dataToSignBuffer = normalizeBufferData(data.data);
 
-    console.log(data.data);
-    console.log(dataToSignBuffer);
+    // console.log(data.data);
+    // console.log(dataToSignBuffer);
 
     const signature = await sign(idToken, dataToSignBuffer);
 

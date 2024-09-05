@@ -45,8 +45,8 @@ export function decryptHandlerFactory() {
 
     const ciphertextBuffer = normalizeBufferData(data.ciphertext);
 
-    console.log(data.ciphertext);
-    console.log(ciphertextBuffer);
+    // console.log(data.ciphertext);
+    // console.log(ciphertextBuffer);
 
     const plaintext = await decrypt(idToken, ciphertextBuffer);
 

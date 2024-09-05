@@ -14,6 +14,8 @@ export async function encrypt(
 
   let ciphertext: string | Uint8Array | null | undefined;
 
+  console.log("plaintext =", plaintext);
+
   try {
     const [encryptResponse] = await kmsClient.encrypt({
       name: encryptDecryptKeyPath,
@@ -37,6 +39,13 @@ export async function encrypt(
       "No ciphertext",
     );
   }
+
+  console.log(
+    "ciphertext =",
+    typeof ciphertext,
+    ciphertext,
+    stringOrUint8ArrayToUint8Array(ciphertext),
+  );
 
   return stringOrUint8ArrayToUint8Array(ciphertext);
 }

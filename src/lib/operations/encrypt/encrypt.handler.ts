@@ -45,12 +45,12 @@ export function encryptHandlerFactory() {
 
     const plaintextBuffer = normalizeBufferData(data.plaintext);
 
-    console.log(data.plaintext);
-    console.log(plaintextBuffer);
+    // console.log(data.plaintext);
+    // console.log(plaintextBuffer);
 
     const ciphertext = await encrypt(idToken, plaintextBuffer);
 
-    console.log(ciphertext.length);
+    // console.log(ciphertext.length);
 
     logRequestSuccess(Route.ENCRYPT, idToken);
 
