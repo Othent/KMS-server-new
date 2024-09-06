@@ -6,10 +6,9 @@ import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { importKeys } from "./import-keys";
 import { CryptoKeyVersionState } from "../../utils/kms/google-kms.utils";
-import { LegacyBufferData } from "../common.types";
+import { BaseOperationIdTokenData, LegacyBufferData } from "../common.types";
 
-export interface ImportKeysIdTokenData {
-  fn: "importKeys";
+export interface ImportKeysIdTokenData extends BaseOperationIdTokenData<Route.IMPORT_KEYS> {
   wrappedSignKey: string | LegacyBufferData;
   wrappedEncryptDecryptKey: string | LegacyBufferData;
 }
@@ -29,7 +28,7 @@ export function importKeysHandlerFactory() {
     const { data } = idToken;
 
     // TODO: Replace with Joi.
-    if (!idToken || !idToken.sub || !data || data.fn !== "importKeys" || (!data.wrappedSignKey && !data.wrappedEncryptDecryptKey)) {
+    if (!idToken || !idToken.sub || !data || data.path !== Route.IMPORT_KEYS || (!data.wrappedSignKey && !data.wrappedEncryptDecryptKey)) {
       throw createOrPropagateError(
         OthentErrorID.Validation,
         400,

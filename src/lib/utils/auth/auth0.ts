@@ -3,7 +3,7 @@ import express from "express";
 import { CONFIG } from "../../server/config/config.utils";
 import { B64UrlString, ownerToAddress } from "../arweave/arweaveUtils";
 import axios from "axios";
-import { CreateUserIdTokenData } from "../../operations/create-user/create-user.handler";
+import { CreateUserIdTokenData, LegacyCreateUserIdTokenData } from "../../operations/create-user/create-user.handler";
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { pem2jwk } from "pem-jwk";
@@ -88,7 +88,7 @@ async function getPublicKey(idToken: IdTokenWithData<any>) {
 }
 
 export async function updateAuth0User(
-  idToken: IdTokenWithData<CreateUserIdTokenData> | IdTokenWithData<ActivateKeysIdTokenData>,
+  idToken: IdTokenWithData<CreateUserIdTokenData | LegacyCreateUserIdTokenData> | IdTokenWithData<ActivateKeysIdTokenData>,
 ) {
   const { sub } = idToken;
 

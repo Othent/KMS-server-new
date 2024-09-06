@@ -6,10 +6,9 @@ import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { activateKeys } from "./activate-keys";
 import { CryptoKeyVersionState } from "../../utils/kms/google-kms.utils";
+import { BaseOperationIdTokenData } from "../common.types";
 
-export interface ActivateKeysIdTokenData {
-  fn: "activateKeys";
-}
+export type ActivateKeysIdTokenData = BaseOperationIdTokenData<Route.ACTIVATE_KEYS>;
 
 export interface ActivateKeysResult {
   signKeyState: CryptoKeyVersionState;
@@ -29,7 +28,7 @@ export function activateKeysHandlerFactory() {
     const { data } = idToken;
 
     // TODO: Replace with Joi.
-    if (!idToken || !idToken.sub || !data || data.fn !== "activateKeys") {
+    if (!idToken || !idToken.sub || !data || data.path !== Route.ACTIVATE_KEYS) {
       throw createOrPropagateError(
         OthentErrorID.Validation,
         400,

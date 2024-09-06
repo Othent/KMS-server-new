@@ -3,16 +3,17 @@ import { decrypt } from "./decrypt";
 import { ExpressRequestWithToken } from "../../utils/auth/auth0";
 import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
-import { createOrPropagateError } from "../../server/errors/errors.utils";
-import { OthentErrorID } from "../../server/errors/error";
-import { LegacyBufferData, LegacyBufferObject, normalizeBufferData, toLegacyBufferObject } from "../common.types";
+import { BaseOperationIdTokenData, LegacyBaseOperationIdTokenData, LegacyBufferData, LegacyBufferObject, normalizeBufferData, toLegacyBufferObject } from "../common.types";
+import { validateDecryptIdTokenOrThrow } from "./decrypt.validation";
 
-export interface DecryptIdTokenData {
-  /**
-   * @deprecated
-   */
-  keyName: string;
-  fn: "decrypt";
+/**
+ * @deprecated
+ */
+export interface LegacyDecryptIdTokenData extends LegacyBaseOperationIdTokenData {
+  ciphertext: LegacyBufferData;
+}
+
+export interface DecryptIdTokenData extends BaseOperationIdTokenData<Route.DECRYPT> {
   // ciphertext: B64UrlString | LegacyBufferData;
   ciphertext: LegacyBufferData;
 }
@@ -23,35 +24,24 @@ export interface DecryptResponseData {
 
 export function decryptHandlerFactory() {
   return async (
-    req: ExpressRequestWithToken<DecryptIdTokenData>,
+    req: ExpressRequestWithToken<DecryptIdTokenData | LegacyDecryptIdTokenData>,
     res: express.Response,
   ) => {
     const { idToken } = req;
     const { data } = idToken;
-
-    // TODO: Only in the new version (old one didn't have fn in data, but had keyName):
-    // || data.fn !== "decrypt"
-
-    // TODO: Replace with Joi.
-    if (!idToken || !idToken.sub || !data || !data.ciphertext) {
-      throw createOrPropagateError(
-        OthentErrorID.Validation,
-        400,
-        "Invalid token data for decrypt()",
-      );
-    }
+    const isLegacyData = !data.hasOwnProperty("path");
+    const treatStringAsB64 = !isLegacyData;
 
     logRequestStart(Route.DECRYPT, idToken);
 
-    const ciphertextBuffer = normalizeBufferData(data.ciphertext);
+    validateDecryptIdTokenOrThrow(idToken);
 
-    // console.log(data.ciphertext);
-    // console.log(ciphertextBuffer);
-
+    const ciphertextBuffer = normalizeBufferData(data.ciphertext, treatStringAsB64);
     const plaintext = await decrypt(idToken, ciphertextBuffer);
 
     logRequestSuccess(Route.DECRYPT, idToken);
 
+    // TODO: Return new version directly as B64:
     res.send({ data: toLegacyBufferObject(plaintext) } satisfies DecryptResponseData);
   };
 }

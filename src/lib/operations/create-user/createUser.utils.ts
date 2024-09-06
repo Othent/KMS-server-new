@@ -2,10 +2,10 @@ import { CONFIG } from "../../server/config/config.utils";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { getKeyRingIdFromIdToken, getKeyRingPath, getLocationPath } from "../../utils/kms/google-kms.utils";
 import { IdTokenWithData } from "../../utils/auth/auth0";
-import { CreateUserIdTokenData } from "./create-user.handler";
+import { CreateUserIdTokenData, LegacyCreateUserIdTokenData } from "./create-user.handler";
 
 export async function createKeyRing(
-  idToken: IdTokenWithData<CreateUserIdTokenData>,
+  idToken: IdTokenWithData<CreateUserIdTokenData | LegacyCreateUserIdTokenData>,
 ) {
   const { locationPath } = getLocationPath();
   const keyRingId = getKeyRingIdFromIdToken(idToken);
@@ -21,7 +21,7 @@ export async function createKeyRing(
 }
 
 export async function createSignKey(
-  idToken: IdTokenWithData<CreateUserIdTokenData>,
+  idToken: IdTokenWithData<CreateUserIdTokenData | LegacyCreateUserIdTokenData>,
   importOnly = false
 ) {
   const { keyRingPath } = getKeyRingPath(idToken);
@@ -45,7 +45,7 @@ export async function createSignKey(
 }
 
 export async function createEncryptDecryptKey(
-  idToken: IdTokenWithData<CreateUserIdTokenData>,
+  idToken: IdTokenWithData<CreateUserIdTokenData | LegacyCreateUserIdTokenData>,
   importOnly = false,
 ) {
   const { keyRingPath } = getKeyRingPath(idToken);
@@ -83,7 +83,7 @@ export async function createEncryptDecryptKey(
 
 // New PoC:
 export async function createImportJob(
-  idToken: IdTokenWithData<CreateUserIdTokenData>,
+  idToken: IdTokenWithData<CreateUserIdTokenData | LegacyCreateUserIdTokenData>,
 ) {
   const { keyRingPath } = getKeyRingPath(idToken);
 

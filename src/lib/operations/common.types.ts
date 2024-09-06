@@ -1,4 +1,16 @@
-import { B64String, b64ToUint8Array, B64UrlString } from "../utils/arweave/arweaveUtils";
+import { Route } from "../server/server.constants";
+import { B64String, b64ToUint8Array, B64UrlString, stringToUint8Array } from "../utils/arweave/arweaveUtils";
+
+export interface BaseOperationIdTokenData<P extends Route> {
+  path: P;
+}
+
+/**
+ * @deprecated
+ */
+export interface LegacyBaseOperationIdTokenData {
+  keyName: string;
+}
 
 /**
  * @deprecated
@@ -12,6 +24,8 @@ export interface LegacyBufferObject {
   type: "Buffer";
   data: number[];
 }
+
+// TODO: Move to bufferUtils...
 
 /**
  * JSON-compatible representation of a Buffer.
@@ -30,12 +44,13 @@ function isLegacyBufferObject(legacyBufferData: LegacyBufferData): legacyBufferD
 }
 
 export function normalizeBufferData(
-  data: LegacyBufferRecord | LegacyBufferObject /* | B64String | B64UrlString, */
+  data: LegacyBufferRecord | LegacyBufferObject | string | B64String | B64UrlString,
+  treatStringsAsB64 = false,
 ) {
-  // TODO: Check if this can be the case in the old version, or only if the new one. If it's only for the new one,
-  // this is probably B64String, not a regular string (once the SDK is also updated to do that).
   if (typeof data === "string") {
-    return b64ToUint8Array(data);
+    return treatStringsAsB64
+      ? b64ToUint8Array(data as B64String | B64UrlString)
+      : stringToUint8Array(data);
   }
 
   if (isLegacyBufferObject(data)) {

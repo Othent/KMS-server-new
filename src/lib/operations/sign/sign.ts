@@ -1,14 +1,13 @@
-import { CONFIG } from "../../server/config/config.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { stringOrUint8ArrayToUint8Array } from "../../utils/arweave/arweaveUtils";
 import { IdTokenWithData } from "../../utils/auth/auth0";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { getSignKeyVersionPath } from "../../utils/kms/google-kms.utils";
-import { SignIdTokenData } from "./sign.handler";
+import { LegacySignIdTokenData, SignIdTokenData } from "./sign.handler";
 
 export async function sign(
-  idToken: IdTokenWithData<SignIdTokenData>,
+  idToken: IdTokenWithData<SignIdTokenData | LegacySignIdTokenData>,
   data: string | Uint8Array,
 ) {
   const { signKeyVersionPath } = getSignKeyVersionPath(idToken);

@@ -6,10 +6,9 @@ import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { fetchImportJob } from "./fetch-import-job";
 import { ImportJob } from "../../utils/kms/google-kms.utils";
+import { BaseOperationIdTokenData } from "../common.types";
 
-export interface FetchImportJobIdTokenData {
-  fn: "fetchImportJob";
-}
+export type FetchImportJobIdTokenData = BaseOperationIdTokenData<Route.FETCH_IMPORT_JOB>;
 
 export interface FetchImportJobResponseData {
   importJob: ImportJob;
@@ -21,7 +20,7 @@ export function fetchImportJobHandlerFactory() {
     const { data } = idToken;
 
     // TODO: Replace with Joi.
-    if (!idToken || !idToken.sub || !data || data.fn !== "fetchImportJob") {
+    if (!idToken || !idToken.sub || !data || data.path !== Route.FETCH_IMPORT_JOB) {
       throw createOrPropagateError(
         OthentErrorID.Validation,
         400,

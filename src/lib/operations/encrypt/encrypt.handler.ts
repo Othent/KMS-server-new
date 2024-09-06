@@ -3,18 +3,19 @@ import { encrypt } from "./encrypt";
 import { ExpressRequestWithToken } from "../../utils/auth/auth0";
 import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
-import { createOrPropagateError } from "../../server/errors/errors.utils";
-import { OthentErrorID } from "../../server/errors/error";
-import { LegacyBufferData, normalizeBufferData, toLegacyBufferObject } from "../common.types";
+import { BaseOperationIdTokenData, LegacyBaseOperationIdTokenData, LegacyBufferData, normalizeBufferData, toLegacyBufferObject } from "../common.types";
+import { B64String, B64UrlString } from "../../utils/arweave/arweaveUtils";
+import { validateEncryptIdTokenOrThrow } from "./encrypt.validation";
 
-export interface EncryptIdTokenData {
-  /**
-   * @deprecated
-   */
-  keyName: string;
-  fn: "encrypt";
-  // plaintext: B64UrlString | LegacyBufferData;
+/**
+ * @deprecated
+ */
+export interface LegacyEncryptIdTokenData extends LegacyBaseOperationIdTokenData {
   plaintext: LegacyBufferData;
+}
+
+export interface EncryptIdTokenData extends BaseOperationIdTokenData<Route.ENCRYPT> {
+  plaintext: B64String | B64UrlString;
 }
 
 export interface EncryptResponseData {
@@ -23,37 +24,24 @@ export interface EncryptResponseData {
 
 export function encryptHandlerFactory() {
   return async (
-    req: ExpressRequestWithToken<EncryptIdTokenData>,
+    req: ExpressRequestWithToken<EncryptIdTokenData | LegacyEncryptIdTokenData>,
     res: express.Response,
   ) => {
     const { idToken } = req;
     const { data } = idToken;
-
-    // TODO: Only in the new version (old one didn't have fn in data, but had keyName):
-    // || data.fn !== "encrypt"
-
-    // TODO: Replace with Joi.
-    if (!idToken || !idToken.sub || !data || !data.plaintext) {
-      throw createOrPropagateError(
-        OthentErrorID.Validation,
-        400,
-        "Invalid token data for encrypt()",
-      );
-    }
+    const isLegacyData = !data.hasOwnProperty("path");
+    const treatStringAsB64 = !isLegacyData;
 
     logRequestStart(Route.ENCRYPT, idToken);
 
-    const plaintextBuffer = normalizeBufferData(data.plaintext);
+    validateEncryptIdTokenOrThrow(idToken);
 
-    // console.log(data.plaintext);
-    // console.log(plaintextBuffer);
-
+    const plaintextBuffer = normalizeBufferData(data.plaintext, treatStringAsB64);
     const ciphertext = await encrypt(idToken, plaintextBuffer);
-
-    // console.log(ciphertext.length);
 
     logRequestSuccess(Route.ENCRYPT, idToken);
 
+    // TODO: Return new version directly as B64:
     res.send({ data: toLegacyBufferObject(ciphertext) } satisfies EncryptResponseData);
   };
 }

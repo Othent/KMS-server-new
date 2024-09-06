@@ -4,17 +4,15 @@ import { stringOrUint8ArrayToUint8Array } from "../../utils/arweave/arweaveUtils
 import { IdTokenWithData } from "../../utils/auth/auth0";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { getEncryptDecryptKeyPath } from "../../utils/kms/google-kms.utils";
-import { EncryptIdTokenData } from "./encrypt.handler";
+import { EncryptIdTokenData, LegacyEncryptIdTokenData } from "./encrypt.handler";
 
 export async function encrypt(
-  idToken: IdTokenWithData<EncryptIdTokenData>,
+  idToken: IdTokenWithData<EncryptIdTokenData | LegacyEncryptIdTokenData>,
   plaintext: string | Uint8Array,
 ) {
   const { encryptDecryptKeyPath } = getEncryptDecryptKeyPath(idToken);
 
   let ciphertext: string | Uint8Array | null | undefined;
-
-  console.log("plaintext =", plaintext);
 
   try {
     const [encryptResponse] = await kmsClient.encrypt({
@@ -39,13 +37,6 @@ export async function encrypt(
       "No ciphertext",
     );
   }
-
-  console.log(
-    "ciphertext =",
-    typeof ciphertext,
-    ciphertext,
-    stringOrUint8ArrayToUint8Array(ciphertext),
-  );
 
   return stringOrUint8ArrayToUint8Array(ciphertext);
 }

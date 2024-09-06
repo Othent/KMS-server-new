@@ -57,8 +57,10 @@ Alternatively, you can also run the playground locally with an old `v1` SDK plus
 exhaustive as the test and some of the param types mentioned below won't be tested:
 
 - `createUser`
-  - `REQ =>`
-  - `<= RES`
+
+  - The old server expects no data in `createUser`.
+
+  - The old server replies with `true` if the user was successfully created.
 
 - `encrypt`
 
@@ -78,7 +80,7 @@ exhaustive as the test and some of the param types mentioned below won't be test
 - `decrypt`
 
   - The old SDK (according to the examples) takes `LegacyBufferObject` (as returned from `encrypt`), but as the old
-    server serializes that using `Buffer.form()`, a `string` would also be valid if encoded properly.
+    server deserializes that using `Buffer.form()`, a `string` would also be valid if encoded properly.
 
     See:
 
@@ -117,15 +119,16 @@ See: https://github.com/Othent/KeyManagementService/pull/18/files#r1686770313
 
 For the server, particularly:
 
-- If `data.keyName` is present, validate the data according to the format / shape required by the old server.
+- If `data.keyName` is present, validate the data according to the format / shape required by the old server. The
+  exception to this is `createUser`, which would not have any `data`.
 
-- If `data.fn` is present, validate the data according to the format / shape required by the new server, and unwrap it
+- If `data.path` is present, validate the data according to the format / shape required by the new server, and unwrap it
   (remove that unnecessary `data` (`data.data`) property in the response).
 
 For the SDK, particularly:
 
 - Remove `data.keyName`.
-- Add `data.fn` and validate this on the server as well.
+- Add `data.path` and validate this on the server as well.
 - Stop using `BufferObject` / `LegacyBufferObject` / `LegacyBufferRecord` and instead serialize/send the data as
   `B64string`.
 - Also update the parsing of the responses after the server stops sending that unnecessary `data` property.

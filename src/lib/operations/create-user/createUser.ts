@@ -1,12 +1,12 @@
 import { IdTokenWithData, updateAuth0User } from "../../utils/auth/auth0";
-import { CreateUserIdTokenData } from "./create-user.handler";
+import { CreateUserIdTokenData, LegacyCreateUserIdTokenData } from "./create-user.handler";
 import { CONFIG } from "../../server/config/config.utils";
 import { delay } from "../../utils/tools/delay";
 import { createKeyRing, createSignKey, createEncryptDecryptKey, createImportJob } from "./createUser.utils";
 import { notifyUserCreationOnSlack } from "../../utils/slack/slack.utils";
 
 export async function createUser(
-  idToken: IdTokenWithData<CreateUserIdTokenData>,
+  idToken: IdTokenWithData<CreateUserIdTokenData | LegacyCreateUserIdTokenData>,
   importOnly: boolean,
 ) {
   console.log(`createUser(${ importOnly ? "importOnly" : "generateKeys" })`);

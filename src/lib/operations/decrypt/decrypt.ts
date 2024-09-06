@@ -1,14 +1,13 @@
-import { CONFIG } from "../../server/config/config.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { stringOrUint8ArrayToUint8Array } from "../../utils/arweave/arweaveUtils";
 import { IdTokenWithData } from "../../utils/auth/auth0";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { getEncryptDecryptKeyPath } from "../../utils/kms/google-kms.utils";
-import { DecryptIdTokenData } from "./decrypt.handler";
+import { DecryptIdTokenData, LegacyDecryptIdTokenData } from "./decrypt.handler";
 
 export async function decrypt(
-  idToken: IdTokenWithData<DecryptIdTokenData>,
+  idToken: IdTokenWithData<DecryptIdTokenData | LegacyDecryptIdTokenData>,
   ciphertext: string | Uint8Array,
 ) {
   const { encryptDecryptKeyPath } = getEncryptDecryptKeyPath(idToken);
