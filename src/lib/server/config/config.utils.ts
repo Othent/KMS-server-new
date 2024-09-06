@@ -9,9 +9,9 @@ type KMSEnvironment = "DEVELOPMENT_SERVER" | "PRODUCTION_SERVER" | "LOCAL_MOCK" 
 
 export class Config {
 
-  static KMS_LOCAL_PROJECT_ID = "othent-kms-local";
+  static KMS_LOCAL_PROJECT_ID = "othent-kms-local" as const;
 
-  static KMS_DEV_PROJECT_ID = "othent-kms-dev";
+  static KMS_DEV_PROJECT_ID = "othent-kms-dev" as const;
 
   // NON-ENV:
 

@@ -8,13 +8,14 @@ import { EncryptIdTokenData, LegacyEncryptIdTokenData } from "./encrypt.handler"
 
 export async function encrypt(
   idToken: IdTokenWithData<EncryptIdTokenData | LegacyEncryptIdTokenData>,
-  plaintext: string | Uint8Array,
+  plaintext: Uint8Array,
 ) {
   const { encryptDecryptKeyPath } = getEncryptDecryptKeyPath(idToken);
 
   let ciphertext: string | Uint8Array | null | undefined;
 
   try {
+    // TODO: Does Google KMS actually return string or is it always a buffer? What encoding?
     const [encryptResponse] = await kmsClient.encrypt({
       name: encryptDecryptKeyPath,
       plaintext,

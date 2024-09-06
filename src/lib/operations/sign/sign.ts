@@ -8,7 +8,7 @@ import { LegacySignIdTokenData, SignIdTokenData } from "./sign.handler";
 
 export async function sign(
   idToken: IdTokenWithData<SignIdTokenData | LegacySignIdTokenData>,
-  data: string | Uint8Array,
+  data: Uint8Array,
 ) {
   const { signKeyVersionPath } = getSignKeyVersionPath(idToken);
 

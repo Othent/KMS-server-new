@@ -49,8 +49,6 @@ export function normalizeBufferData(
   treatStringsAsB64 = false,
 ) {
   if (typeof data === "string") {
-    console.log("PLAIN STRING RECEIVED");
-
     return treatStringsAsB64
       ? b64ToUint8Array(data as B64String | B64UrlString)
       : stringToUint8Array(data);

@@ -8,7 +8,7 @@ import { DecryptIdTokenData, LegacyDecryptIdTokenData } from "./decrypt.handler"
 
 export async function decrypt(
   idToken: IdTokenWithData<DecryptIdTokenData | LegacyDecryptIdTokenData>,
-  ciphertext: string | Uint8Array,
+  ciphertext: Uint8Array,
 ) {
   const { encryptDecryptKeyPath } = getEncryptDecryptKeyPath(idToken);
 
