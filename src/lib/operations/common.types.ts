@@ -33,14 +33,15 @@ export interface LegacyBufferObject {
  */
 export type LegacyBufferData = LegacyBufferRecord | LegacyBufferObject;
 
-function isLegacyBufferObject(legacyBufferData: LegacyBufferData): legacyBufferData is LegacyBufferObject {
-  return legacyBufferData.hasOwnProperty("type");
-
-  /*
-  obj.type === "Buffer" &&
-  Array.isArray(obj.data) &&
-  typeof obj[0] === "number"
-  */
+export function isLegacyBufferObject(
+  legacyBufferData: LegacyBufferData,
+): legacyBufferData is LegacyBufferObject {
+  return (
+    !!legacyBufferData &&
+    typeof legacyBufferData === "object" &&
+    (legacyBufferData as LegacyBufferObject).type === "Buffer" &&
+    Array.isArray((legacyBufferData as LegacyBufferObject).data)
+  );
 }
 
 export function normalizeBufferData(
@@ -48,6 +49,8 @@ export function normalizeBufferData(
   treatStringsAsB64 = false,
 ) {
   if (typeof data === "string") {
+    console.log("PLAIN STRING RECEIVED");
+
     return treatStringsAsB64
       ? b64ToUint8Array(data as B64String | B64UrlString)
       : stringToUint8Array(data);

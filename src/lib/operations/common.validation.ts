@@ -6,8 +6,10 @@ export function extendLegacyBaseOperationIdTokenDataSchema<T extends ZodRawShape
 ) {
   return z.object({
     sub: z.string(),
-    keyName: z.string(),
-    ...data,
+    data: z.object({
+      keyName: z.string(),
+      ...data,
+    }),
   });
 }
 
@@ -17,8 +19,10 @@ export function extendBaseOperationIdTokenDataSchema<T extends ZodRawShape>(
 ) {
   return z.object({
     sub: z.string(),
-    path: z.literal(path),
-    ...data,
+    data: z.object({
+      path: z.literal(path),
+      ...data,
+    }),
   });
 }
 
