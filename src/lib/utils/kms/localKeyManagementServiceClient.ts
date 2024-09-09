@@ -1,7 +1,7 @@
 import assert from "assert";
 import crypto from "crypto";
 import { delay } from "../tools/delay";
-import { B64String, b64ToUint8Array, binaryDataTypeToString, uint8ArrayTob64 } from "../arweave/arweaveUtils";
+import { B64String, b64ToUint8Array, binaryDataTypeToString, stringOrUint8ArrayToUint8Array, uint8ArrayTob64 } from "../arweave/arweaveUtils";
 import { CryptoKeyVersionState } from "./google-kms.utils";
 // import { KeyManagementServiceClient } from "@google-cloud/kms";
 
@@ -97,8 +97,6 @@ const IMPORT_JOB_PEM = crypto.generateKeyPairSync("rsa", {
 
 export class LocalKeyManagementServiceClient /* implements KeyManagementServiceClient */ {
 
-  private isEnabled = false;
-
   async testLocalKeyManagementServiceClient() {
     // Give the server some time to start:
     await delay(1000);
@@ -115,8 +113,11 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
     });
 
     const { ciphertext } = encryptResponse[0];
+    const ciphertextB64String = !ciphertext || typeof ciphertext === "string"
+      ? (ciphertext || "")
+      : uint8ArrayTob64(ciphertext);
 
-    console.log(` ├ encrypt("${originalPlaintext}") => ${ciphertext}`);
+    console.log(` ├ encrypt("${originalPlaintext}") => ${ciphertextB64String}`);
 
     // DECRYPT:
 
@@ -125,9 +126,14 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
     });
 
     const { plaintext } = decryptResponse[0];
-    const plaintextString = binaryDataTypeToString(b64ToUint8Array(plaintext as any));
+    const plaintextB64String = !plaintext || typeof plaintext === "string"
+      ? (plaintext || "")
+      : uint8ArrayTob64(plaintext);
+    const plaintextString = !plaintext || typeof plaintext === "string"
+      ? (plaintext || "")
+      : binaryDataTypeToString(plaintext);
 
-    console.log(` ├ decrypt("${ciphertext}") => ${plaintext} (${ plaintextString })`);
+    console.log(` ├ decrypt("${ciphertextB64String}") => ${ plaintextB64String } => ${ plaintextString }`);
 
     assert.equal(
       originalPlaintext,
@@ -148,13 +154,17 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
     });
 
     const { signature } = asymmetricSignResponse[0];
+    const signatureB64String = !signature || typeof signature === "string"
+      ? (signature || "")
+      : uint8ArrayTob64(signature);
 
-    console.log(` ├ asymmetricSign("${originalPlainTextHash}") => ${(signature as string).slice(0, 32)}...`);
+    console.log(` ├ asymmetricSign("${originalPlainTextHash}") => ${signatureB64String.slice(0, 32)}...`);
 
     const publicKeyResponse = await this.getPublicKey();
     const { pem } = publicKeyResponse[0];
     const publicKey = crypto.createPublicKey(pem || "");
 
+    /*
     console.log({
       plaintext: originalPlaintext,
       plaintextHash: originalPlainTextHash,
@@ -162,12 +172,15 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       publicKey,
       signature,
     })
+    */
+
+    assert(!!signature && typeof signature !== "string", "Invalid signature type.");
 
     const isSignatureValid = crypto.verify(
       ASYMMETRIC_ALGORITHM,
       originalPlainTextHashBuffer,
       publicKey,
-      b64ToUint8Array(signature as B64String),
+      signature,
     );
 
     console.log(` ├ isSignatureValid = ${isSignatureValid}`);
@@ -176,8 +189,6 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
 
     console.log(` └ publicKey =\n\n${pem}`)
     console.log("");
-
-    this.isEnabled = true;
   }
 
   locationPath(...args: string[]) {
@@ -333,15 +344,15 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       throw new Error("Not plaintext.");
     }
 
+    if (typeof request.plaintext === "string") {
+      throw new Error("`plaintext` must be a binary type, plain `string` not accepted accepted.");
+    }
+
     const cipher = crypto.createCipheriv(
       SYMMETRIC_ALGORITHM,
       KEY_BUFFER,
       IV_BUFFER,
     );
-
-    if (this.isEnabled && typeof request.plaintext === 'string') {
-      throw new Error(`Mocked encrypt() doesn't support string plaintext.`);
-    }
 
     const plaintextBuffer = typeof request.plaintext === 'string'
       ? Buffer.from(request.plaintext || "", "base64")
@@ -351,24 +362,12 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
 
     ciphertextBuffer = Buffer.concat([ciphertextBuffer, cipher.final()]);
 
-    const ciphertext = ciphertextBuffer.toString("base64");
-    // const ciphertext2 = uint8ArrayTob64(ciphertextBuffer);
-
-    console.log({
-      fn: "ENCRYPT",
-      original: binaryDataTypeToString(plaintextBuffer),
-      ciphertext,
-      // ciphertext2,
-      ciphertextBuffer: new Uint8Array(ciphertextBuffer).buffer,
-    })
-
-    // console.log("BUFFER =", ciphertextBuffer);
-
-    // console.log(stringOrUint8ArrayToUint8Array(ciphertext))
+    // Only needed for debugging:
+    // const ciphertext = ciphertextBuffer.toString("base64");
 
     return Promise.resolve([
       {
-        ciphertext,
+        ciphertext: ciphertextBuffer,
       } satisfies IEncryptResponse,
       request,
       undefined,
@@ -382,42 +381,30 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       throw new Error("Not ciphertext.");
     }
 
+    if (typeof request.ciphertext === "string") {
+      throw new Error("`ciphertext` must be a binary type, plain `string` not accepted accepted.");
+    }
+
     const decipher = crypto.createDecipheriv(
       "aes-256-cbc",
       KEY_BUFFER,
       IV_BUFFER,
     );
 
-    if (this.isEnabled && typeof request.ciphertext === 'string') {
-      throw new Error(`Mocked decrypt() doesn't support string ciphertext.`);
-    }
-
-    // TODO: If string throw not implemented...
-
     const ciphertextBuffer = typeof request.ciphertext === 'string'
-      ? Buffer.from(request.ciphertext, "base64")
-      // ? b64ToUint8Array(request.ciphertext as B64String)
+      ? Buffer.from(request.ciphertext || "", "base64")
       : request.ciphertext;
-    //   : stringToUint8Array(binaryDataTypeToString(request.ciphertext.buffer));
 
     let plaintextBuffer = decipher.update(ciphertextBuffer);
 
     plaintextBuffer = Buffer.concat([plaintextBuffer, decipher.final()]);
 
-    const plaintext = plaintextBuffer.toString("base64");
-    // const plaintext2 = uint8ArrayTob64(plaintextBuffer);
-
-    console.log({
-      fn: "DECRYPT",
-      encrypted: uint8ArrayTob64(ciphertextBuffer),
-      encryptedBuffer: ciphertextBuffer,
-      plaintext,
-      plaintextString: plaintextBuffer.toString(),
-    })
+    // Only needed for debugging:
+    // const plaintext = plaintextBuffer.toString("base64");
 
     return Promise.resolve([
       {
-        plaintext,
+        plaintext: plaintextBuffer,
       } satisfies IDecryptResponse,
       request,
       undefined,
@@ -457,6 +444,10 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       throw new Error("Not data.");
     }
 
+    if (typeof request.data === "string") {
+      throw new Error("`data` must be a binary type, plain `string` not accepted accepted.");
+    }
+
     const dataBuffer = typeof request.data === 'string'
       ? Buffer.from(request.data || "", "base64")
       : request.data;
@@ -467,15 +458,12 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       PRIVATE_KEY,
     );
 
-    const signature = signatureBuffer.toString("base64");
-
-    console.log({
-      signature
-    });
+    // Only needed for debugging:
+    // const signature = signatureBuffer.toString("base64");
 
     return Promise.resolve([
       {
-        signature,
+        signature: signatureBuffer,
       } satisfies IAsymmetricSignResponse,
       request,
       undefined,
