@@ -135,21 +135,37 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       "Decrypted message doesn't match the original input.",
     );
 
+    const originalPlainTextHash = await crypto.hash(
+      "SHA-256",
+      originalPlaintextBuffer,
+      "base64"
+    );
+
+    const originalPlainTextHashBuffer = Buffer.from(originalPlainTextHash, "base64");
+
     const asymmetricSignResponse = await this.asymmetricSign({
-      data: originalPlaintextBuffer,
+      data: originalPlainTextHashBuffer,
     });
 
     const { signature } = asymmetricSignResponse[0];
 
-    console.log(` ├ asymmetricSign("${originalPlaintext}") => ${(signature as string).slice(0, 32)}...`);
+    console.log(` ├ asymmetricSign("${originalPlainTextHash}") => ${(signature as string).slice(0, 32)}...`);
 
     const publicKeyResponse = await this.getPublicKey();
     const { pem } = publicKeyResponse[0];
     const publicKey = crypto.createPublicKey(pem || "");
 
+    console.log({
+      plaintext: originalPlaintext,
+      plaintextHash: originalPlainTextHash,
+      plaintextHashBuffer: originalPlainTextHashBuffer,
+      publicKey,
+      signature,
+    })
+
     const isSignatureValid = crypto.verify(
       ASYMMETRIC_ALGORITHM,
-      Buffer.from(originalPlaintext),
+      originalPlainTextHashBuffer,
       publicKey,
       b64ToUint8Array(signature as B64String),
     );
@@ -413,6 +429,7 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
   ): Promise<[IPublicKey, IGetPublicKeyRequest | undefined, {} | undefined]> {
     const publicKeyDer = PUBLIC_KEY.export({
       type: "spki",
+      // TODO: This can be exported directly as `format: "pem"`
       format: "der",
     }).toString("base64");
     const formattedPublicKey = publicKeyDer.replace(/.{64}/g, "$&\n");
@@ -441,7 +458,7 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
     }
 
     const dataBuffer = typeof request.data === 'string'
-      ? Buffer.from(request.data || "")
+      ? Buffer.from(request.data || "", "base64")
       : request.data;
 
     const signatureBuffer = crypto.sign(
