@@ -28,7 +28,7 @@ const RESET = "\x1b[0m";
 
 export function logRequestStart<D>(route: Route, idToken: IdTokenWithData<D>) {
   // TODO: This logger is for development only. Replace with Winston / Morgan in production.
-  if (CONFIG.IS_PROD) return;
+  if (CONFIG.IS_PROD || CONFIG.IS_TEST || !CONFIG.IS_DEV) return;
 
   console.log(
     `├ ${CYAN}REQ ${route} ${getDevelopmentOnlyTokenID(idToken)}${RESET}`,
@@ -40,7 +40,7 @@ export function logRequestSuccess<D>(
   idToken: IdTokenWithData<D>,
 ) {
   // TODO: This logger is for development only. Replace with Winston / Morgan in production.
-  if (CONFIG.IS_PROD) return;
+  if (CONFIG.IS_PROD || CONFIG.IS_TEST || !CONFIG.IS_DEV) return;
 
   console.log(
     `└ ${GREEN}RES ${route} ${getDevelopmentOnlyTokenID(idToken)}${RESET}\n`,
@@ -53,7 +53,7 @@ export function logRequestError<D>(
   error: unknown,
 ) {
   // TODO: This logger is for development only. Replace with Winston / Morgan in production.
-  if (CONFIG.IS_PROD) return;
+  if (CONFIG.IS_PROD || CONFIG.IS_TEST || !CONFIG.IS_DEV) return;
 
   console.error(
     `└ ${RED}ERR ${route} ${getDevelopmentOnlyTokenID(idToken)} => ${error instanceof OthentServerError ? error.getLog() : `${error}`}${RESET}\n`,

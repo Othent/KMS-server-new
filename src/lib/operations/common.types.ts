@@ -15,7 +15,7 @@ export interface LegacyBaseOperationIdTokenData {
 /**
  * @deprecated
  */
-type LegacyBufferRecord = Record<number, number>;
+export type LegacyBufferRecord = Record<number, number>;
 
 /**
  * @deprecated

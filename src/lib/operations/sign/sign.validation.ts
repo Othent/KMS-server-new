@@ -11,7 +11,7 @@ const LegacySignIdTokenDataSchema = extendLegacyBaseOperationIdTokenDataSchema({
 });
 
 const SignIdTokenDataSchema = extendBaseOperationIdTokenDataSchema(Route.SIGN, {
-  data: z.string(),
+  data: z.string().trim().min(1),
 });
 
 const SignIdTokenDataSchemas = z.union([

@@ -11,7 +11,7 @@ const LegacyDecryptIdTokenDataSchema = extendLegacyBaseOperationIdTokenDataSchem
 });
 
 const DecryptIdTokenDataSchema = extendBaseOperationIdTokenDataSchema(Route.DECRYPT, {
-  ciphertext: z.string(),
+  ciphertext: z.string().trim().min(1),
 });
 
 const DecryptIdTokenDataSchemas = z.union([

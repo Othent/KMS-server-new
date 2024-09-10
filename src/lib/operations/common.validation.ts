@@ -5,9 +5,9 @@ export function extendLegacyBaseOperationIdTokenDataSchema<T extends ZodRawShape
   data: T
 ) {
   return z.object({
-    sub: z.string(),
+    sub: z.string().trim().min(1),
     data: z.object({
-      keyName: z.string(),
+      keyName: z.string().trim().min(1),
       ...data,
     }),
   });
@@ -18,7 +18,7 @@ export function extendBaseOperationIdTokenDataSchema<T extends ZodRawShape>(
   data: T
 ) {
   return z.object({
-    sub: z.string(),
+    sub: z.string().trim().min(1),
     data: z.object({
       path: z.literal(path),
       ...data,
@@ -40,5 +40,5 @@ export const LegacyBufferObjectSchema = z.object({
 export const LegacyBufferDataOrStringSchema = z.union([
   LegacyBufferRecordSchema,
   LegacyBufferObjectSchema,
-  z.string()
+  z.string().trim().min(1),
 ]);

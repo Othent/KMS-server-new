@@ -11,7 +11,7 @@ import { validateEncryptIdTokenOrThrow } from "./encrypt.validation";
  * @deprecated
  */
 export interface LegacyEncryptIdTokenData extends LegacyBaseOperationIdTokenData {
-  plaintext: LegacyBufferData;
+  plaintext: LegacyBufferData | string;
 }
 
 export interface EncryptIdTokenData extends BaseOperationIdTokenData<Route.ENCRYPT> {

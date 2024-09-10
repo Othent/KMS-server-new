@@ -11,7 +11,7 @@ const LegacyEncryptIdTokenDataSchema = extendLegacyBaseOperationIdTokenDataSchem
 });
 
 const EncryptIdTokenDataSchema = extendBaseOperationIdTokenDataSchema(Route.ENCRYPT, {
-  plaintext: z.string(),
+  plaintext: z.string().trim().min(1),
 });
 
 const EncryptIdTokenDataSchemas = z.union([
@@ -22,13 +22,16 @@ const EncryptIdTokenDataSchemas = z.union([
 export function validateEncryptIdTokenOrThrow(
   idToken?: IdTokenWithData<EncryptIdTokenData | LegacyEncryptIdTokenData>,
 ) {
-  const isValid = !!idToken && EncryptIdTokenDataSchemas.safeParse(idToken).success;
+  if (!idToken) return false;
 
-  if (!isValid) {
+  const { error } = EncryptIdTokenDataSchemas.safeParse(idToken);
+
+  if (error) {
     throw createOrPropagateError(
       OthentErrorID.Validation,
       400,
       "Invalid token data for encrypt()",
+      JSON.stringify(error),
     );
   }
 
