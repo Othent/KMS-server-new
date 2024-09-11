@@ -1,10 +1,10 @@
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
-import { stringOrUint8ArrayToUint8Array } from "../../utils/arweave/arweaveUtils";
 import { IdTokenWithData } from "../../utils/auth/auth0";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { getEncryptDecryptKeyPath } from "../../utils/kms/google-kms.utils";
 import { EncryptIdTokenData, LegacyEncryptIdTokenData } from "./encrypt.handler";
+import { normalizeKMSResponseData } from "../common.types";
 
 export async function encrypt(
   idToken: IdTokenWithData<EncryptIdTokenData | LegacyEncryptIdTokenData>,
@@ -39,5 +39,5 @@ export async function encrypt(
     );
   }
 
-  return stringOrUint8ArrayToUint8Array(ciphertext);
+  return normalizeKMSResponseData(ciphertext);
 }

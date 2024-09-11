@@ -1,10 +1,10 @@
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
-import { stringOrUint8ArrayToUint8Array } from "../../utils/arweave/arweaveUtils";
 import { IdTokenWithData } from "../../utils/auth/auth0";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { getEncryptDecryptKeyPath } from "../../utils/kms/google-kms.utils";
 import { DecryptIdTokenData, LegacyDecryptIdTokenData } from "./decrypt.handler";
+import { normalizeKMSResponseData } from "../common.types";
 
 export async function decrypt(
   idToken: IdTokenWithData<DecryptIdTokenData | LegacyDecryptIdTokenData>,
@@ -34,5 +34,5 @@ export async function decrypt(
     throw createOrPropagateError(OthentErrorID.Decryption, 500, "No plaintext");
   }
 
-  return stringOrUint8ArrayToUint8Array(plaintext);
+  return normalizeKMSResponseData(plaintext);
 }

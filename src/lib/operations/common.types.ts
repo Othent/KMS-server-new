@@ -47,7 +47,7 @@ export function isLegacyBufferObject(
 export function normalizeBufferData(
   data: LegacyBufferRecord | LegacyBufferObject | string | B64String | B64UrlString,
   treatStringsAsB64 = false,
-) {
+): Uint8Array {
   if (typeof data === "string") {
     return treatStringsAsB64
       ? b64ToUint8Array(data as B64String | B64UrlString)
@@ -67,3 +67,15 @@ export function toLegacyBufferObject(buffer: Uint8Array): LegacyBufferObject {
     data: Array.from(buffer),
   }
 }
+
+export function normalizeKMSResponseData(str: string | Uint8Array): Uint8Array {
+  return typeof str === 'string' ? stringToUint8Array(str) : new Uint8Array(str);
+}
+
+export type LegacyTokenDataFormat = "LegacyBufferObject" | "LegacyBufferRecord" | "string";
+
+export const LEGACY_TOKEN_DATA_FORMATS = ["LegacyBufferObject", "LegacyBufferRecord", "string"] as const satisfies LegacyTokenDataFormat[];
+
+export type TokenDataFormat = "B64String" | "B64UrlString";
+
+export const TOKEN_DATA_FORMATS = ["B64String", "B64UrlString"] as const satisfies TokenDataFormat[];

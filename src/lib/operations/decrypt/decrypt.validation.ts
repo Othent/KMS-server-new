@@ -22,13 +22,16 @@ const DecryptIdTokenDataSchemas = z.union([
 export function validateDecryptIdTokenOrThrow(
   idToken?: IdTokenWithData<DecryptIdTokenData | LegacyDecryptIdTokenData>,
 ) {
-  const isValid = !!idToken && DecryptIdTokenDataSchemas.safeParse(idToken).success;
+  if (!idToken) return false;
 
-  if (!isValid) {
+  const { error } = DecryptIdTokenDataSchemas.safeParse(idToken);
+
+  if (error) {
     throw createOrPropagateError(
       OthentErrorID.Validation,
       400,
       "Invalid token data for decrypt()",
+      JSON.stringify(error),
     );
   }
 

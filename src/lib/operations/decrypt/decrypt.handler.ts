@@ -5,17 +5,17 @@ import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { BaseOperationIdTokenData, LegacyBaseOperationIdTokenData, LegacyBufferData, LegacyBufferObject, normalizeBufferData, toLegacyBufferObject } from "../common.types";
 import { validateDecryptIdTokenOrThrow } from "./decrypt.validation";
+import { B64String, B64UrlString } from "../../utils/arweave/arweaveUtils";
 
 /**
  * @deprecated
  */
 export interface LegacyDecryptIdTokenData extends LegacyBaseOperationIdTokenData {
-  ciphertext: LegacyBufferData;
+  ciphertext: LegacyBufferData | string;
 }
 
 export interface DecryptIdTokenData extends BaseOperationIdTokenData<Route.DECRYPT> {
-  // ciphertext: B64UrlString | LegacyBufferData;
-  ciphertext: LegacyBufferData;
+  ciphertext: B64String | B64UrlString;
 }
 
 export interface DecryptResponseData {
@@ -28,13 +28,14 @@ export function decryptHandlerFactory() {
     res: express.Response,
   ) => {
     const { idToken } = req;
+
+    validateDecryptIdTokenOrThrow(idToken);
+
     const { data } = idToken;
     const isLegacyData = !data.hasOwnProperty("path");
     const treatStringAsB64 = !isLegacyData;
 
     logRequestStart(Route.DECRYPT, idToken);
-
-    validateDecryptIdTokenOrThrow(idToken);
 
     const ciphertextBuffer = normalizeBufferData(data.ciphertext, treatStringAsB64);
     const plaintext = await decrypt(idToken, ciphertextBuffer);

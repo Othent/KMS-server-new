@@ -1,10 +1,10 @@
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
-import { stringOrUint8ArrayToUint8Array } from "../../utils/arweave/arweaveUtils";
 import { IdTokenWithData } from "../../utils/auth/auth0";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { getSignKeyVersionPath } from "../../utils/kms/google-kms.utils";
 import { LegacySignIdTokenData, SignIdTokenData } from "./sign.handler";
+import { normalizeKMSResponseData } from "../common.types";
 
 export async function sign(
   idToken: IdTokenWithData<SignIdTokenData | LegacySignIdTokenData>,
@@ -34,5 +34,5 @@ export async function sign(
     throw createOrPropagateError(OthentErrorID.Decryption, 500, "No signature");
   }
 
-  return stringOrUint8ArrayToUint8Array(signature);
+  return normalizeKMSResponseData(signature);
 }

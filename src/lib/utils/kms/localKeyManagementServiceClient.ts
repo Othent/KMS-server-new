@@ -1,7 +1,7 @@
 import assert from "assert";
 import crypto from "crypto";
 import { delay } from "../tools/delay";
-import { B64String, b64ToUint8Array, binaryDataTypeToString, stringOrUint8ArrayToUint8Array, uint8ArrayTob64 } from "../arweave/arweaveUtils";
+import { binaryDataTypeToString, uint8ArrayTob64 } from "../arweave/arweaveUtils";
 import { CryptoKeyVersionState } from "./google-kms.utils";
 // import { KeyManagementServiceClient } from "@google-cloud/kms";
 
