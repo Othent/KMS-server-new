@@ -3,10 +3,11 @@ import { signHandlerFactory, SignIdTokenData, SignResponseData, LegacySignIdToke
 import httpMocks from "node-mocks-http";
 import { ExpressRequestWithToken } from '../../utils/auth/auth0';
 import { Route } from '../../server/server.constants';
-import { B64String, B64UrlString, binaryDataTypeToString, stringToUint8Array, uint8ArrayTob64, uint8ArrayTob64Url } from '../../utils/arweave/arweaveUtils';
+import { B64String, b64ToUint8Array, B64UrlString, binaryDataTypeToString, stringToUint8Array, uint8ArrayTob64, uint8ArrayTob64Url } from '../../utils/arweave/arweaveUtils';
 import { EMPTY_VALUES, LEGACY_TOKEN_DATA_FORMATS, LegacyBufferObject, LegacyBufferRecord, LegacyTokenDataFormat, normalizeBufferData, TOKEN_DATA_FORMATS, TokenDataFormat } from '../common.types';
 import { encrypt } from '../encrypt/encrypt';
 import { LocalKeyManagementServiceClient } from '../../utils/kms/localKeyManagementServiceClient';
+import { kmsClient } from '../../utils/kms/kmsClient';
 
 describe('sign handler', () => {
   const signHandler = signHandlerFactory();
@@ -28,12 +29,14 @@ describe('sign handler', () => {
 
   const DATA_TO_SIGN = "Sign this data.";
 
+  let HASHED_DATA_TO_SIGN = new Uint8Array();
+
   const getLegacyIdTokenData = (format: LegacyTokenDataFormat) => {
     let data: LegacyBufferRecord = {};
 
     // `sing()` only accepts `LegacyBufferRecord`:
     if (format === "LegacyBufferRecord") {
-      data = { ...Array.from(stringToUint8Array(DATA_TO_SIGN)) };
+      data = { ...Array.from(HASHED_DATA_TO_SIGN) };
     }
 
     return {
@@ -46,9 +49,9 @@ describe('sign handler', () => {
     let data: B64String | B64UrlString = "" as B64String;
 
     if (format === "B64String") {
-      data = uint8ArrayTob64(stringToUint8Array(DATA_TO_SIGN));
+      data = uint8ArrayTob64(HASHED_DATA_TO_SIGN);
     } else if (format === "B64UrlString") {
-      data = uint8ArrayTob64Url(stringToUint8Array(DATA_TO_SIGN));
+      data = uint8ArrayTob64Url(HASHED_DATA_TO_SIGN);
     }
 
     return {
@@ -56,6 +59,14 @@ describe('sign handler', () => {
       data,
     } satisfies SignIdTokenData;
   };
+
+  beforeAll(async () => {
+    const dataToSignBuffer = Buffer.from(DATA_TO_SIGN);
+    const dataToSignHash = await LocalKeyManagementServiceClient.hashDataToSign(dataToSignBuffer);
+    const dataToSignHashBuffer = Buffer.from(dataToSignHash, "base64");
+
+    HASHED_DATA_TO_SIGN = dataToSignHashBuffer;
+  });
 
   describe('(legacy format)', () => {
     describe('validates the ID JWT token data', () => {
@@ -99,7 +110,7 @@ describe('sign handler', () => {
 
         const resultDataBuffer = normalizeBufferData(result.data);
         const isSignatureValid = await LocalKeyManagementServiceClient.verifySignature(
-          stringToUint8Array(DATA_TO_SIGN),
+          Buffer.from(DATA_TO_SIGN),
           resultDataBuffer,
         );
 
@@ -151,7 +162,7 @@ describe('sign handler', () => {
 
         const resultDataBuffer = normalizeBufferData(result.data);
         const isSignatureValid = await LocalKeyManagementServiceClient.verifySignature(
-          stringToUint8Array(DATA_TO_SIGN),
+          Buffer.from(DATA_TO_SIGN),
           resultDataBuffer,
         );
 

@@ -180,9 +180,6 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
 
     console.log(` ├ asymmetricSign("${originalPlainTextHash}") => ${signatureB64String.slice(0, 32)}...`);
 
-    const publicKeyResponse = await this.getPublicKey();
-    const { pem } = publicKeyResponse[0];
-
     assert(!!signature && typeof signature !== "string", "Invalid signature type.");
 
     const isSignatureValid = await LocalKeyManagementServiceClient.verifySignature(originalPlaintextBuffer, signature);
@@ -190,6 +187,9 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
     console.log(` ├ isSignatureValid = ${isSignatureValid}`);
 
     assert(isSignatureValid === true, "Invalid signature.");
+
+    const publicKeyResponse = await this.getPublicKey();
+    const { pem } = publicKeyResponse[0];
 
     console.log(` └ publicKey =\n\n${pem}`)
     console.log("");
