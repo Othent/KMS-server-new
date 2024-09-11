@@ -166,11 +166,11 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       "Decrypted message doesn't match the original input.",
     );
 
-    const originalPlainTextHash = await LocalKeyManagementServiceClient.hashDataToSign(originalPlaintextBuffer);
-    const originalPlainTextHashBuffer = Buffer.from(originalPlainTextHash, "base64");
+    const originalPlaintextHash = await LocalKeyManagementServiceClient.hashDataToSign(originalPlaintextBuffer);
+    const originalPlaintextHashBuffer = Buffer.from(originalPlaintextHash, "base64");
 
     const asymmetricSignResponse = await this.asymmetricSign({
-      data: originalPlainTextHashBuffer,
+      data: originalPlaintextHashBuffer,
     });
 
     const { signature } = asymmetricSignResponse[0];
@@ -178,7 +178,7 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       ? (signature || "")
       : uint8ArrayTob64(signature);
 
-    console.log(` ├ asymmetricSign("${originalPlainTextHash}") => ${signatureB64String.slice(0, 32)}...`);
+    console.log(` ├ asymmetricSign("${originalPlaintextHash}") => ${signatureB64String.slice(0, 32)}...`);
 
     assert(!!signature && typeof signature !== "string", "Invalid signature type.");
 
