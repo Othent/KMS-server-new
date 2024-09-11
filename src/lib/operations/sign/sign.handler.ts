@@ -3,19 +3,19 @@ import { ExpressRequestWithToken } from "../../utils/auth/auth0";
 import { sign } from "./sign";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { Route } from "../../server/server.constants";
-import { BaseOperationIdTokenData, LegacyBaseOperationIdTokenData, LegacyBufferData, LegacyBufferObject, normalizeBufferData, toLegacyBufferObject } from "../common.types";
+import { BaseOperationIdTokenData, LegacyBaseOperationIdTokenData, LegacyBufferData, LegacyBufferObject, LegacyBufferRecord, normalizeBufferData, toLegacyBufferObject } from "../common.types";
 import { validateSignIdTokenOrThrow } from "./sign.validation";
+import { B64String, B64UrlString } from "../../utils/arweave/arweaveUtils";
 
 /**
  * @deprecated
  */
 export interface LegacySignIdTokenData extends LegacyBaseOperationIdTokenData {
-  data: LegacyBufferData;
+  data: LegacyBufferRecord;
 }
 
 export interface SignIdTokenData extends BaseOperationIdTokenData<Route.SIGN> {
-  // data: B64UrlString | LegacyBufferData;
-  data: LegacyBufferData;
+  data: B64String | B64UrlString;
 }
 
 export interface SignResponseData {
@@ -28,13 +28,14 @@ export function signHandlerFactory() {
     res: express.Response,
   ) => {
     const { idToken } = req;
+
+    validateSignIdTokenOrThrow(idToken);
+
     const { data } = idToken;
     const isLegacyData = !data.hasOwnProperty("path");
     const treatStringAsB64 = !isLegacyData;
 
     logRequestStart(Route.SIGN, idToken);
-
-    validateSignIdTokenOrThrow(idToken);
 
     const dataToSignBuffer = normalizeBufferData(data.data, treatStringAsB64);
     const signature = await sign(idToken, dataToSignBuffer);

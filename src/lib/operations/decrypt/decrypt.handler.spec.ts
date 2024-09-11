@@ -4,7 +4,7 @@ import httpMocks from "node-mocks-http";
 import { ExpressRequestWithToken } from '../../utils/auth/auth0';
 import { Route } from '../../server/server.constants';
 import { B64String, B64UrlString, binaryDataTypeToString, stringToUint8Array, uint8ArrayTob64, uint8ArrayTob64Url } from '../../utils/arweave/arweaveUtils';
-import { LEGACY_TOKEN_DATA_FORMATS, LegacyBufferObject, LegacyBufferRecord, LegacyTokenDataFormat, normalizeBufferData, TOKEN_DATA_FORMATS, TokenDataFormat } from '../common.types';
+import { EMPTY_VALUES, LEGACY_TOKEN_DATA_FORMATS, LegacyBufferObject, LegacyBufferRecord, LegacyTokenDataFormat, normalizeBufferData, TOKEN_DATA_FORMATS, TokenDataFormat } from '../common.types';
 import { encrypt } from '../encrypt/encrypt';
 
 describe('decrypt handler', () => {
@@ -85,11 +85,13 @@ describe('decrypt handler', () => {
         })).rejects.toThrow("Invalid token data for decrypt()");
       });
 
-      test('has data', async () => {
-        await expect(callDecryptHandlerWithToken({
-          ...getLegacyIdTokenData("LegacyBufferObject"),
-          ciphertext: "",
-        })).rejects.toThrow("Invalid token data for decrypt()");
+      LEGACY_TOKEN_DATA_FORMATS.forEach((format) => {
+        test(`has ${ format } data`, async () => {
+          await expect(callDecryptHandlerWithToken({
+            ...getLegacyIdTokenData(format),
+            ciphertext: EMPTY_VALUES[format],
+          })).rejects.toThrow("Invalid token data for decrypt()");
+        });
       });
     });
 
@@ -128,11 +130,20 @@ describe('decrypt handler', () => {
         })).rejects.toThrow("Invalid token data for decrypt()");
       });
 
-      test('has data', async () => {
+      test(`has path = ${Route.DECRYPT}`, async () => {
         await expect(callDecryptHandlerWithToken({
           ...getIdTokenData("B64String"),
-          ciphertext: "" as B64String,
+          path: Route.HOME as any,
         })).rejects.toThrow("Invalid token data for decrypt()");
+      });
+
+      TOKEN_DATA_FORMATS.forEach((format) => {
+        test(`has ${ format } data`, async () => {
+          await expect(callDecryptHandlerWithToken({
+            ...getIdTokenData(format),
+            ciphertext: EMPTY_VALUES[format],
+          })).rejects.toThrow("Invalid token data for decrypt()");
+        });
       });
     });
 

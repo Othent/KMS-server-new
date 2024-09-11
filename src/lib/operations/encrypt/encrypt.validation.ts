@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { extendLegacyBaseOperationIdTokenDataSchema, extendBaseOperationIdTokenDataSchema, LegacyBufferDataOrStringSchema } from "../common.validation";
+import { extendLegacyBaseOperationIdTokenDataSchema, extendBaseOperationIdTokenDataSchema, LegacyBufferDataOrStringSchema, LegacyBufferRecordSchema, LegacyBufferObjectSchema } from "../common.validation";
 import { Route } from "../../server/server.constants";
 import { IdTokenWithData } from "../../utils/auth/auth0";
 import { EncryptIdTokenData, LegacyEncryptIdTokenData } from "./encrypt.handler";

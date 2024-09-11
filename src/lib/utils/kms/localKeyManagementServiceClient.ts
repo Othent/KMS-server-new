@@ -66,36 +66,61 @@ type IAsymmetricSignRequest =
 type IAsymmetricSignResponse =
   import("@google-cloud/kms/build/protos/protos").google.cloud.kms.v1.IAsymmetricSignResponse;
 
-const SYMMETRIC_ALGORITHM = "aes-256-cbc";
-const KEY_BUFFER = crypto.randomBytes(32);
-const IV_BUFFER = crypto.randomBytes(16);
-
-// TODO: Add an endpoint to return these to the frontend to use the mocked KMS for signing and verifying too:
-const ASYMMETRIC_ALGORITHM = "SHA256";
-const { privateKey: PRIVATE_KEY, publicKey: PUBLIC_KEY } =
-  crypto.generateKeyPairSync("rsa", {
-    modulusLength: 2048,
-  });
-
-const IMPORT_JOB_PEM = crypto.generateKeyPairSync("rsa", {
-  modulusLength: 3072,
-  // publicExponent: new Uint8Array([1,0,1]),
-  publicKeyEncoding: {
-    type: 'spki',
-    format: 'pem',
-  },
-  privateKeyEncoding: {
-    type: 'pkcs8',
-    format: 'pem',
-    cipher: 'aes-256-cbc',
-    passphrase: 'top secret'
-  }
-}).publicKey;
-
 // The `implements` part is commented out to avoid having to mock that massive class. If you need to add/update the current implementation, you can uncomment
 // it while you are working on the changes to get some help from autocompletion, and comment it again once you are done:
 
 export class LocalKeyManagementServiceClient /* implements KeyManagementServiceClient */ {
+
+  // Private symmetric encryption/decryption key:
+  static SYMMETRIC_ALGORITHM = "aes-256-cbc";
+  static KEY_BUFFER = crypto.randomBytes(32);
+  static IV_BUFFER = crypto.randomBytes(16);
+
+  // Private and public asymmetric signing (and potentially encryption/decryption) keys:
+  static ASYMMETRIC_ALGORITHM = "SHA256";
+  static RSA_KEY_PAIR = crypto.generateKeyPairSync("rsa", { modulusLength: 2048 });
+  static PRIVATE_KEY = LocalKeyManagementServiceClient.RSA_KEY_PAIR.privateKey;
+  static PUBLIC_KEY = LocalKeyManagementServiceClient.RSA_KEY_PAIR.publicKey;
+
+  // Wrapping keys for the import keys PoC:
+  static IMPORT_JOB_PEM = crypto.generateKeyPairSync("rsa", {
+    modulusLength: 3072,
+    // publicExponent: new Uint8Array([1,0,1]),
+    publicKeyEncoding: {
+      type: 'spki',
+      format: 'pem',
+    },
+    privateKeyEncoding: {
+      type: 'pkcs8',
+      format: 'pem',
+      cipher: 'aes-256-cbc',
+      passphrase: 'top secret'
+    }
+  }).publicKey;
+
+  static hashDataToSign(data: NodeJS.ArrayBufferView) {
+    return crypto.hash(
+      "SHA-256",
+      data,
+      "base64"
+    );
+  }
+
+  static async verifySignature(
+    data: NodeJS.ArrayBufferView,
+    signature: NodeJS.ArrayBufferView,
+  ) {
+    const originalPlainTextHash = await LocalKeyManagementServiceClient.hashDataToSign(data);
+    const originalPlainTextHashBuffer = Buffer.from(originalPlainTextHash, "base64");
+
+    return crypto.verify(
+      LocalKeyManagementServiceClient.ASYMMETRIC_ALGORITHM,
+      originalPlainTextHashBuffer,
+      LocalKeyManagementServiceClient.PUBLIC_KEY,
+      signature,
+    );
+  }
+
 
   async testLocalKeyManagementServiceClient() {
     // Give the server some time to start:
@@ -141,12 +166,7 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       "Decrypted message doesn't match the original input.",
     );
 
-    const originalPlainTextHash = await crypto.hash(
-      "SHA-256",
-      originalPlaintextBuffer,
-      "base64"
-    );
-
+    const originalPlainTextHash = await LocalKeyManagementServiceClient.hashDataToSign(originalPlaintextBuffer);
     const originalPlainTextHashBuffer = Buffer.from(originalPlainTextHash, "base64");
 
     const asymmetricSignResponse = await this.asymmetricSign({
@@ -162,30 +182,14 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
 
     const publicKeyResponse = await this.getPublicKey();
     const { pem } = publicKeyResponse[0];
-    const publicKey = crypto.createPublicKey(pem || "");
-
-    /*
-    console.log({
-      plaintext: originalPlaintext,
-      plaintextHash: originalPlainTextHash,
-      plaintextHashBuffer: originalPlainTextHashBuffer,
-      publicKey,
-      signature,
-    })
-    */
 
     assert(!!signature && typeof signature !== "string", "Invalid signature type.");
 
-    const isSignatureValid = crypto.verify(
-      ASYMMETRIC_ALGORITHM,
-      originalPlainTextHashBuffer,
-      publicKey,
-      signature,
-    );
+    const isSignatureValid = await LocalKeyManagementServiceClient.verifySignature(originalPlaintextBuffer, signature);
 
     console.log(` ├ isSignatureValid = ${isSignatureValid}`);
 
-    assert(isSignatureValid, "Invalid signature.");
+    assert(isSignatureValid === true, "Invalid signature.");
 
     console.log(` └ publicKey =\n\n${pem}`)
     console.log("");
@@ -300,7 +304,7 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       {
         state: "ACTIVE",
         publicKey: {
-          pem: IMPORT_JOB_PEM,
+          pem: LocalKeyManagementServiceClient.IMPORT_JOB_PEM,
         },
       } satisfies IImportJob,
       request,
@@ -315,7 +319,7 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       {
         state: "ACTIVE",
         publicKey: {
-          pem: IMPORT_JOB_PEM,
+          pem: LocalKeyManagementServiceClient.IMPORT_JOB_PEM,
         },
       } satisfies IImportJob,
       request,
@@ -349,9 +353,9 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
     }
 
     const cipher = crypto.createCipheriv(
-      SYMMETRIC_ALGORITHM,
-      KEY_BUFFER,
-      IV_BUFFER,
+      LocalKeyManagementServiceClient.SYMMETRIC_ALGORITHM,
+      LocalKeyManagementServiceClient.KEY_BUFFER,
+      LocalKeyManagementServiceClient.IV_BUFFER,
     );
 
     const plaintextBuffer = typeof request.plaintext === 'string'
@@ -387,8 +391,8 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
 
     const decipher = crypto.createDecipheriv(
       "aes-256-cbc",
-      KEY_BUFFER,
-      IV_BUFFER,
+      LocalKeyManagementServiceClient.KEY_BUFFER,
+      LocalKeyManagementServiceClient.IV_BUFFER,
     );
 
     const ciphertextBuffer = typeof request.ciphertext === 'string'
@@ -414,7 +418,7 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
   getPublicKey(
     request?: IGetPublicKeyRequest,
   ): Promise<[IPublicKey, IGetPublicKeyRequest | undefined, {} | undefined]> {
-    const publicKeyDer = PUBLIC_KEY.export({
+    const publicKeyDer = LocalKeyManagementServiceClient.PUBLIC_KEY.export({
       type: "spki",
       // TODO: This can be exported directly as `format: "pem"`
       format: "der",
@@ -453,9 +457,9 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       : request.data;
 
     const signatureBuffer = crypto.sign(
-      ASYMMETRIC_ALGORITHM,
+      LocalKeyManagementServiceClient.ASYMMETRIC_ALGORITHM,
       dataBuffer,
-      PRIVATE_KEY,
+      LocalKeyManagementServiceClient.PRIVATE_KEY,
     );
 
     // Only needed for debugging:

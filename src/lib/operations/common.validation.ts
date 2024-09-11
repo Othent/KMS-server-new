@@ -29,7 +29,21 @@ export function extendBaseOperationIdTokenDataSchema<T extends ZodRawShape>(
 }
 
 // Do not use z.record() or try to validate the shape of the object as that would be slow:
-export const LegacyBufferRecordSchema = z.object({});
+export const LegacyBufferRecordSchema = z.object({}).passthrough().superRefine((val, ctx) => {
+  if (Object.keys(val).length === 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Empty LegacyBufferRecord",
+    });
+  }
+
+  if (val.hasOwnProperty("type") || val.hasOwnProperty("data")) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Object is LegacyBufferObject, not LegacyBufferRecord",
+    });
+  }
+});
 
 // type a = z.infer<typeof LegacyBufferRecordSchema> satisfies LegacyBufferRecord;
 

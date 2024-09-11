@@ -5,7 +5,7 @@ import { ExpressRequestWithToken } from '../../utils/auth/auth0';
 import { Route } from '../../server/server.constants';
 import { B64String, b64UrlDecode, B64UrlString, binaryDataTypeToString, stringToUint8Array, uint8ArrayTob64, uint8ArrayTob64Url } from '../../utils/arweave/arweaveUtils';
 import { decrypt } from '../decrypt/decrypt';
-import { LEGACY_TOKEN_DATA_FORMATS, LegacyBufferObject, LegacyBufferRecord, LegacyTokenDataFormat, normalizeBufferData, TOKEN_DATA_FORMATS, TokenDataFormat } from '../common.types';
+import { EMPTY_VALUES, LEGACY_TOKEN_DATA_FORMATS, LegacyBufferObject, LegacyBufferRecord, LegacyTokenDataFormat, normalizeBufferData, TOKEN_DATA_FORMATS, TokenDataFormat } from '../common.types';
 
 describe('encrypt handler', () => {
   const encryptHandler = encryptHandlerFactory();
@@ -74,11 +74,13 @@ describe('encrypt handler', () => {
         })).rejects.toThrow("Invalid token data for encrypt()");
       });
 
-      test('has data', async () => {
-        await expect(callEncryptHandlerWithToken({
-          ...getLegacyIdTokenData("LegacyBufferObject"),
-          plaintext: "",
-        })).rejects.toThrow("Invalid token data for encrypt()");
+      LEGACY_TOKEN_DATA_FORMATS.forEach((format) => {
+        test(`has ${ format } data`, async () => {
+          await expect(callEncryptHandlerWithToken({
+            ...getLegacyIdTokenData(format),
+            plaintext: EMPTY_VALUES[format],
+          })).rejects.toThrow("Invalid token data for encrypt()");
+        });
       });
     });
 
@@ -115,11 +117,20 @@ describe('encrypt handler', () => {
         })).rejects.toThrow("Invalid token data for encrypt()");
       });
 
-      test('has data', async () => {
+      test(`has path = ${Route.DECRYPT}`, async () => {
         await expect(callEncryptHandlerWithToken({
           ...getIdTokenData("B64String"),
-          plaintext: "" as B64String,
+          path: Route.HOME as any,
         })).rejects.toThrow("Invalid token data for encrypt()");
+      });
+
+      TOKEN_DATA_FORMATS.forEach((format) => {
+        test('has data', async () => {
+          await expect(callEncryptHandlerWithToken({
+            ...getIdTokenData(format),
+            plaintext: EMPTY_VALUES[format],
+          })).rejects.toThrow("Invalid token data for encrypt()");
+        });
       });
     });
 

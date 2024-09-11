@@ -79,3 +79,11 @@ export const LEGACY_TOKEN_DATA_FORMATS = ["LegacyBufferObject", "LegacyBufferRec
 export type TokenDataFormat = "B64String" | "B64UrlString";
 
 export const TOKEN_DATA_FORMATS = ["B64String", "B64UrlString"] as const satisfies TokenDataFormat[];
+
+export const EMPTY_VALUES = {
+  LegacyBufferObject: { type: "Buffer", data: [] } as LegacyBufferObject,
+  LegacyBufferRecord: {} as LegacyBufferRecord,
+  string: "",
+  B64String: "" as B64String,
+  B64UrlString: "" as B64UrlString,
+} as const;
