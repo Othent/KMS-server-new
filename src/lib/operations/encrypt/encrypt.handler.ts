@@ -4,7 +4,7 @@ import { ExpressRequestWithToken } from "../../utils/auth/auth0";
 import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { BaseOperationIdTokenData, LegacyBaseOperationIdTokenData, LegacyBufferData, LegacyBufferObject, normalizeBufferData, toLegacyBufferObject } from "../common.types";
-import { B64String, B64UrlString } from "../../utils/arweave/arweaveUtils";
+import { B64String, B64UrlString, uint8ArrayTob64 } from "../../utils/arweave/arweaveUtils";
 import { validateEncryptIdTokenOrThrow } from "./encrypt.validation";
 
 /**
@@ -18,8 +18,12 @@ export interface EncryptIdTokenData extends BaseOperationIdTokenData<Route.ENCRY
   plaintext: B64String | B64UrlString;
 }
 
-export interface EncryptResponseData {
+export interface LegacyEncryptResponseData {
   data: LegacyBufferObject;
+};
+
+export interface EncryptResponseData {
+  encryptedData: B64String;
 };
 
 export function encryptHandlerFactory() {
@@ -29,20 +33,23 @@ export function encryptHandlerFactory() {
   ) => {
     const { idToken } = req;
 
+    logRequestStart(Route.ENCRYPT, idToken);
+
     validateEncryptIdTokenOrThrow(idToken);
 
     const { data } = idToken;
     const isLegacyData = !data.hasOwnProperty("path");
     const treatStringAsB64 = !isLegacyData;
 
-    logRequestStart(Route.ENCRYPT, idToken);
-
     const plaintextBuffer = normalizeBufferData(data.plaintext, treatStringAsB64);
     const ciphertext = await encrypt(idToken, plaintextBuffer);
 
     logRequestSuccess(Route.ENCRYPT, idToken);
 
-    // TODO: Return new version directly as B64:
-    res.send({ data: toLegacyBufferObject(ciphertext) } satisfies EncryptResponseData);
+    res.send(
+      isLegacyData
+        ? { data: toLegacyBufferObject(ciphertext) } satisfies LegacyEncryptResponseData
+        : { encryptedData: uint8ArrayTob64(ciphertext) } satisfies EncryptResponseData
+    );
   };
 }

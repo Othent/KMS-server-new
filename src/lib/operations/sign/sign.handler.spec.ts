@@ -1,13 +1,11 @@
 import {describe, expect, test} from '@jest/globals';
-import { signHandlerFactory, SignIdTokenData, SignResponseData, LegacySignIdTokenData } from './sign.handler';
+import { signHandlerFactory, SignIdTokenData, SignResponseData, LegacySignIdTokenData, LegacySignResponseData } from './sign.handler';
 import httpMocks from "node-mocks-http";
 import { ExpressRequestWithToken } from '../../utils/auth/auth0';
 import { Route } from '../../server/server.constants';
-import { B64String, b64ToUint8Array, B64UrlString, binaryDataTypeToString, stringToUint8Array, uint8ArrayTob64, uint8ArrayTob64Url } from '../../utils/arweave/arweaveUtils';
-import { EMPTY_VALUES, LEGACY_TOKEN_DATA_FORMATS, LegacyBufferObject, LegacyBufferRecord, LegacyTokenDataFormat, normalizeBufferData, TOKEN_DATA_FORMATS, TokenDataFormat } from '../common.types';
-import { encrypt } from '../encrypt/encrypt';
+import { B64String, B64UrlString, stringToUint8Array, uint8ArrayTob64, uint8ArrayTob64Url } from '../../utils/arweave/arweaveUtils';
+import { EMPTY_VALUES, LEGACY_TOKEN_DATA_FORMATS, LegacyBufferRecord, LegacyTokenDataFormat, normalizeBufferData, TOKEN_DATA_FORMATS, TokenDataFormat } from '../common.types';
 import { LocalKeyManagementServiceClient } from '../../utils/kms/localKeyManagementServiceClient';
-import { kmsClient } from '../../utils/kms/kmsClient';
 
 describe('sign handler', () => {
   const signHandler = signHandlerFactory();
@@ -24,7 +22,7 @@ describe('sign handler', () => {
 
     await signHandler(req, res);
 
-    return res._getData() as SignResponseData;
+    return res._getData() as LegacySignResponseData | SignResponseData;
   }
 
   const DATA_TO_SIGN = "Sign this data.";
@@ -100,15 +98,16 @@ describe('sign handler', () => {
 
       test(`accepts ${ format } and returns the right result`, async () => {
         const result = await callSignHandlerWithToken(getLegacyIdTokenData(format));
+        const data = (result as LegacySignResponseData).data || (result as SignResponseData).signature;
 
-        expect(result.data).toEqual(
+        expect(data).toEqual(
           expect.objectContaining({
             type: "Buffer",
             data: expect.any(Array),
           }),
         );
 
-        const resultDataBuffer = normalizeBufferData(result.data);
+        const resultDataBuffer = normalizeBufferData(data);
         const isSignatureValid = await LocalKeyManagementServiceClient.verifySignature(
           Buffer.from(DATA_TO_SIGN),
           resultDataBuffer,
@@ -152,15 +151,11 @@ describe('sign handler', () => {
     TOKEN_DATA_FORMATS.forEach((format) => {
       test(`accepts ${ format } and returns the right result`, async () => {
         const result = await callSignHandlerWithToken(getIdTokenData(format));
+        const data = (result as LegacySignResponseData).data || (result as SignResponseData).signature;
 
-        expect(result.data).toEqual(
-          expect.objectContaining({
-            type: "Buffer",
-            data: expect.any(Array),
-          }),
-        );
+        expect(data).toMatch(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/);
 
-        const resultDataBuffer = normalizeBufferData(result.data);
+        const resultDataBuffer = normalizeBufferData(data, true);
         const isSignatureValid = await LocalKeyManagementServiceClient.verifySignature(
           Buffer.from(DATA_TO_SIGN),
           resultDataBuffer,

@@ -5,7 +5,7 @@ import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { BaseOperationIdTokenData, LegacyBaseOperationIdTokenData, LegacyBufferData, LegacyBufferObject, normalizeBufferData, toLegacyBufferObject } from "../common.types";
 import { validateDecryptIdTokenOrThrow } from "./decrypt.validation";
-import { B64String, B64UrlString } from "../../utils/arweave/arweaveUtils";
+import { B64String, B64UrlString, uint8ArrayTob64 } from "../../utils/arweave/arweaveUtils";
 
 /**
  * @deprecated
@@ -18,8 +18,12 @@ export interface DecryptIdTokenData extends BaseOperationIdTokenData<Route.DECRY
   ciphertext: B64String | B64UrlString;
 }
 
-export interface DecryptResponseData {
+export interface LegacyDecryptResponseData {
   data: LegacyBufferObject;
+};
+
+export interface DecryptResponseData {
+  decryptedData: B64String;
 };
 
 export function decryptHandlerFactory() {
@@ -29,20 +33,23 @@ export function decryptHandlerFactory() {
   ) => {
     const { idToken } = req;
 
+    logRequestStart(Route.DECRYPT, idToken);
+
     validateDecryptIdTokenOrThrow(idToken);
 
     const { data } = idToken;
     const isLegacyData = !data.hasOwnProperty("path");
     const treatStringAsB64 = !isLegacyData;
 
-    logRequestStart(Route.DECRYPT, idToken);
-
     const ciphertextBuffer = normalizeBufferData(data.ciphertext, treatStringAsB64);
     const plaintext = await decrypt(idToken, ciphertextBuffer);
 
     logRequestSuccess(Route.DECRYPT, idToken);
 
-    // TODO: Return new version directly as B64:
-    res.send({ data: toLegacyBufferObject(plaintext) } satisfies DecryptResponseData);
+    res.send(
+      isLegacyData
+        ? { data: toLegacyBufferObject(plaintext) } satisfies LegacyDecryptResponseData
+        : { decryptedData: uint8ArrayTob64(plaintext) } satisfies DecryptResponseData
+    );
   };
 }

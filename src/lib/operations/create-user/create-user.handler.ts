@@ -3,8 +3,6 @@ import { createUser } from "./createUser";
 import { ExpressRequestWithToken } from "../../utils/auth/auth0";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { Route } from "../../server/server.constants";
-import { createOrPropagateError } from "../../server/errors/errors.utils";
-import { OthentErrorID } from "../../server/errors/error";
 import { BaseOperationIdTokenData } from "../common.types";
 import { validateCreateUserIdTokenOrThrow } from "./create-user.validation";
 
@@ -27,14 +25,15 @@ export function createUserHandlerFactory() {
     res: express.Response,
   ) => {
     const { idToken } = req;
-    const { data } = idToken;
-    const isLegacyData = !data;
 
     logRequestStart(Route.CREATE_USER, idToken);
 
     validateCreateUserIdTokenOrThrow(idToken);
 
-    const importOnly = !!idToken.data?.importOnly;
+    const { data } = idToken;
+    const isLegacyData = !data?.hasOwnProperty("path");
+    // const importOnly = !!idToken.data?.importOnly;
+    const importOnly = false;
     const success = await createUser(idToken, importOnly);
 
     logRequestSuccess(Route.CREATE_USER, idToken);

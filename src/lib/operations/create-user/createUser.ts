@@ -9,8 +9,6 @@ export async function createUser(
   idToken: IdTokenWithData<CreateUserIdTokenData | LegacyCreateUserIdTokenData>,
   importOnly: boolean,
 ) {
-  console.log(`createUser(${ importOnly ? "importOnly" : "generateKeys" })`);
-
   // TODO: Check if the keyRing / signKey / encryptDecryptKey already exists but the keys were never generated or
   // imported?
 

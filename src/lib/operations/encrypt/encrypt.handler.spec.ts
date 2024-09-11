@@ -1,5 +1,5 @@
 import {describe, expect, test} from '@jest/globals';
-import { encryptHandlerFactory, EncryptIdTokenData, EncryptResponseData, LegacyEncryptIdTokenData } from './encrypt.handler';
+import { encryptHandlerFactory, EncryptIdTokenData, EncryptResponseData, LegacyEncryptIdTokenData, LegacyEncryptResponseData } from './encrypt.handler';
 import httpMocks from "node-mocks-http";
 import { ExpressRequestWithToken } from '../../utils/auth/auth0';
 import { Route } from '../../server/server.constants';
@@ -22,7 +22,7 @@ describe('encrypt handler', () => {
 
     await encryptHandler(req, res);
 
-    return res._getData() as EncryptResponseData;
+    return res._getData() as LegacyEncryptResponseData | EncryptResponseData;
   }
 
   const SECRET = "My secret.";
@@ -87,15 +87,16 @@ describe('encrypt handler', () => {
     LEGACY_TOKEN_DATA_FORMATS.forEach((format) => {
       test(`accepts ${ format } and returns the right result`, async () => {
         const result = await callEncryptHandlerWithToken(getLegacyIdTokenData(format));
+        const data = (result as LegacyEncryptResponseData).data || (result as EncryptResponseData).encryptedData;
 
-        expect(result.data).toEqual(
+        expect(data).toEqual(
           expect.objectContaining({
             type: "Buffer",
             data: expect.any(Array),
           }),
         );
 
-        const resultDataBuffer = normalizeBufferData(result.data);
+        const resultDataBuffer = normalizeBufferData(data);
         const decrypted = await decrypt({ sub: "<SUB>" } as any, resultDataBuffer);
         const decryptedText = binaryDataTypeToString(decrypted);
 
@@ -137,15 +138,11 @@ describe('encrypt handler', () => {
     TOKEN_DATA_FORMATS.forEach((format) => {
       test(`accepts ${ format } and returns the right result`, async () => {
         const result = await callEncryptHandlerWithToken(getIdTokenData(format));
+        const data = (result as LegacyEncryptResponseData).data || (result as EncryptResponseData).encryptedData;
 
-        expect(result.data).toEqual(
-          expect.objectContaining({
-            type: "Buffer",
-            data: expect.any(Array),
-          }),
-        );
+        expect(data).toMatch(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/);
 
-        const resultDataBuffer = normalizeBufferData(result.data);
+        const resultDataBuffer = normalizeBufferData(data, true);
         const decrypted = await decrypt({ sub: "<SUB>" } as any, resultDataBuffer);
         const decryptedText = binaryDataTypeToString(decrypted);
 
