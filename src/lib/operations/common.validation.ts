@@ -11,7 +11,7 @@ export function extendLegacyBaseOperationIdTokenDataSchema<T extends ZodRawShape
       path: z.never().optional(),
       ...data,
     }),
-  }).strict();
+  });
 }
 
 export function extendBaseOperationIdTokenDataSchema<T extends ZodRawShape>(
@@ -25,7 +25,7 @@ export function extendBaseOperationIdTokenDataSchema<T extends ZodRawShape>(
       path: z.literal(path),
       ...data,
     }),
-  }).strict();
+  });
 }
 
 // Do not use z.record() or try to validate the shape of the object as that would be slow:
