@@ -1,7 +1,7 @@
 import { CONFIG } from "../../server/config/config.utils";
 import { OthentServerError } from "../../server/errors/error";
 import { Route } from "../../server/server.constants";
-import { IdTokenWithData } from "../auth/auth0.utils";
+import { IdTokenWithData } from "../auth/auth0.types";
 
 export function getDevelopmentOnlyTokenID<D>(
   idToken: IdTokenWithData<D> | null,

@@ -1,11 +1,11 @@
 import { expressJwtSecret, GetVerificationKey } from "jwks-rsa";
 import {
-  ExpressRequestWithToken,
   getAuth0Issuer,
   getAuth0URL,
 } from "../../utils/auth/auth0.utils";
 import { expressjwt } from "express-jwt";
 import express from "express";
+import { ExpressRequestWithToken } from "../../utils/auth/auth0.types";
 
 export const getToken = (req: express.Request) => {
   return req.body.encodedData;

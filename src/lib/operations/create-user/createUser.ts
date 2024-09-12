@@ -1,4 +1,5 @@
-import { IdTokenWithData, updateAuth0User, UserMetadata } from "../../utils/auth/auth0.utils";
+import { updateAuth0User } from "../../utils/auth/auth0.utils";
+import { IdTokenWithData, UserMetadata } from "../../utils/auth/auth0.types";
 import { CreateUserIdTokenData, LegacyCreateUserIdTokenData } from "./create-user.handler";
 import { CONFIG } from "../../server/config/config.utils";
 import { delay } from "../../utils/tools/delay";

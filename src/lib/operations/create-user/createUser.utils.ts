@@ -1,7 +1,7 @@
 import { CONFIG } from "../../server/config/config.utils";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { getKeyRingIdFromIdToken, getKeyRingPath, getLocationPath } from "../../utils/kms/google-kms.utils";
-import { IdTokenWithData } from "../../utils/auth/auth0.utils";
+import { IdTokenWithData } from "../../utils/auth/auth0.types";
 import { CreateUserIdTokenData, LegacyCreateUserIdTokenData } from "./create-user.handler";
 
 export async function createKeyRing(

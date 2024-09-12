@@ -1,6 +1,6 @@
 import express from "express";
 import { getLastNonce, updateJWTNonce } from "../../utils/database/DB";
-import { ExpressRequestWithToken } from "../../utils/auth/auth0.utils";
+import { ExpressRequestWithToken } from "../../utils/auth/auth0.types";
 import { CONFIG } from "../../server/config/config.utils";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";

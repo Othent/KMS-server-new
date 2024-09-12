@@ -1,4 +1,4 @@
-import { IdTokenWithData } from "../../utils/auth/auth0.utils";
+import { IdTokenWithData } from "../../utils/auth/auth0.types";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { getImportJobPath } from "../../utils/kms/google-kms.utils";
 import { FetchImportJobIdTokenData } from "./fetch-import-job.handler";

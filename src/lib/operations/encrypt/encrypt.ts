@@ -1,6 +1,6 @@
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
-import { IdTokenWithData } from "../../utils/auth/auth0.utils";
+import { IdTokenWithData } from "../../utils/auth/auth0.types";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { getEncryptDecryptKeyPath } from "../../utils/kms/google-kms.utils";
 import { EncryptIdTokenData, LegacyEncryptIdTokenData } from "./encrypt.handler";

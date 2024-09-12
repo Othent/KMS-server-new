@@ -1,5 +1,5 @@
 import express from "express";
-import { ExpressRequestWithToken } from "../../utils/auth/auth0.utils";
+import { ExpressRequestWithToken } from "../../utils/auth/auth0.types";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { Route } from "../../server/server.constants";
 import { createOrPropagateError } from "../../server/errors/errors.utils";

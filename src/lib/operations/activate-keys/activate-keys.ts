@@ -1,6 +1,6 @@
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { CONFIG } from "../../server/config/config.utils";
-import { IdTokenWithData, updateAuth0User } from "../../utils/auth/auth0.utils";
+import { IdTokenWithData } from "../../utils/auth/auth0.types";
 import { ActivateKeysIdTokenData } from "./activate-keys.handler";
 import { CryptoKeyVersionState, getEncryptDecryptKeyPath, getEncryptDecryptKeyVersionPath, getSignKeyPath, getSignKeyVersionPath, normalizeCryptoKeyVersionState } from "../../utils/kms/google-kms.utils";
 
