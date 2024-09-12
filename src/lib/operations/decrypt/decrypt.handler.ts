@@ -1,6 +1,6 @@
 import express from "express";
 import { decrypt } from "./decrypt";
-import { ExpressRequestWithToken } from "../../utils/auth/auth0";
+import { ExpressRequestWithToken } from "../../utils/auth/auth0.utils";
 import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { BaseOperationIdTokenData, LegacyBaseOperationIdTokenData, LegacyBufferData, LegacyBufferObject, normalizeBufferData, toLegacyBufferObject } from "../common.types";

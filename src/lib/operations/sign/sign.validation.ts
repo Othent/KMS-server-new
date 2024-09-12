@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { extendLegacyBaseOperationIdTokenDataSchema, extendBaseOperationIdTokenDataSchema, LegacyBufferDataOrStringSchema } from "../common.validation";
 import { Route } from "../../server/server.constants";
-import { IdTokenWithData } from "../../utils/auth/auth0";
+import { IdTokenWithData } from "../../utils/auth/auth0.utils";
 import { SignIdTokenData, LegacySignIdTokenData } from "./sign.handler";
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";

@@ -1,6 +1,6 @@
 import express from "express";
 import { createUser } from "./createUser";
-import { ExpressRequestWithToken, IdTokenWithData } from "../../utils/auth/auth0";
+import { ExpressRequestWithToken, IdTokenWithData } from "../../utils/auth/auth0.utils";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { Route } from "../../server/server.constants";
 import { BaseOperationIdTokenData } from "../common.types";

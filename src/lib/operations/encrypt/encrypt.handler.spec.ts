@@ -1,7 +1,7 @@
 import {describe, expect, test} from '@jest/globals';
 import { encryptHandlerFactory, EncryptIdTokenData, EncryptResponseData, LegacyEncryptIdTokenData, LegacyEncryptResponseData } from './encrypt.handler';
 import httpMocks from "node-mocks-http";
-import { ExpressRequestWithToken } from '../../utils/auth/auth0';
+import { ExpressRequestWithToken } from '../../utils/auth/auth0.utils';
 import { Route } from '../../server/server.constants';
 import { B64String, b64UrlDecode, B64UrlString, binaryDataTypeToString, stringToUint8Array, uint8ArrayTob64, uint8ArrayTob64Url } from '../../utils/arweave/arweaveUtils';
 import { decrypt } from '../decrypt/decrypt';

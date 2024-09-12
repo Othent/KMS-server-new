@@ -1,5 +1,5 @@
 import express from "express";
-import { ExpressRequestWithToken } from "../../utils/auth/auth0";
+import { ExpressRequestWithToken } from "../../utils/auth/auth0.utils";
 import { sign } from "./sign";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { Route } from "../../server/server.constants";

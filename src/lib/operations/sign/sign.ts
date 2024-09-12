@@ -1,6 +1,6 @@
 import { OthentErrorID } from "../../server/errors/error";
 import { createOrPropagateError } from "../../server/errors/errors.utils";
-import { IdTokenWithData } from "../../utils/auth/auth0";
+import { IdTokenWithData } from "../../utils/auth/auth0.utils";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { getSignKeyVersionPath } from "../../utils/kms/google-kms.utils";
 import { LegacySignIdTokenData, SignIdTokenData } from "./sign.handler";

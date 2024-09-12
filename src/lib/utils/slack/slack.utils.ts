@@ -1,7 +1,7 @@
 import axios from "axios";
 import { CreateUserIdTokenData, LegacyCreateUserIdTokenData } from "../../operations/create-user/create-user.handler";
 import { CONFIG } from "../../server/config/config.utils";
-import { IdTokenWithData } from "../auth/auth0";
+import { IdTokenWithData } from "../auth/auth0.utils";
 import { getKeyRingIdFromIdToken } from "../kms/google-kms.utils";
 
 export async function notifyUserCreationOnSlack(

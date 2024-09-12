@@ -1,5 +1,5 @@
 import { CONFIG } from "../../server/config/config.utils";
-import { IdTokenWithData } from "../../utils/auth/auth0";
+import { IdTokenWithData } from "../../utils/auth/auth0.utils";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { getImportJobPath, getSignKeyPath, getEncryptDecryptKeyPath, normalizeCryptoKeyVersionState } from "../../utils/kms/google-kms.utils";
 import { ImportKeysIdTokenData } from "./import-keys.handler";

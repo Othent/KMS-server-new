@@ -3,7 +3,7 @@ import {
   ExpressRequestWithToken,
   getAuth0Issuer,
   getAuth0URL,
-} from "../../utils/auth/auth0";
+} from "../../utils/auth/auth0.utils";
 import { expressjwt } from "express-jwt";
 import express from "express";
 

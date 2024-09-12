@@ -1,5 +1,5 @@
 import { CONFIG } from "../../server/config/config.utils";
-import { IdTokenWithData } from "../auth/auth0";
+import { IdTokenWithData } from "../auth/auth0.utils";
 import { kmsClient } from "./kmsClient";
 import { google } from "@google-cloud/kms/build/protos/protos";
 

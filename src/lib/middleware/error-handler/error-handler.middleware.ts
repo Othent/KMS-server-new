@@ -3,7 +3,7 @@ import { Route } from "../../server/server.constants";
 import {
   ExpressRequestWithToken,
   isExpressRequestWithToken,
-} from "../../utils/auth/auth0";
+} from "../../utils/auth/auth0.utils";
 import express from "express";
 import { logRequestError } from "../../utils/log/log.utils";
 

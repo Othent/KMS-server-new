@@ -1,7 +1,7 @@
 import {describe, expect, test} from '@jest/globals';
 import { signHandlerFactory, SignIdTokenData, SignResponseData, LegacySignIdTokenData, LegacySignResponseData } from './sign.handler';
 import httpMocks from "node-mocks-http";
-import { ExpressRequestWithToken } from '../../utils/auth/auth0';
+import { ExpressRequestWithToken } from '../../utils/auth/auth0.utils';
 import { Route } from '../../server/server.constants';
 import { B64String, B64UrlString, stringToUint8Array, uint8ArrayTob64, uint8ArrayTob64Url } from '../../utils/arweave/arweaveUtils';
 import { EMPTY_VALUES, LEGACY_TOKEN_DATA_FORMATS, LegacyBufferRecord, LegacyTokenDataFormat, normalizeBufferData, TOKEN_DATA_FORMATS, TokenDataFormat } from '../common.types';
