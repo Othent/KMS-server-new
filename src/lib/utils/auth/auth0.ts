@@ -1,4 +1,3 @@
-import type { JwtPayload } from "jsonwebtoken";
 import express from "express";
 import { CONFIG } from "../../server/config/config.utils";
 import { B64UrlString, ownerToAddress } from "../arweave/arweaveUtils";
@@ -10,26 +9,17 @@ import { pem2jwk } from "pem-jwk";
 import { getSignKeyVersionPath } from "../kms/google-kms.utils";
 import { kmsClient } from "../kms/kmsClient";
 import { ActivateKeysIdTokenData } from "../../operations/activate-keys/activate-keys.handler";
+import type { IdToken } from "@auth0/auth0-spa-js";
 
-export interface IdTokenWithData<D = void> extends JwtPayload {
-  // Default from Auth0:
-  given_name: string;
-  family_name: string;
-  nickname: string;
-  picture: string;
-  locale: string;
-  updated_at: string;
-  email: string;
-  email_verified: string;
-  nonce: string;
-  name: string;
-  sid: string;
-
+export interface UserMetadata {
   // Custom from Auth0's Add User Metadata action:
   owner: B64UrlString; // Public key derived from `sub`.
   walletAddress: B64UrlString; // Wallet address derived from `owner`.
   authSystem: "KMS";
+}
 
+
+export interface IdTokenWithData<D = void> extends IdToken, UserMetadata {
   // Extra data also added to the token in Add User Metadata action when calling functions other than createUser:
   data: void extends D ? never : D;
 }
@@ -89,7 +79,7 @@ async function getPublicKey(idToken: IdTokenWithData<any>) {
 
 export async function updateAuth0User(
   idToken: IdTokenWithData<CreateUserIdTokenData | LegacyCreateUserIdTokenData> | IdTokenWithData<ActivateKeysIdTokenData>,
-) {
+): Promise<UserMetadata> {
   const { sub } = idToken;
 
   if (!sub) throw new Error("Cannot generate wallet address.");
@@ -137,6 +127,12 @@ export async function updateAuth0User(
   }
 
   try {
+    const userMetadata: UserMetadata = {
+      authSystem: CONFIG.AUTH_SYSTEM,
+      owner,
+      walletAddress,
+    };
+
     await axios.request({
       method: "PATCH",
       url: getAuth0URL(`/api/v2/users/${sub}`),
@@ -145,13 +141,11 @@ export async function updateAuth0User(
         "content-type": "application/json",
       },
       data: {
-        user_metadata: {
-          authSystem: CONFIG.AUTH_SYSTEM,
-          owner,
-          walletAddress,
-        },
+        user_metadata: userMetadata,
       },
     });
+
+    return userMetadata;
   } catch (err) {
     throw createOrPropagateError(
       OthentErrorID.UserCreation,

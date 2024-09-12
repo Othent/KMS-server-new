@@ -15,8 +15,8 @@ export class Config {
 
   // NON-ENV:
 
-  AUTH_SYSTEM = "KMS";
-  UPLOAD_LIMIT = "100mb";
+  AUTH_SYSTEM = "KMS" as const;
+  UPLOAD_LIMIT = "100mb" as const;
 
   // NODE / SERVER ENV:
 

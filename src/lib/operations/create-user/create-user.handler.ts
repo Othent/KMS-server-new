@@ -1,6 +1,6 @@
 import express from "express";
 import { createUser } from "./createUser";
-import { ExpressRequestWithToken } from "../../utils/auth/auth0";
+import { ExpressRequestWithToken, IdTokenWithData } from "../../utils/auth/auth0";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { Route } from "../../server/server.constants";
 import { BaseOperationIdTokenData } from "../common.types";
@@ -15,9 +15,13 @@ export interface CreateUserIdTokenData extends BaseOperationIdTokenData<Route.CR
   importOnly: boolean;
 }
 
-export interface CreateUserResponseData {
+export interface LegacyCreateUserResponseData {
   data: boolean;
 };
+
+export interface CreateUserResponseData {
+  idTokenWithData: IdTokenWithData<null> | null;
+}
 
 export function createUserHandlerFactory() {
   return async (
@@ -34,11 +38,14 @@ export function createUserHandlerFactory() {
     const isLegacyData = !data?.hasOwnProperty("path");
     // const importOnly = !!idToken.data?.importOnly;
     const importOnly = false;
-    const success = await createUser(idToken, importOnly);
+    const idTokenWithData = await createUser(idToken, importOnly);
 
     logRequestSuccess(Route.CREATE_USER, idToken);
 
-    // TODO: Return new version directly as B64:
-    res.json({ data: success } satisfies CreateUserResponseData);
+    res.send(
+      isLegacyData
+        ? { data: !!idTokenWithData } satisfies LegacyCreateUserResponseData
+        : { idTokenWithData } satisfies CreateUserResponseData
+    );
   };
 }

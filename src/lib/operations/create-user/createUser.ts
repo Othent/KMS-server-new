@@ -1,4 +1,4 @@
-import { IdTokenWithData, updateAuth0User } from "../../utils/auth/auth0";
+import { IdTokenWithData, updateAuth0User, UserMetadata } from "../../utils/auth/auth0";
 import { CreateUserIdTokenData, LegacyCreateUserIdTokenData } from "./create-user.handler";
 import { CONFIG } from "../../server/config/config.utils";
 import { delay } from "../../utils/tools/delay";
@@ -8,7 +8,7 @@ import { notifyUserCreationOnSlack } from "../../utils/slack/slack.utils";
 export async function createUser(
   idToken: IdTokenWithData<CreateUserIdTokenData | LegacyCreateUserIdTokenData>,
   importOnly: boolean,
-) {
+): Promise<IdTokenWithData<null> | null> {
   // TODO: Check if the keyRing / signKey / encryptDecryptKey already exists but the keys were never generated or
   // imported?
 
@@ -35,10 +35,11 @@ export async function createUser(
   // TODO: Replace with code that actually checks the key state:
   await delay(2000);
 
+  let userMetadata: UserMetadata | null = null;
+
   if (!importOnly) {
-    await updateAuth0User(idToken);
+    userMetadata = await updateAuth0User(idToken);
   }
 
-  // TODO: Return the created user and keys status?
-  return true;
+  return userMetadata ? { ...idToken, ...userMetadata, data: null } satisfies IdTokenWithData<null> : null;
 }
