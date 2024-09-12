@@ -15,8 +15,6 @@ export async function createKeyRing(
     keyRingId,
   });
 
-  console.log("createKeyRing DONE");
-
   return keyRing;
 }
 
@@ -39,8 +37,6 @@ export async function createSignKey(
     skipInitialVersionCreation: importOnly,
   });
 
-  console.log("createSignKey DONE");
-
   return key;
 }
 
@@ -62,8 +58,6 @@ export async function createEncryptDecryptKey(
     },
     skipInitialVersionCreation: importOnly,
   });
-
-  console.log("createEncryptDecryptKey DONE");
 
   return key;
 }
@@ -95,8 +89,6 @@ export async function createImportJob(
       importMethod: 'RSA_OAEP_3072_SHA256',
     },
   });
-
-  console.log("createImportJob DONE");
 
   return importJob;
 }
