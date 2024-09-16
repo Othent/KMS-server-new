@@ -1,7 +1,7 @@
 import { expressJwtSecret, GetVerificationKey } from "jwks-rsa";
 import {
-  getAuth0Issuer,
-  getAuth0URL,
+  getAuth0IssuerURL,
+  getAuth0CustomDomainURL,
 } from "../../utils/auth/auth0.utils";
 import { expressjwt } from "express-jwt";
 import express from "express";
@@ -27,19 +27,15 @@ export function jwtValidatorFactory() {
   // - https://github.com/sgmeyer/auth0-node-jwks-rs256
 
   const secret = expressJwtSecret({
-    jwksUri: getAuth0URL("/.well-known/jwks.json/"),
+    jwksUri: getAuth0CustomDomainURL("/.well-known/jwks.json/"),
   }) as GetVerificationKey;
 
   return expressjwt({
     getToken,
     secret,
-
     requestProperty: "idToken",
-
-    // TODO: Validate both audience and issuer:
-    // audience: "",
-
-    issuer: getAuth0Issuer(),
+    issuer: getAuth0IssuerURL(),
+    // audience: "", // Only for machine-to-machine tokens?
     algorithms: ["RS256"],
   }) as JWTValidatorMiddlewareFn;
 }

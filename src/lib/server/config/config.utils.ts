@@ -27,9 +27,10 @@ export class Config {
 
   // AUTH0:
 
-  AUTH0_CLIENT_DOMAIN = "";
-  AUTH0_CLIENT_ID = "";
-  AUTH0_CLIENT_SECRET = "";
+  AUTH0_CUSTOM_DOMAIN = "";
+  AUTH0_M2M_CLIENT_DOMAIN = "";
+  AUTH0_M2M_CLIENT_ID = "";
+  AUTH0_M2M_CLIENT_SECRET = "";
 
   // GOOGLE KMS:
 
@@ -80,9 +81,10 @@ export class Config {
 
     // AUTH0:
 
-    this.AUTH0_CLIENT_DOMAIN = process.env.auth0ClientDomain || "";
-    this.AUTH0_CLIENT_ID = process.env.auth0ClientId || "";
-    this.AUTH0_CLIENT_SECRET = process.env.auth0ClientSecret || "";
+    this.AUTH0_CUSTOM_DOMAIN = process.env.auth0CustomDomain || "";
+    this.AUTH0_M2M_CLIENT_DOMAIN = process.env.auth0ClientDomain || "";
+    this.AUTH0_M2M_CLIENT_ID = process.env.auth0ClientId || "";
+    this.AUTH0_M2M_CLIENT_SECRET = process.env.auth0ClientSecret || "";
 
     // GOOGLE KMS:
 
@@ -180,9 +182,10 @@ export class Config {
     // AUTH0:
 
     const isAuth0Valid = !!(
-      this.AUTH0_CLIENT_DOMAIN &&
-      this.AUTH0_CLIENT_ID &&
-      this.AUTH0_CLIENT_SECRET
+      this.AUTH0_CUSTOM_DOMAIN &&
+      this.AUTH0_M2M_CLIENT_DOMAIN &&
+      this.AUTH0_M2M_CLIENT_ID &&
+      this.AUTH0_M2M_CLIENT_SECRET
     );
 
     // GOOGLE KMS:
@@ -244,10 +247,11 @@ export class Config {
       `${isAuth0Valid ? "✅" : "❌"}  AUTH0${isAuth0Valid ? ":" : " - Auth0 must always be configured"}`,
     );
     console.log(" ╷");
-    console.log(` ├ AUTH0_CLIENT_DOMAIN = ${this.AUTH0_CLIENT_DOMAIN}`);
-    console.log(` ├ AUTH0_CLIENT_ID = ${this.AUTH0_CLIENT_ID}`);
+    console.log(` ├ AUTH0_CUSTOM_DOMAIN = ${this.AUTH0_CUSTOM_DOMAIN}`);
+    console.log(` ├ AUTH0_M2M_CLIENT_DOMAIN = ${this.AUTH0_M2M_CLIENT_DOMAIN}`);
+    console.log(` ├ AUTH0_M2M_CLIENT_ID = ${this.AUTH0_M2M_CLIENT_ID}`);
     console.log(
-      ` └ AUTH0_CLIENT_SECRET = ${this.AUTH0_CLIENT_SECRET ? "****" : ""}  `,
+      ` └ AUTH0_M2M_CLIENT_SECRET = ${this.AUTH0_M2M_CLIENT_SECRET ? "****" : ""}  `,
     );
     console.log("");
     console.log(

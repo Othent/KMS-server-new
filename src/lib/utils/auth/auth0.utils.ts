@@ -10,18 +10,33 @@ import { kmsClient } from "../kms/kmsClient";
 import { ActivateKeysIdTokenData } from "../../operations/activate-keys/activate-keys.handler";
 import { IdTokenWithData, UserMetadata } from "./auth0.types";
 
-export type ValidAuth0Pathnames =
-  | "/oauth/token/"
-  | "/api/v2/"
-  | `/api/v2/users/${string}`
-  | `/.well-known/jwks.json/`;
-
-export function getAuth0URL(pathname: ValidAuth0Pathnames) {
-  return `https://${CONFIG.AUTH0_CLIENT_DOMAIN}${pathname}` as const;
+export function getAuth0IssuerURL() {
+  return `https://${CONFIG.AUTH0_CUSTOM_DOMAIN}/` as const;
 }
 
-export function getAuth0Issuer() {
-  return `https://${CONFIG.AUTH0_CLIENT_DOMAIN}/` as const;
+export type ValidAuth0CustomDomainPathnames =
+  | "/oauth/token/"
+  | "/.well-known/jwks.json/"
+  | "/.well-known/openid-configuration/";
+
+/**
+ * @returns Returns an Auth0 URL. Available URls are listed at https://auth.othent.io/.well-known/openid-configuration.
+ */
+export function getAuth0CustomDomainURL(pathname: ValidAuth0CustomDomainPathnames) {
+  return `https://${CONFIG.AUTH0_CUSTOM_DOMAIN}${pathname}` as const;
+}
+
+export type ValidAuth0MachineToMachinePathnames =
+  | "/api/v2/"
+  | `/api/v2/users/${string}`;
+
+/**
+ * @returns Returns a URL of an Auth0 resource.
+ */
+export function getAuth0MachineToMachineURL(pathname: ValidAuth0MachineToMachinePathnames) {
+  // TODO: We should be able to use the custom domain here too. See https://community.auth0.com/t/using-machine-to-machine-authentication-with-a-custom-domain/50461/3
+
+  return `https://${CONFIG.AUTH0_M2M_CLIENT_DOMAIN}${pathname}` as const;
 }
 
 async function getPublicKey(idToken: IdTokenWithData<any>) {
@@ -73,15 +88,17 @@ export async function updateAuth0User(
     // considering caching them in Redis. However, it would be really important to protect that Redis DB / cluster and
     // the key stored in it. It might be worth also using Google KMS to store that key encrypted.
 
-    const tokenResponse = await axios.post(getAuth0URL("/oauth/token/"), {
+    const tokenResponse = await axios.post(getAuth0MachineToMachineURL("/oauth/token/" as any), {
       grant_type: "client_credentials",
-      client_id: CONFIG.AUTH0_CLIENT_ID,
-      client_secret: CONFIG.AUTH0_CLIENT_SECRET,
-      audience: getAuth0URL("/api/v2/"),
+      client_id: CONFIG.AUTH0_M2M_CLIENT_ID,
+      client_secret: CONFIG.AUTH0_M2M_CLIENT_SECRET,
+      audience: getAuth0MachineToMachineURL("/api/v2/"),
     });
 
     accessToken = tokenResponse.data.access_token;
   } catch (err) {
+    console.log("ERR 1", err);
+
     // TODO: Include data.error, data.error_description and data.error_uri
 
     throw createOrPropagateError(
@@ -109,7 +126,7 @@ export async function updateAuth0User(
 
     await axios.request({
       method: "PATCH",
-      url: getAuth0URL(`/api/v2/users/${sub}`),
+      url: getAuth0MachineToMachineURL(`/api/v2/users/${sub}`),
       headers: {
         authorization: `Bearer ${accessToken}`,
         "content-type": "application/json",
@@ -121,6 +138,8 @@ export async function updateAuth0User(
 
     return userMetadata;
   } catch (err) {
+    console.log("ERR 2", err);
+
     throw createOrPropagateError(
       OthentErrorID.UserCreation,
       500,

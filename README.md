@@ -6,14 +6,16 @@ Node.js/Express.js server to interact with Auth0 and Google KMS.
 
 ## Running It Locally:
 
-First, you need to update `.env` with a valid `auth0ClientDomain`, `auth0ClientId` and `auth0ClientSecret` values pointing to an Auth0 application with the following params:
+First, you need to update `.env` with a valid `auth0CustomDomain`, `auth0ClientDomain`, `auth0ClientId` and `auth0ClientSecret` values pointing to an Auth0
+application with the following params:
 
 - Type: `Machine to Machine`.
 - Permissions / Scopes: `read:client_credentials` and `update:users` (this cannot be change after creating the Application).
 - Credentials: `Client Secret (Post)`.
 - Grant Types: `Client Credentials`.
 
-Also, the tenant both this Machine to Machine application and the Single Page application used the KMS SDK (`KeyManagementService`) you are using should have at least the `actions/add-user-metadata.ts` action configured in its Login flow.
+Also, the tenant both this Machine to Machine application and the Single Page application used the KMS SDK (`KeyManagementService`) you are using should have
+at least the `actions/add-user-metadata.ts` action configured in its Login flow.
 
 Then, simply run:
 
