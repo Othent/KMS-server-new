@@ -18,7 +18,7 @@ export function normalizeCryptoKeyVersionState(keyVersion: google.cloud.kms.v1.I
 export function getKeyRingIdFromIdToken(idToken: IdTokenWithData<any>): string {
   if (!idToken.sub) throw new Error("Cannot retrieve KeyRing ID.");
 
-  return idToken.sub.replace("|", "0");
+  return idToken.sub.replace("|", "0").replace("-","0");
 }
 
 export function getLocationPath() {
