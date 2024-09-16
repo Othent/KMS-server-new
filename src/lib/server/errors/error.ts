@@ -59,6 +59,11 @@ export class OthentServerError extends Error {
     } else if (typeof error === "string" || typeof error === "number") {
       this.cause = new Error(`${error}`);
     }
+
+    // Special case for mysterious Google KMS authentication issue:
+    if (id === OthentErrorID.Unexpected && this.cause?.message.startsWith("16 UNAUTHENTICATED")) {
+      this.developerMessage = `Is your system's time in-sync with Google KMS servers'?${ this.developerMessage ? `\n\n${ this.developerMessage }` : "" }`;
+    }
   }
 
   getErrorResponse(): ErrorResponse {
