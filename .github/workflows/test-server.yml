@@ -1,33 +1,44 @@
-name: Test server functions
+name: Test
 
 on: [push]
 
 jobs:
   test:
-    runs-on: macos-latest
-    name: 🚀 Test server functions
+    runs-on: ubuntu-latest
+    name: 🚀 Test
     steps:
-      - name: 📚 checkout
-        uses: actions/checkout@v2.1.1
-      - name: 🟢 node
-        uses: actions/setup-node@v2.5.0
+      - name: 📚 Checkout
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Install PNPM
+        uses: pnpm/action-setup@v4
         with:
-          node-version: 20.5.0
-          registry-url: https://registry.npmjs.org
-      - name: 📦 Install dependencies
-        run: npm install
-      - name: 🧪 Run tests
+          version: 9
+          run_install: false
+
+      - name: 🟢 Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: 📦 Install Dependencies
+        run: pnpm install
+
+      - name: 🧪 Run Tests
         env:
+          auth0CustomDomain: ${{ secrets.AUTH0CUSTOMDOMAIN }}
+          auth0ClientDomain: ${{ secrets.AUTH0CLIENTDOMAIN }}
           auth0ClientId: ${{ secrets.AUTH0CLIENTID }}
           auth0ClientSecret: ${{ secrets.AUTH0CLIENTSECRET }}
           kmsProjectId: ${{ secrets.KMSPROJECTID }}
+          kmsProjectLocation: ${{ secrets.KMSPROJECTLOCATION }}
           googleCredentials: ${{ secrets.GOOGLECREDENTIALS }}
           signKeyVersion: ${{ secrets.SIGNKEYVERSION }}
+          encryptDecryptKeyVersion: ${{ secrets.ENCRYPTDECRYPTKEYVERSION }}
           PORT: ${{ secrets.PORT }}
           mongoDBUsername: ${{ secrets.mongoDBUsername }}
           mongoDBPassword: ${{ secrets.mongoDBPassword }}
           mongoDBHost: ${{ secrets.mongoDBHost }}
           mongoDBName: ${{ secrets.mongoDBName }}
-        run: npm run test
-      - name: 💄 Run prettier
-        run: npm run prettier
+        run: pnpm run test

@@ -1,23 +1,10 @@
 import { MongoClient } from "mongodb";
+import { CONFIG } from "../../server/config/config.utils";
 
-export async function mongo_client() {
-  if (
-    !process.env.mongoDBUsername ||
-    !process.env.mongoDBPassword ||
-    !process.env.mongoDBHost ||
-    !process.env.mongoDBName
-  ) {
-    console.log(
-      "Please specify a mongoDBUsername/mongoDBPassword/mongoDBHost/mongoDBName file in the .env",
-    );
-    throw new Error(
-      "Please specify a mongoDBUsername/mongoDBPassword/mongoDBHost/mongoDBName file in the .env",
-    );
-  }
-
+export async function getMongoClient() {
   return new MongoClient(
-    `mongodb://${process.env.mongoDBUsername}:${encodeURIComponent(
-      process.env.mongoDBPassword,
-    )}@${process.env.mongoDBHost}/${process.env.mongoDBName}`,
+    `mongodb://${CONFIG.MONGODB_USERNAME}:${encodeURIComponent(
+      CONFIG.MONGODB_PASSWORD,
+    )}@${CONFIG.MONGODB_HOST}/${CONFIG.MONGODB_DB_NAME}`,
   );
 }

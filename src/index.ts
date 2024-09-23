@@ -1,205 +1,23 @@
+import { OthentApp } from "./lib/server/server";
+import { CONFIG } from "./lib/server/config/config.utils";
 import express from "express";
-import cors from "cors";
-import bodyParser from "body-parser";
-import multer from "multer";
-const upload = multer();
-const app: express.Application = express();
-app.use(
-  cors({
-    origin: "*",
-  }),
-);
-app.use(bodyParser.json({ limit: "100mb" }));
-app.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
-import * as dotEnv from "dotenv";
-dotEnv.config();
-import { verifyJWT } from "./lib/utils/auth/verifyJWT";
-import { OTHENT_PUBLIC_KEY } from "./lib/utils/auth/verifyJWT";
 
-// Home (ping)
-app.get("/", (req: express.Request, res: express.Response) => {
-  res.json({ response: true });
-});
+let app: express.Application | null = null;
 
-// Create user
-import createUser from "./lib/createUser";
-app.post("/create-user", async (req, res) => {
-  try {
-    const accessToken = await verifyJWT(
-      req.body.encodedData,
-      OTHENT_PUBLIC_KEY,
-    );
+try {
+  CONFIG.log();
 
-    if (accessToken) {
-      console.log(
-        "\x1b[36m%s\x1b[0m",
-        `\nRequest: /create-user, body: ${JSON.stringify(accessToken)}`,
-      );
+  if (!CONFIG.isValid) throw new Error("Invalid config.");
 
-      const response = await createUser(accessToken);
-      console.log(
-        "\x1b[32m",
-        `Response: /create-user: ${JSON.stringify(response)}`,
-      );
-      res.json(response);
-    } else {
-      res.json({ success: false, error: "Invalid JWT" });
-    }
-  } catch (error) {
-    if (error instanceof Error) {
-      res.json({ success: false, error: error.message });
-    } else {
-      res.json({ success: false, error: "An unknown error occurred" });
-    }
-  }
-});
+  const othentApp = new OthentApp();
 
-// Decrypt
-import decrypt from "./lib/decrypt";
-app.post("/decrypt", upload.single("ciphertext"), async (req, res) => {
-  try {
-    const accessToken = await verifyJWT(
-      req.body.encodedData,
-      OTHENT_PUBLIC_KEY,
-    );
+  othentApp.listen();
 
-    if (accessToken) {
-      console.log(
-        "\x1b[36m%s\x1b[0m",
-        `\nRequest: /decrypt, body: ${JSON.stringify(accessToken)}`,
-      );
+  app = othentApp.getExpressApp();
+} catch (err) {
+  console.log("The server could not be started:", err);
 
-      const response = await decrypt(
-        accessToken.data.ciphertext,
-        accessToken.data.keyName,
-      );
-      console.log(
-        "\x1b[32m",
-        `Response: /decrypt: ${JSON.stringify(response)}`,
-      );
-      res.send(response);
-    } else {
-      res.json({ success: false, error: "Invalid JWT" });
-    }
-  } catch (error) {
-    if (error instanceof Error) {
-      res.json({ success: false, error: error.message });
-    } else {
-      res.json({ success: false, error: "An unknown error occurred" });
-    }
-  }
-});
-
-// Encrypt
-import encrypt from "./lib/encrypt";
-app.post("/encrypt", upload.single("plaintext"), async (req, res) => {
-  try {
-    const accessToken = await verifyJWT(
-      req.body.encodedData,
-      OTHENT_PUBLIC_KEY,
-    );
-
-    if (accessToken) {
-      console.log(
-        "\x1b[36m%s\x1b[0m",
-        `\nRequest: /encrypt, body: ${JSON.stringify(accessToken)}`,
-      );
-
-      const response = await encrypt(
-        accessToken.data.plaintext,
-        accessToken.data.keyName,
-      );
-      console.log(
-        "\x1b[32m",
-        `Response: /encrypt: ${JSON.stringify(response)}`,
-      );
-      res.send(response);
-    } else {
-      res.json({ success: false, error: "Invalid JWT" });
-    }
-  } catch (error) {
-    if (error instanceof Error) {
-      res.json({ success: false, error: error.message });
-    } else {
-      res.json({ success: false, error: "An unknown error occurred" });
-    }
-  }
-});
-
-// Sign
-import sign from "./lib/sign";
-app.post("/sign", async (req, res) => {
-  try {
-    const accessToken = await verifyJWT(
-      req.body.encodedData,
-      OTHENT_PUBLIC_KEY,
-    );
-
-    if (accessToken) {
-      console.log(
-        "\x1b[36m%s\x1b[0m",
-        `\nRequest: /sign, body: ${JSON.stringify(accessToken)}`,
-      );
-
-      const response = await sign(
-        accessToken.data.data,
-        accessToken.data.keyName,
-      );
-      console.log("\x1b[32m", `Response: /sign: ${JSON.stringify(response)}`);
-      res.send(response);
-    } else {
-      res.json({ success: false, error: "Invalid JWT" });
-    }
-  } catch (error) {
-    if (error instanceof Error) {
-      res.json({ success: false, error: error.message });
-    } else {
-      res.json({ success: false, error: "An unknown error occurred" });
-    }
-  }
-});
-
-// Create bundle and sign data
-import createBundleAndSign from "./lib/createBundleAndSign";
-app.post("/create-bundle-and-sign", async (req, res) => {
-  try {
-    const accessToken = await verifyJWT(
-      req.body.encodedData,
-      OTHENT_PUBLIC_KEY,
-    );
-
-    if (accessToken) {
-      console.log(
-        "\x1b[36m%s\x1b[0m",
-        `\nRequest: /sign, body: ${JSON.stringify(accessToken)}`,
-      );
-
-      const response = await createBundleAndSign(
-        accessToken.data.data,
-        accessToken.data.keyName,
-        // @ts-ignore
-        accessToken.data.owner,
-        // @ts-ignore
-        accessToken.data.tags,
-      );
-      console.log("\x1b[32m", `Response: /sign: ${JSON.stringify(response)}`);
-      res.send(response);
-    } else {
-      res.json({ success: false, error: "Invalid JWT" });
-    }
-  } catch (error) {
-    if (error instanceof Error) {
-      res.json({ success: false, error: error.message });
-    } else {
-      res.json({ success: false, error: "An unknown error occurred" });
-    }
-  }
-});
-
-// Start up server
-const port = process.env.PORT;
-app.listen(port, () => {
-  console.log("\x1b[32m", `Server **LIVE** listening on port ${port}`);
-});
+  process.exit(1);
+}
 
 export default app;
