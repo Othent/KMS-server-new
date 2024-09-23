@@ -170,14 +170,12 @@ export class Config {
   }
 
   validate() {
-    const { PORT, IS_PROD, IS_DEV, IS_TEST } = this;
+    const { PORT, IS_PROD } = this;
 
     // NODE / SERVER ENV:
 
-    const isProductionPort = PORT === 80;
     const isPortValid = PORT > 0;
-    const isNodeEnvValid =
-      (isProductionPort ? IS_PROD : IS_DEV || IS_TEST) && isPortValid;
+    const isNodeEnvValid = isPortValid;
 
     // AUTH0:
 
