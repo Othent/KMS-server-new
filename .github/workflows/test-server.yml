@@ -10,7 +10,7 @@ jobs:
       - name: 📚 Checkout
         uses: actions/checkout@v4
 
-      - name: 🟢 Install PNPM
+      - name: ⚙️ Install PNPM
         uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -22,10 +22,10 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
-      - name: 📦 Install dependencies
+      - name: 📦 Install Dependencies
         run: pnpm install
 
-      - name: 🧪 Run tests
+      - name: 🧪 Run Tests
         env:
           auth0CustomDomain: ${{ secrets.AUTH0CUSTOMDOMAIN }}
           auth0ClientDomain: ${{ secrets.AUTH0CLIENTDOMAIN }}
@@ -41,6 +41,4 @@ jobs:
           mongoDBPassword: ${{ secrets.mongoDBPassword }}
           mongoDBHost: ${{ secrets.mongoDBHost }}
           mongoDBName: ${{ secrets.mongoDBName }}
-        run: npm run test
-      - name: 💄 Run prettier
-        run: npm run prettier
+        run: pnpm run test
