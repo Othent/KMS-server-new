@@ -12,7 +12,7 @@
     "start": "node dist/index.js",
     "build": "bun run prettier && tsup src/index.ts --format cjs,esm --dts",
     "dev": "node --import=tsx --watch ./src/index.ts",
-    "heroku-postbuild": "tsup src/index.ts --format cjs,esm --dts",
+    "heroku-postbuild": "pnpm run test && tsup src/index.ts --format cjs,esm --dts",
     "test": "jest",
     "test:watch": "jest --watch",
     "prettier": "prettier --write ."
