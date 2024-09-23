@@ -1,21 +1,30 @@
-name: Test server functions
+name: Test
 
 on: [push]
 
 jobs:
   test:
-    runs-on: macos-latest
-    name: 🚀 Test server functions
+    runs-on: ubuntu-latest
+    name: 🚀 Test
     steps:
-      - name: 📚 checkout
-        uses: actions/checkout@v2.1.1
-      - name: 🟢 node
-        uses: actions/setup-node@v2.5.0
+      - name: 📚 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🟢 Install PNPM
+        uses: pnpm/action-setup@v4
         with:
-          node-version: 20.5.0
-          registry-url: https://registry.npmjs.org
+          version: 9
+          run_install: false
+
+      - name: 🟢 Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
       - name: 📦 Install dependencies
-        run: npm install
+        run: pnpm install
+
       - name: 🧪 Run tests
         env:
           auth0CustomDomain: ${{ secrets.AUTH0CUSTOMDOMAIN }}
