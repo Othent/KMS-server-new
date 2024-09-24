@@ -1,0 +1,93 @@
+name: 📋 Server CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  auth0CustomDomain: ${{ secrets.AUTH0CUSTOMDOMAIN }}
+  auth0ClientDomain: ${{ secrets.AUTH0CLIENTDOMAIN }}
+  auth0ClientId: ${{ secrets.AUTH0CLIENTID }}
+  auth0ClientSecret: ${{ secrets.AUTH0CLIENTSECRET }}
+
+  kmsProjectId: ${{ secrets.KMSPROJECTID }}
+  kmsProjectLocation: ${{ secrets.KMSPROJECTLOCATION }}
+  googleCredentials: ${{ secrets.GOOGLECREDENTIALS }}
+
+  signKeyVersion: ${{ secrets.SIGNKEYVERSION }}
+  encryptDecryptKeyVersion: ${{ secrets.ENCRYPTDECRYPTKEYVERSION }}
+
+  PORT: ${{ secrets.PORT }}
+
+  mongoDBUsername: ${{ secrets.mongoDBUsername }}
+  mongoDBPassword: ${{ secrets.mongoDBPassword }}
+  mongoDBHost: ${{ secrets.mongoDBHost }}
+  mongoDBName: ${{ secrets.mongoDBName }}
+
+  SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+  SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+
+  NODE_ENV: development
+
+jobs:
+
+  build:
+    name: 🧱 Build (tsup)
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: 📚 Checkout
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Environment and Dependencies
+        uses: ./.github/actions/setup-environment-n-deps
+
+      - name: 🧱 Build (tsup)
+        run: pnpm build
+
+      - name: ✅ Verify Build
+        run: pnpm start --onlyCheck
+
+        # Most likely not needed until monorepo:
+        # env:
+        #   NODE_OPTIONS: --max-old-space-size=32768
+
+  # TODO: Enable later once I add the linter.
+  # lint:
+  #   name: 🕵️ Lint (eslint)
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+
+  #     - name: 📚 Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: ⚙️ Setup Environment and Dependencies
+  #       uses: ./.github/actions/setup-environment-n-deps
+
+  #     - name: 🕵️ Lint (eslint)
+  #       run: pnpm lint
+
+  test:
+    name: 🧪 Test (Jest)
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: 📚 Checkout
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Environment and Dependencies
+        uses: ./.github/actions/setup-environment-n-deps
+
+      - name: 🧪 Test (Jest)
+        run: pnpm test
