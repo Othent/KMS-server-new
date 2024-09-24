@@ -211,19 +211,6 @@ export class Config {
       )
     );
 
-    console.log(
-      !!this.KMS_ENVIRONMENT,
-      !!this.KMS_PROJECT_ID,
-      !!this.KMS_PROJECT_LOCATION,
-      !!this.KMS_IMPORT_JOB_ID,
-      !!this.KMS_SIGN_KEY_ID,
-      !!this.KMS_SIGN_KEY_VERSION,
-      !!this.KMS_ENCRYPT_DECRYPT_KEY_ID,
-      !!this.KMS_ENCRYPT_DECRYPT_KEY_VERSION,
-      !!this.KMS_SIGN_KEY_ALGORITHM,
-      !!this.KMS_ENCRYPT_DECRYPT_KEY_ALGORITHM,
-    );
-
     // MONGODB & SLACK:
 
     const isMongoDBValid = IS_PROD ? this.MONGODB_ENABLED : true;
