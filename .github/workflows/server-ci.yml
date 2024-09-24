@@ -17,16 +17,23 @@ env:
   auth0ClientDomain: ${{ secrets.AUTH0CLIENTDOMAIN }}
   auth0ClientId: ${{ secrets.AUTH0CLIENTID }}
   auth0ClientSecret: ${{ secrets.AUTH0CLIENTSECRET }}
+
   kmsProjectId: ${{ secrets.KMSPROJECTID }}
   kmsProjectLocation: ${{ secrets.KMSPROJECTLOCATION }}
   googleCredentials: ${{ secrets.GOOGLECREDENTIALS }}
+
   signKeyVersion: ${{ secrets.SIGNKEYVERSION }}
   encryptDecryptKeyVersion: ${{ secrets.ENCRYPTDECRYPTKEYVERSION }}
+
   PORT: ${{ secrets.PORT }}
+
   mongoDBUsername: ${{ secrets.mongoDBUsername }}
   mongoDBPassword: ${{ secrets.mongoDBPassword }}
   mongoDBHost: ${{ secrets.mongoDBHost }}
   mongoDBName: ${{ secrets.mongoDBName }}
+
+  SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+  SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
 
 jobs:
 
@@ -44,6 +51,9 @@ jobs:
 
       - name: 🧱 Build (tsup)
         run: pnpm build
+
+      - name: ✅ Verify Build
+        run: pnpm build --onlyCheck
 
         # Most likely not needed until monorepo:
         # env:
@@ -66,7 +76,7 @@ jobs:
   #       run: pnpm lint
 
   test:
-    name: 🧪 Test
+    name: 🧪 Test (Jest)
     runs-on: ubuntu-latest
 
     steps:
@@ -77,5 +87,5 @@ jobs:
       - name: ⚙️ Setup Environment and Dependencies
         uses: ./.github/actions/setup-environment-n-deps
 
-      - name: 🧪 Tests
+      - name: 🧪 Test (Jest)
         run: pnpm test

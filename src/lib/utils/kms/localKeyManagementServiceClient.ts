@@ -192,7 +192,6 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
     const { pem } = publicKeyResponse[0];
 
     console.log(` └ publicKey =\n\n${pem}`)
-    console.log("");
   }
 
   locationPath(...args: string[]) {

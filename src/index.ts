@@ -2,6 +2,20 @@ import { OthentApp } from "./lib/server/server";
 import { CONFIG } from "./lib/server/config/config.utils";
 import express from "express";
 
+interface ServerArgs {
+  onlyCheck?: boolean;
+}
+
+const args = process.argv.slice(2).reduce((acc, cur) => {
+  const parts = cur.split("=");
+  const key = parts[0].replace(/^-+/, "");
+  const value = parts[1] === undefined ? true : parts[1];
+
+  acc[key] = value;
+
+  return acc;
+}, {} as Record<string, string | boolean>) as ServerArgs;
+
 let app: express.Application | null = null;
 
 try {
@@ -11,7 +25,9 @@ try {
 
   const othentApp = new OthentApp();
 
-  othentApp.listen();
+  if (!args.onlyCheck) {
+    othentApp.listen();
+  }
 
   app = othentApp.getExpressApp();
 } catch (err) {

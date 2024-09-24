@@ -170,12 +170,15 @@ export class Config {
   }
 
   validate() {
-    const { PORT, IS_PROD } = this;
+    const { PORT, IS_PROD, IS_DEV, IS_TEST } = this;
 
     // NODE / SERVER ENV:
 
     const isPortValid = PORT > 0;
-    const isNodeEnvValid = isPortValid;
+    const isNodeEnvValid =
+      isPortValid &&
+      process.env.NODE_ENV !== undefined &&
+      (IS_PROD || IS_DEV || IS_TEST);
 
     // AUTH0:
 
@@ -199,6 +202,13 @@ export class Config {
       this.KMS_ENCRYPT_DECRYPT_KEY_VERSION &&
       this.KMS_SIGN_KEY_ALGORITHM &&
       this.KMS_ENCRYPT_DECRYPT_KEY_ALGORITHM
+    ) && (
+      (IS_PROD && this.KMS_ENVIRONMENT === "PRODUCTION_SERVER") || (
+        (IS_DEV || IS_TEST) && (
+          this.KMS_ENVIRONMENT === "DEVELOPMENT_SERVER" ||
+          this.KMS_ENVIRONMENT === "LOCAL_MOCK"
+        )
+      )
     );
 
     // MONGODB & SLACK:
@@ -253,7 +263,7 @@ export class Config {
     );
     console.log("");
     console.log(
-      `${isGoogleKMSValid ? "✅" : "❌"}  GOOGLE KMS (${ KMS_ENVIRONMENT })${isGoogleKMSValid ? ":" : " - GoogleKMS must be configured in production"}`,
+      `${isGoogleKMSValid ? "✅" : "❌"}  GOOGLE KMS (${ KMS_ENVIRONMENT })${isGoogleKMSValid ? ":" : " - Invalid GoogleKMS config"}`,
     );
     console.log(" ╷");
     console.log(` ├ GOOGLE_CREDENTIALS = ${Object.keys(this.GOOGLE_CREDENTIALS).length > 0 ? "{ **** }" : "{}"}`);
