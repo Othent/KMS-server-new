@@ -36,8 +36,11 @@ jobs:
 
     steps:
 
+      - name: 📚 Checkout
+        uses: actions/checkout@v4
+
       - name: ⚙️ Setup Environment and Dependencies
-        uses: ./../actions/setup-environment-n-deps
+        uses: ./.github/actions/setup-environment-n-deps
 
       - name: 🧱 Build (tsup)
         run: pnpm build
@@ -53,8 +56,11 @@ jobs:
 
   #   steps:
 
+  #     - name: 📚 Checkout
+  #       uses: actions/checkout@v4
+
   #     - name: ⚙️ Setup Environment and Dependencies
-  #       uses: ./../actions/setup-environment-n-deps
+  #       uses: ./.github/actions/setup-environment-n-deps
 
   #     - name: 🕵️ Lint (eslint)
   #       run: pnpm lint
@@ -65,8 +71,12 @@ jobs:
 
     steps:
 
+
+      - name: 📚 Checkout
+        uses: actions/checkout@v4
+
       - name: ⚙️ Setup Environment and Dependencies
-        uses: ./../actions/setup-environment-n-deps
+        uses: ./.github/actions/setup-environment-n-deps
 
       - name: 🧪 Tests
         run: pnpm test

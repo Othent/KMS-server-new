@@ -35,6 +35,3 @@ runs:
     - name: 📦 Install Dependencies
       shell: bash
       run: pnpm install --frozen-lockfile=false
-
-    - name: 📚 Checkout
-      uses: actions/checkout@v4
