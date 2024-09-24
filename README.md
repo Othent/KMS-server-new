@@ -1,13 +1,29 @@
-# KMS Server (New)
+# Othent KMS Server
 
-Node.js/Express.js server to interact with Auth0 and Google KMS.
+Othent's Node.js/Express.js server to manage Arweave wallets/keys stored in Google Key Management Service, secured by
+Auth0.
+
+Try our demo at [kms-demo.othent.io](https://kms-demo.othent.io)!
+
+<br />
+
+[![Othent KMS JS SDK NPM page](https://img.shields.io/npm/v/%40othent%2Fkms?style=for-the-badge&color=%23CC3534)](https://www.npmjs.com/package/@othent/kms) [![Othent KMS Server Statements Coverage](https://img.shields.io/badge/Stmts_Coverage-65.83%25-black?style=for-the-badge&color=%23FFFF00)](https://www.npmjs.com/package/@othent/kms)
+
+
+<br />
+
+[![Othent KMS JS SDK NPM demo](https://kms-demo.othent.io/othent-kms-demo-screenshot.png)](https://kms-demo.othent.io)
+
+<br />
+
+Learn how to set it up at https://docs.othent.io or looking at our demo's code at https://github.com/Othent/KMS-test-repo.
 
 <br />
 
 ## Running It Locally:
 
 First, you need to update `.env` with a valid `auth0CustomDomain`, `auth0ClientDomain`, `auth0ClientId` and `auth0ClientSecret` values pointing to an Auth0
-application with the following params:
+application created with the following params:
 
 - Type: `Machine to Machine`.
 - Permissions / Scopes: `read:client_credentials` and `update:users` (this cannot be change after creating the Application).
@@ -30,7 +46,10 @@ You don't need to configure the remaining 3 services:
 - MongoDB database won't be used (this logic is skipped).
 - Slack integration won't be used (this logic is skipped).
 
+You might also want to install VSCode's CodeQL extension. See https://codeql.github.com/.
+
 <br />
+
 
 ## Running It In Production:
 
@@ -41,22 +60,27 @@ Remember you need to set the different variables in `.env` or your Cloud provide
 - MongoDB database.
 - Slack integration.
 
+<br />
+
+
 ## Testing And Backwards Compatibility:
 
 As there's only one production / live version of the server project at a time, tests need to make sure that the current
-server can take request and send responses that work with both the old SDK and the new SDK.
+server can take request and send responses that work with both the latest SDK (`@othent/kms`) version, as well as older
+versions.
 
 Below we can see a breakdown of the main server functions and the data types the different SDK versions would send to
 them and expect as response.
 
-Also note that, right now the request data types mentioned below are the ones included as `data` in Auth0's ID token.
-- The response data types mentioned below are sent directly, mea
+This repository contains a specific `.spec.ts` for each of these functions, to verify they work as expected and are
+backwards-compatible. Alternatively, the [playground project]( https://github.com/Othent/KMS-test-repo) can be run
+locally with an older (`v1`) `@othent/kms` by using an adapter (included in the repo, but commented out). However, keep
+in mind that won't be as exhaustive as the test in this repo, and not all cases mentioned below will be tested.
 
-### Old SDK (v1)
+<br />
 
-To verify that the server is backwards-compatible with the old SDK you should run `sdk-v1-compatibility.e2e.ts`.
-Alternatively, you can also run the playground locally with an old `v1` SDK plus an adapter, but that won't be as
-exhaustive as the test and some of the param types mentioned below won't be tested:
+
+### v1 SDK
 
 - `createUser`
 
@@ -104,8 +128,10 @@ exhaustive as the test and some of the param types mentioned below won't be test
 
     See https://github.com/Othent/KeyManagementService/pull/18/files#r1686770313
 
+<br />
 
-### New SDK (v2.0.0)
+
+### v2.0.0 SDK
 
 Version `2.0.0` of `@othent/kms` improves and normalizes the data types accepted and returned by the different
 functions, but doesn't change the shape in which that data is sent to the server, so that's still `LegacyBufferRecord`
@@ -116,6 +142,9 @@ The only breaking change is that `decrypt` would not accept `BufferObject` / `Le
 developers upgrading to `2.0.0` would have to convert those manually.
 
 See: https://github.com/Othent/KeyManagementService/pull/18/files#r1686770313
+
+<br />
+
 
 ### New / Upcoming Server & SDK (v2.1.0)
 
@@ -129,8 +158,9 @@ For the server, particularly:
 
 For the SDK, particularly:
 
-- Remove `data.keyName`.
-- Add `data.path` and validate this on the server as well.
-- Stop using `BufferObject` / `LegacyBufferObject` / `LegacyBufferRecord` and instead serialize/send the data as
+- Remove `data.keyName` and add `data.path` instead.
+
+- Stop using `BufferObject` / `LegacyBufferObject` / `LegacyBufferRecord` and instead serialize/send all data as
   `B64string`.
-- Also update the parsing of the responses after the server stops sending that unnecessary `data` property.
+
+- Also update the parsing of the responses after the server stops sending that unnecessary nested `data` property.

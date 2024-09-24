@@ -1,4 +1,4 @@
-name: 📋 Server CI
+name: 🧪 Building & Testing
 
 on:
   pull_request:

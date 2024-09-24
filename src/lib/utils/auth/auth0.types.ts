@@ -10,6 +10,8 @@ export interface UserMetadata {
 }
 
 export interface IdTokenWithData<D = void> extends IdToken, UserMetadata {
+  sub: string;
+
   // Extra data also added to the token in Add User Metadata action when calling functions other than createUser:
   data: void extends D ? never : D;
 }
