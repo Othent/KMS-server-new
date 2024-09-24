@@ -1,9 +1,5 @@
-import * as dotEnv from "dotenv";
 import type { GoogleAuthOptions } from "google-auth-library";
 import { google } from "@google-cloud/kms/build/protos/protos";
-
-// TODO: Not needed in Node.js 20:
-dotEnv.config();
 
 type KMSEnvironment = "DEVELOPMENT_SERVER" | "PRODUCTION_SERVER" | "LOCAL_MOCK" | "";
 
