@@ -278,7 +278,7 @@ export class Config {
     console.log(` └ KMS_ENCRYPT_DECRYPT_KEY_ALGORITHM = ${!!this.KMS_ENCRYPT_DECRYPT_KEY_ALGORITHM ? "****" : ""}`);
     console.log("");
     console.log(
-      `${isMongoDBValid ? "✅" : "❌"}  MONGO DB${isMongoDBValid ? ":" : " - MongoDB must be configured in production"}`,
+      `${ this.MONGODB_ENABLED ? (isMongoDBValid ? "✅" : "❌") : "⚫" }  MONGO DB${isMongoDBValid ? ":" : " - MongoDB must be configured in production"}`,
     );
     console.log(" ╷");
     console.log(
@@ -291,7 +291,7 @@ export class Config {
     console.log(` └ MONGODB_DB_NAME = ${!!this.MONGODB_DB_NAME ? "****" : ""}`);
     console.log("");
     console.log(
-      `${isSlackValid ? "✅" : "❌"}  SLACK${isSlackValid ? ":" : " - Slack must be configured in production"}`,
+      `${ this.SLACK_ENABLED ? (isSlackValid ? "✅" : "❌") : "⚫" }  SLACK${isSlackValid ? ":" : " - Slack must be configured in production"}`,
     );
     console.log(" ╷");
     console.log(
