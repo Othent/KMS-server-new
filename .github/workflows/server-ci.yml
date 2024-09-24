@@ -53,7 +53,7 @@ jobs:
         run: pnpm build
 
       - name: ✅ Verify Build
-        run: pnpm build --onlyCheck
+        run: pnpm start --onlyCheck
 
         # Most likely not needed until monorepo:
         # env:
