@@ -5,23 +5,26 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "engines": {
-    "node": ">=20.17.0 <22.0.0"
-  },
   "scripts": {
     "start": "node dist/index.js",
-    "build": "bun run prettier && tsup src/index.ts --format cjs,esm --dts",
+    "build": "tsup src/index.ts --format cjs,esm --dts",
     "dev": "node --import=tsx --watch ./src/index.ts",
-    "heroku-postbuild": "tsup src/index.ts --format cjs,esm --dts",
+    "heroku-postbuild": "pnpm build",
+    "clean": "rm -rf dist",
+    "nuke": "pnpm clean && rm -rf node_modules pnpm-lock.yaml",
     "test": "jest",
     "test:watch": "jest --watch",
-    "prettier": "prettier --write ."
+    "prettier": "prettier --write .",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Othent/kms-server-new.git"
   },
-  "author": "Lorimer Jenkins",
+  "contributors": [
+    "Lorimer Jenkins <lj@communitylabs.com> (http://lorimerjenkins.com/)",
+    "Daniel Gámez Franco <dfranco@communitylabs.com> (https://gmzcodes.com/)"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Othent/kms-server-new/issues"
@@ -38,7 +41,9 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-jwt": "^8.4.1",
+    "husky": "^9.1.6",
     "jwks-rsa": "^3.1.0",
+    "lint-staged": "^15.2.10",
     "mongodb": "^6.3.0",
     "multer": "^1.4.5-lts.1",
     "pem-jwk": "^2.0.0",
@@ -67,5 +72,13 @@
     "tsup": "^8.0.1",
     "tsx": "^4.16.2",
     "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=20.17.0 <22.0.0"
+  },
+  "lint-staged": {
+    "*": [
+      "prettier --write --ignore-unknown"
+    ]
   }
 }

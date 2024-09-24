@@ -1,0 +1,72 @@
+name: 📋 Server CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  auth0CustomDomain: ${{ secrets.AUTH0CUSTOMDOMAIN }}
+  auth0ClientDomain: ${{ secrets.AUTH0CLIENTDOMAIN }}
+  auth0ClientId: ${{ secrets.AUTH0CLIENTID }}
+  auth0ClientSecret: ${{ secrets.AUTH0CLIENTSECRET }}
+  kmsProjectId: ${{ secrets.KMSPROJECTID }}
+  kmsProjectLocation: ${{ secrets.KMSPROJECTLOCATION }}
+  googleCredentials: ${{ secrets.GOOGLECREDENTIALS }}
+  signKeyVersion: ${{ secrets.SIGNKEYVERSION }}
+  encryptDecryptKeyVersion: ${{ secrets.ENCRYPTDECRYPTKEYVERSION }}
+  PORT: ${{ secrets.PORT }}
+  mongoDBUsername: ${{ secrets.mongoDBUsername }}
+  mongoDBPassword: ${{ secrets.mongoDBPassword }}
+  mongoDBHost: ${{ secrets.mongoDBHost }}
+  mongoDBName: ${{ secrets.mongoDBName }}
+
+jobs:
+
+  build:
+    name: 🧱 Build (tsup)
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: ⚙️ Setup Environment and Dependencies
+        uses: ./.github/actions/setup-node
+
+      - name: 🧱 Build (tsup)
+        run: pnpm build
+
+        # Most likely not needed until monorepo:
+        # env:
+        #   NODE_OPTIONS: --max-old-space-size=32768
+
+  # TODO: Enable later once I add the linter.
+  # lint:
+  #   name: 🕵️ Lint (eslint)
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+
+  #     - name: ⚙️ Setup Environment and Dependencies
+  #       uses: ./.github/actions/setup-node
+
+  #     - name: 🕵️ Lint (eslint)
+  #       run: pnpm lint
+
+  test:
+    name: 🧪 Test
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: ⚙️ Setup Environment and Dependencies
+        uses: ./.github/actions/setup-node
+
+      - name: 🧪 Tests
+        run: pnpm test
