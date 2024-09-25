@@ -18,7 +18,7 @@ stmtsCoverage=$(echo "$stmtsCoverageFromJSON" | awk '{printf "%d", $1 * 100}')
 # Set the color based on the coverage value
 if (( stmtsCoverage < 5000 )); then
     badgeColor="FF0000"
-elif (( stmtsCoverage < 7000 )); then
+elif (( stmtsCoverage < 8000 )); then
     badgeColor="FFFF00"
 else
     badgeColor="008000"
