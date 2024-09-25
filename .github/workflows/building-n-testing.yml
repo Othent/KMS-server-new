@@ -27,15 +27,17 @@ env:
 
   PORT: ${{ secrets.PORT }}
 
-  mongoDBUsername: ${{ secrets.mongoDBUsername }}
-  mongoDBPassword: ${{ secrets.mongoDBPassword }}
-  mongoDBHost: ${{ secrets.mongoDBHost }}
-  mongoDBName: ${{ secrets.mongoDBName }}
-
-  SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
-  SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
-
   NODE_ENV: test
+
+  # These are only used in the production environment, they are not used in the CI which uses a test environment:
+
+  # mongoDBUsername: ${{ secrets.mongoDBUsername }}
+  # mongoDBPassword: ${{ secrets.mongoDBPassword }}
+  # mongoDBHost: ${{ secrets.mongoDBHost }}
+  # mongoDBName: ${{ secrets.mongoDBName }}
+
+  # SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+  # SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
 
 jobs:
 
