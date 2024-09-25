@@ -146,24 +146,33 @@ See: https://github.com/Othent/KeyManagementService/pull/18/files#r1686770313
 <br />
 
 
-### New / Upcoming Server & SDK (v2.1.0)
+### v2.1.0 SDK
 
-For the server, particularly:
-
-- If `data.keyName` is present, validate the data according to the format / shape required by the old server. The
-  exception to this is `createUser`, which would not have any `data`.
-
-- If `data.path` is present, validate the data according to the format / shape required by the new server, and unwrap it
-  (remove that unnecessary `data` (`data.data`) property in the response).
-
-For the SDK, particularly:
+Version `2.1.0` of `@othent/kms` changes the shape in which that data is sent to the server, getting rid of the legacy
+data types. That means that this new version of the SDK doesn't work with the old backend. These are the main changes:
 
 - Remove `data.keyName` and add `data.path` instead.
 
 - Stop using `BufferObject` / `LegacyBufferObject` / `LegacyBufferRecord` and instead serialize/send all data as
   `B64string`.
 
-- Also update the parsing of the responses after the server stops sending that unnecessary nested `data` property.
+- The `data.data` construct when extracting the data from the server responses has been replaced to have specific
+  property names for each endpoint (e.g. `data.encryptedData`).
+
+<br />
+
+
+### Server Needs
+
+According to 3 sections above, the server needs to handle both the old format / data types (`keyName` + `BufferObject`
+/ `LegacyBufferObject` data) as well as the new ones (`path` + `B64string`), so:
+
+- If `data.keyName` is present, validate the data according to the format / shape required by the old server
+  (`BufferObject` / `LegacyBufferObject` / `LegacyBufferRecord`). The exception to this is `createUser`, which would not
+  have any `data`.
+
+- If `data.path` is present, validate the data according to the format / shape required by the new server (`B64string`),
+  and use a specific property name for each endpoint to return the response's data (e.g. `data.encryptedData`).
 
 <br />
 
