@@ -35,7 +35,7 @@ env:
   SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
   SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
 
-  NODE_ENV: development
+  NODE_ENV: testing
 
 jobs:
 
