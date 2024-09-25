@@ -70,7 +70,11 @@ export class Config {
   // VALIDATION:
 
   constructor() {
-    process.loadEnvFile('.env');
+    try {
+      process.loadEnvFile('.env');
+    } catch (err) {
+      // Do nothing. This will work locally but not on the server, as the env variables there are defined in secrets.
+    }
 
     this.init();
   }
