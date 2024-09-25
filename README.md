@@ -164,3 +164,46 @@ For the SDK, particularly:
   `B64string`.
 
 - Also update the parsing of the responses after the server stops sending that unnecessary nested `data` property.
+
+<br />
+
+
+## Deploying A New Release:
+
+1.  Use [`pnpm version`](https://docs.npmjs.com/cli/v7/commands/npm-version) to bump the version, which will also make sure
+    the next commit has the right tags.
+
+    ```
+    npm version patch
+    npm version minor
+    npm version major
+    ```
+
+    The `preversion`, `version` and `postversion` scripts defined in `package.json` will test, format, build, tag and
+    push all the changes automatically. See https://docs.npmjs.com/cli/v10/commands/npm-version.
+
+2.  As soon as the new branch gets merged, a new up-to-date server will be deployed. You can verify the current live
+    version with a `GET` request to https://kms-server.othent.io:
+
+  	```
+    {
+      "version": "2.0.0",
+      "hasToken": false,
+      "hasTokenData": false,
+      "isTokenValid": false,
+      "isTokenUnused": true
+    }
+    ```
+
+<br />
+
+
+### Troubleshooting
+
+If you added / pushed an incorrect tag, you can delete it from the server with:
+
+    git push origin :refs/tags/v0.1.0
+
+And locally with:
+
+    git tag -d v0.1.0

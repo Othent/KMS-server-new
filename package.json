@@ -7,14 +7,17 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "start": "node dist/index.js",
-    "build": "tsup src/index.ts --format cjs,esm --dts",
-    "dev": "node --import=tsx --watch ./src/index.ts",
+    "build": "BUILD_DATE=\"$(date --utc +%FT%TZ)\" tsup src/index.ts --format cjs,esm --dts",
+    "dev": "BUILD_DATE=\"$(date --utc +%FT%TZ)\" node --import=tsx --watch ./src/index.ts",
     "heroku-postbuild": "pnpm build && pnpm start --onlyCheck",
     "clean": "rm -rf dist coverage",
     "nuke": "pnpm clean && rm -rf node_modules pnpm-lock.yaml",
     "test": "jest",
     "test:watch": "jest --watch",
     "prettier": "prettier --write .",
+    "preversion": "pnpm test",
+    "version": "pnpm run build && git add .",
+    "postversion": "git push && git push --tags",
     "prepare": "husky"
   },
   "repository": {

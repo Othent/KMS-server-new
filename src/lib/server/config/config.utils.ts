@@ -1,6 +1,8 @@
 import type { GoogleAuthOptions } from "google-auth-library";
 import { google } from "@google-cloud/kms/build/protos/protos";
 
+import * as pkg from "../../../../package.json";
+
 type KMSEnvironment = "DEVELOPMENT_SERVER" | "PRODUCTION_SERVER" | "LOCAL_MOCK" | "";
 
 export class Config {
@@ -8,6 +10,10 @@ export class Config {
   static KMS_LOCAL_PROJECT_ID = "othent-kms-local" as const;
 
   static KMS_DEV_PROJECT_ID = "othent-kms-dev" as const;
+
+  // BUILD
+  pgkVersion = pkg.version;
+  buildDate = process.env.BUILD_DATE || "";
 
   // NON-ENV:
 
@@ -64,6 +70,8 @@ export class Config {
   // VALIDATION:
 
   constructor() {
+    process.loadEnvFile('.env');
+
     this.init();
   }
 
