@@ -24,8 +24,10 @@ else
     badgeColor="008000"
 fi
 
+echo -e "\033[0;32m✔\033[0m Updating 'Stmts Coverage' shield to '${stmtsCoverageFromJSON}%'..."
+
 sed -i -e "s/Stmts_Coverage-.*%25.*)]/Stmts_Coverage-${stmtsCoverageFromJSON}%25-black?style=for-the-badge\&color=%23${badgeColor})]/" ./README.md
 # -i = in-place edit
 # Note there's no g flag used in the regular expression to make sure only one line is affected (just in case).
 
-git update-index --again
+git add ./README.md
