@@ -8,17 +8,17 @@ export import CryptoKeyVersionState = google.cloud.kms.v1.CryptoKeyVersion.Crypt
 export type ImportJob = Pick<google.cloud.kms.v1.IImportJob, "state" | "publicKey">;
 
 export function normalizeCryptoKeyVersionState(keyVersion: google.cloud.kms.v1.ICryptoKeyVersion) {
-  return (
-    keyVersion.state ? (
-      typeof keyVersion.state === "string" ? CryptoKeyVersionState[keyVersion.state] : keyVersion.state
-    ) : CryptoKeyVersionState.CRYPTO_KEY_VERSION_STATE_UNSPECIFIED
-  ) satisfies CryptoKeyVersionState;
+  const rawKeyVersionState = keyVersion?.state ?? CryptoKeyVersionState.CRYPTO_KEY_VERSION_STATE_UNSPECIFIED;
+  const normalizedKeyVersionState = typeof rawKeyVersionState === "string" ? CryptoKeyVersionState[rawKeyVersionState] : rawKeyVersionState;
+  const validatedKeyVersionState = Object.values(CryptoKeyVersionState).includes(normalizedKeyVersionState) ? normalizedKeyVersionState : CryptoKeyVersionState.CRYPTO_KEY_VERSION_STATE_UNSPECIFIED;
+
+  return validatedKeyVersionState satisfies CryptoKeyVersionState;
 }
 
 export function getKeyRingIdFromIdToken(idToken: IdTokenWithData<any>): string {
   if (!idToken.sub) throw new Error("Cannot retrieve KeyRing ID.");
 
-  return idToken.sub.replace("|", "0").replace("-","0");
+  return idToken.sub.replace(/[|-]/g, "0");
 }
 
 export function getLocationPath() {
