@@ -1,6 +1,5 @@
 import assert from "assert";
 import crypto from "crypto";
-import { delay } from "../tools/delay";
 import { binaryDataTypeToString, uint8ArrayTob64 } from "../arweave/arweaveUtils";
 import { CryptoKeyVersionState } from "./google-kms.utils";
 // import { KeyManagementServiceClient } from "@google-cloud/kms";
@@ -123,9 +122,6 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
 
 
   async testLocalKeyManagementServiceClient() {
-    // Give the server some time to start:
-    await delay(1000);
-
     console.log("✔️  Verifying `LocalKeyManagementServiceClient`...");
     console.log(" ╷ ");
 
