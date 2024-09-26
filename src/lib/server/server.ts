@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import { Route } from "./server.constants";
-import { pingHandlerFactory } from "../operations/ping/ping.handler";
 import { createUserHandlerFactory } from "../operations/create-user/create-user.handler";
 import { decryptHandlerFactory } from "../operations/decrypt/decrypt.handler";
 import { encryptHandlerFactory } from "../operations/encrypt/encrypt.handler";
@@ -15,6 +14,7 @@ import { errorHandlerFactory } from "../middleware/error-handler/error-handler.m
 import { importKeysHandlerFactory } from "../operations/import-keys/import-keys.handler";
 import { fetchImportJobHandlerFactory } from "../operations/fetch-import-job/fetch-import-job.handler";
 import { activateKeysHandlerFactory } from "../operations/activate-keys/activate-keys.handler";
+import { statusHandlerFactory } from "../operations/status/status.handler";
 
 export class OthentApp {
   app: express.Application = express();
@@ -55,7 +55,14 @@ export class OthentApp {
       next();
     });
 
-    app.get(Route.HOME, jwtValidator, jwtUnused, pingHandlerFactory());
+    app.get(Route.HOME,
+      asyncHandler(
+        statusHandlerFactory({
+          jwtValidator,
+          jwtUnused,
+        }),
+      ) as unknown as express.Handler,
+    );
 
     app.post(
       Route.CREATE_USER,

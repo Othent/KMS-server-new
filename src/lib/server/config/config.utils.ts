@@ -1,13 +1,19 @@
 import type { GoogleAuthOptions } from "google-auth-library";
 import { google } from "@google-cloud/kms/build/protos/protos";
 
-type KMSEnvironment = "DEVELOPMENT_SERVER" | "PRODUCTION_SERVER" | "LOCAL_MOCK" | "";
+import * as pkg from "../../../../package.json";
+
+export type KMSEnvironment = "DEVELOPMENT_SERVER" | "PRODUCTION_SERVER" | "LOCAL_MOCK" | "";
 
 export class Config {
 
   static KMS_LOCAL_PROJECT_ID = "othent-kms-local" as const;
 
   static KMS_DEV_PROJECT_ID = "othent-kms-dev" as const;
+
+  // BUILD
+  pgkVersion = pkg.version;
+  buildDate = process.env.BUILD_DATE || "";
 
   // NON-ENV:
 
@@ -64,6 +70,12 @@ export class Config {
   // VALIDATION:
 
   constructor() {
+    try {
+      process.loadEnvFile('.env');
+    } catch (err) {
+      // Do nothing. This will work locally but not on the server, as the env variables there are defined in secrets.
+    }
+
     this.init();
   }
 
@@ -174,7 +186,7 @@ export class Config {
     const isNodeEnvValid =
       isPortValid &&
       process.env.NODE_ENV !== undefined &&
-      (IS_PROD || IS_DEV || IS_TEST);
+      [IS_PROD, IS_DEV, IS_TEST].filter(Boolean).length === 1;
 
     // AUTH0:
 
@@ -255,7 +267,7 @@ export class Config {
     console.log(` ├ AUTH0_M2M_CLIENT_DOMAIN = ${this.AUTH0_M2M_CLIENT_DOMAIN}`);
     console.log(` ├ AUTH0_M2M_CLIENT_ID = ${this.AUTH0_M2M_CLIENT_ID}`);
     console.log(
-      ` └ AUTH0_M2M_CLIENT_SECRET = ${this.AUTH0_M2M_CLIENT_SECRET ? "****" : ""}  `,
+      ` └ AUTH0_M2M_CLIENT_SECRET = ${this.AUTH0_M2M_CLIENT_SECRET ? "****" : ""}`,
     );
     console.log("");
     console.log(

@@ -1,4 +1,4 @@
-name: 🧪 Building & Testing
+name: 🧞‍♂️ CI
 
 on:
   pull_request:
@@ -27,15 +27,17 @@ env:
 
   PORT: ${{ secrets.PORT }}
 
-  mongoDBUsername: ${{ secrets.mongoDBUsername }}
-  mongoDBPassword: ${{ secrets.mongoDBPassword }}
-  mongoDBHost: ${{ secrets.mongoDBHost }}
-  mongoDBName: ${{ secrets.mongoDBName }}
+  NODE_ENV: test
 
-  SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
-  SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+  # These are only used in the production environment, they are not used in the CI which uses a test environment:
 
-  NODE_ENV: development
+  # mongoDBUsername: ${{ secrets.mongoDBUsername }}
+  # mongoDBPassword: ${{ secrets.mongoDBPassword }}
+  # mongoDBHost: ${{ secrets.mongoDBHost }}
+  # mongoDBName: ${{ secrets.mongoDBName }}
+
+  # SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+  # SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
 
 jobs:
 

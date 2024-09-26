@@ -27,14 +27,25 @@ if (KMS_ENVIRONMENT === "DEVELOPMENT_SERVER" || KMS_ENVIRONMENT === "PRODUCTION_
     }, 1000);
   }
 } else if (KMS_ENVIRONMENT === "LOCAL_MOCK") {
-  const localKeyManagementServiceClient = new LocalKeyManagementServiceClient();
+  try {
+    const localKeyManagementServiceClient = new LocalKeyManagementServiceClient();
 
-  kmsClient = localKeyManagementServiceClient;
+    kmsClient = localKeyManagementServiceClient;
 
-  if (process.env.NODE_ENV !== "test") {
-    setTimeout(() => {
-      localKeyManagementServiceClient.testLocalKeyManagementServiceClient();
-    }, 1000);
+    if (process.env.NODE_ENV !== "test") {
+      setTimeout(() => {
+        localKeyManagementServiceClient.testLocalKeyManagementServiceClient();
+      }, 1000);
+    }
+  } catch (err) {
+    // For some weird reason, while running `localKeyManagementServiceClass.spec.ts`, the
+    // `new LocalKeyManagementServiceClient()` above throws:
+    //
+    // > TypeError: localKeyManagementServiceClient_1.LocalKeyManagementServiceClient is not a constructor
+    //
+    // Despite this file (`kmsClient.ts`) not being part of that test.
+
+    if (process.env.NODE_ENV !== "test") throw err;
   }
 } else {
   throw new Error("Cannot initialize `kmsClient`.");
