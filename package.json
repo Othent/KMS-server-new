@@ -1,6 +1,6 @@
 {
   "name": "@othent/kms-server",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Server for KMS interactions.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
