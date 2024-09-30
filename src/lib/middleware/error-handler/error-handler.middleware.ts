@@ -6,6 +6,8 @@ import {
 } from "../../utils/auth/auth0.types";
 import express from "express";
 import { logRequestError } from "../../utils/log/log.utils";
+import { OthentErrorID, OthentServerError } from "../../server/errors/error";
+import { notifyErrorOnSlack } from "../../utils/slack/slack.utils";
 
 export function errorHandlerFactory() {
   return (
@@ -19,6 +21,8 @@ export function errorHandlerFactory() {
       isExpressRequestWithToken(req) ? req.idToken : null,
       err,
     );
+
+    notifyErrorOnSlack(req.path as Route, err);
 
     if (res.headersSent) {
       return next(err);
