@@ -1,11 +1,12 @@
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { CONFIG } from "../../server/config/config.utils";
 import { IdTokenWithData } from "../../utils/auth/auth0.types";
-import { ActivateKeysIdTokenData } from "./activate-keys.handler";
 import { CryptoKeyVersionState, getEncryptDecryptKeyPath, getEncryptDecryptKeyVersionPath, getSignKeyPath, getSignKeyVersionPath, normalizeCryptoKeyVersionState } from "../../utils/kms/google-kms.utils";
 
-export async function activateKeys(
-  idToken: IdTokenWithData<ActivateKeysIdTokenData>,
+export const ACTIVATE_KEYS_INTERVALS = [1000, 1000, 3000, 7000, 17000]; // 1s, 2s, 5s, 12s, 29s
+
+export async function activateKeys<T>(
+  idToken: IdTokenWithData<T>,
 ) {
   const { signKeyVersionPath } = getSignKeyVersionPath(idToken);
   const { encryptDecryptKeyVersionPath } = getEncryptDecryptKeyVersionPath(idToken);

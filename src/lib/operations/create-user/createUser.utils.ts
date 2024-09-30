@@ -13,6 +13,11 @@ export async function createKeyRing(
   const [keyRing] = await kmsClient.createKeyRing({
     parent: locationPath,
     keyRingId,
+  }).catch((err) => {
+    console.log("createKeyRing error =", err);
+
+    // TODO: Only ignore errors regarding duplicate entities.
+    return [null];
   });
 
   return keyRing;
@@ -35,6 +40,11 @@ export async function createSignKey(
       importOnly,
     },
     skipInitialVersionCreation: importOnly,
+  }).catch((err) => {
+    console.log("createSignKey error =", err);
+
+    // TODO: Only ignore errors regarding duplicate entities.
+    return [null];
   });
 
   return key;
@@ -57,6 +67,11 @@ export async function createEncryptDecryptKey(
       importOnly,
     },
     skipInitialVersionCreation: importOnly,
+  }).catch((err) => {
+    console.log("createEncryptDecryptKey error =", err);
+
+    // TODO: Only ignore errors regarding duplicate entities.
+    return [null];
   });
 
   return key;
@@ -88,6 +103,11 @@ export async function createImportJob(
       protectionLevel: 'HSM',
       importMethod: 'RSA_OAEP_3072_SHA256',
     },
+  }).catch((err) => {
+    console.log("createImportJob error =", err);
+
+    // TODO: Only ignore errors regarding duplicate entities.
+    return [null];
   });
 
   return importJob;

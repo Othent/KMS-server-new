@@ -69,10 +69,27 @@ async function getPublicKey(idToken: IdTokenWithData<any>) {
 export async function updateAuth0User(
   idToken: IdTokenWithData<CreateUserIdTokenData | LegacyCreateUserIdTokenData> | IdTokenWithData<ActivateKeysIdTokenData>,
 ): Promise<UserMetadata> {
+  console.log("PREV TOKEN =", idToken);
+
   const { sub } = idToken;
 
   if (!sub) throw new Error("Cannot generate wallet address.");
 
+  const alreadyHasAuthSystem = idToken.authSystem !== undefined;
+  const alreadyHasOwner = idToken.owner !== undefined;
+  const alreadyHasWalletAddress = idToken.walletAddress !== undefined;
+
+  if (alreadyHasAuthSystem || alreadyHasOwner || alreadyHasWalletAddress) {
+    const properties = [
+      alreadyHasAuthSystem ? "`authSystem`" : "",
+      alreadyHasOwner ? "`owner`" : "",
+      alreadyHasWalletAddress ? "`walletAddress`" : "",
+    ].filter(Boolean);
+
+    throw new Error(`Cannot update user with existing ${ properties.join(", ") } properties.`);
+  }
+
+  const authSystem = CONFIG.AUTH_SYSTEM;
   const owner = await getPublicKey(idToken);
   const walletAddress = await ownerToAddress(owner);
 
@@ -97,8 +114,6 @@ export async function updateAuth0User(
 
     accessToken = tokenResponse.data.access_token;
   } catch (err) {
-    console.log("ERR 1", err);
-
     // TODO: Include data.error, data.error_description and data.error_uri
 
     throw createOrPropagateError(
@@ -119,7 +134,7 @@ export async function updateAuth0User(
 
   try {
     const userMetadata: UserMetadata = {
-      authSystem: CONFIG.AUTH_SYSTEM,
+      authSystem,
       owner,
       walletAddress,
     };
@@ -138,8 +153,6 @@ export async function updateAuth0User(
 
     return userMetadata;
   } catch (err) {
-    console.log("ERR 2", err);
-
     throw createOrPropagateError(
       OthentErrorID.UserCreation,
       500,
