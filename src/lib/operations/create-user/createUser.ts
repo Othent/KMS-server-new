@@ -34,7 +34,7 @@ export async function createUser(
 
     await delay(nextAttemptAfter);
 
-    console.log(`Attempt ${ activateKeysAttempt + 1 } / ${ ACTIVATE_KEYS_INTERVALS.length }...`);
+    console.log(`Attempt ${ activateKeysAttempt } / ${ ACTIVATE_KEYS_INTERVALS.length }...`);
 
     const activateKeyResult = await activateKeys(idToken).catch((err) => {
       console.log("activateKeys error =", err);
@@ -46,7 +46,7 @@ export async function createUser(
       activateKeyResult?.signKeyState === CryptoKeyVersionState.ENABLED &&
       activateKeyResult?.encryptDecryptKeyState === CryptoKeyVersionState.ENABLED
     );
-  } while (activateKeysAttempt <= ACTIVATE_KEYS_INTERVALS.length && !areKeysActive);
+  } while (activateKeysAttempt < ACTIVATE_KEYS_INTERVALS.length && !areKeysActive);
 
   if (!areKeysActive) {
     throw new Error("Timed out while trying to activate keys.");
