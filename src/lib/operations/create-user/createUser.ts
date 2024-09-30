@@ -21,16 +21,8 @@ export async function createUser(
     importOnly ? createImportJob(idToken) : undefined,
   ]);
 
-  // Skip the Slack ping when running locally:
-  if (CONFIG.SLACK_ENABLED) {
-    // TODO: Notify only once the keys are generated?
-
-    try {
-      await notifyUserCreationOnSlack(idToken);
-    } catch (err) {
-      console.log("Ping failed silently:", err);
-    }
-  }
+  // TODO: Notify only once the keys are generated and/or the Auth0 user is updated?
+  notifyUserCreationOnSlack(idToken);
 
   // Wait for the key to be generated...
   // TODO: Replace with code that actually checks the key state:
@@ -41,6 +33,8 @@ export async function createUser(
   if (!importOnly) {
     userMetadata = await updateAuth0User(idToken);
   }
+
+  // TODO: Throw error if !userMetadata
 
   return userMetadata ? { ...idToken, ...userMetadata, data: null } satisfies IdTokenWithData<null> : null;
 }
