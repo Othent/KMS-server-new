@@ -1,9 +1,9 @@
 import {describe, expect, test} from '@jest/globals';
 import { CreateUserIdTokenData } from './create-user.handler';
 import { IdTokenWithData } from '../../utils/auth/auth0.types';
-import { B64UrlString } from '../../utils/arweave/arweaveUtils';
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { createKeyRing, createSignKey, createEncryptDecryptKey, createImportJob } from './create-user.utils';
+import { B64UrlString } from '../../utils/lib/binary-data-types/binary-data-types.types';
 
 describe('create user utils', () => {
 

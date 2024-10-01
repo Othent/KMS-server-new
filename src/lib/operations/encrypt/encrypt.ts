@@ -4,7 +4,7 @@ import { IdTokenWithData } from "../../utils/auth/auth0.types";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { getEncryptDecryptKeyPath } from "../../utils/kms/google-kms.utils";
 import { EncryptIdTokenData, LegacyEncryptIdTokenData } from "./encrypt.handler";
-import { normalizeKMSResponseData } from "../common.types";
+import { UI8A } from "../../utils/lib/binary-data-types/binary-data-types.utils";
 
 export async function encrypt(
   idToken: IdTokenWithData<EncryptIdTokenData | LegacyEncryptIdTokenData>,
@@ -39,5 +39,5 @@ export async function encrypt(
     );
   }
 
-  return normalizeKMSResponseData(ciphertext);
+  return UI8A.from(ciphertext, "string");
 }

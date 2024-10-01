@@ -6,7 +6,8 @@ import { createOrPropagateError } from "../../server/errors/errors.utils";
 import { OthentErrorID } from "../../server/errors/error";
 import { importKeys } from "./import-keys";
 import { CryptoKeyVersionState } from "../../utils/kms/google-kms.utils";
-import { BaseOperationIdTokenData, LegacyBufferData } from "../common.types";
+import { BaseOperationIdTokenData } from "../common.types";
+import { LegacyBufferData } from "../../utils/lib/legacy-serialized-buffers/legacy-serialized-buffer.types";
 
 export interface ImportKeysIdTokenData extends BaseOperationIdTokenData<Route.IMPORT_KEYS> {
   wrappedSignKey: string | LegacyBufferData;

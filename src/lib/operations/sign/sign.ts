@@ -4,7 +4,7 @@ import { IdTokenWithData } from "../../utils/auth/auth0.types";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { getSignKeyVersionPath } from "../../utils/kms/google-kms.utils";
 import { LegacySignIdTokenData, SignIdTokenData } from "./sign.handler";
-import { normalizeKMSResponseData } from "../common.types";
+import { UI8A } from "../../utils/lib/binary-data-types/binary-data-types.utils";
 
 export async function sign(
   idToken: IdTokenWithData<SignIdTokenData | LegacySignIdTokenData>,
@@ -34,5 +34,5 @@ export async function sign(
     throw createOrPropagateError(OthentErrorID.Decryption, 500, "No signature");
   }
 
-  return normalizeKMSResponseData(signature);
+  return UI8A.from(signature, "string");
 }

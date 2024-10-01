@@ -3,11 +3,11 @@ import { createUserHandlerFactory, CreateUserIdTokenData, CreateUserResponseData
 import httpMocks from "node-mocks-http";
 import { ExpressRequestWithToken, UserMetadata } from '../../utils/auth/auth0.types';
 import { Route } from '../../server/server.constants';
-import { B64UrlString } from '../../utils/arweave/arweaveUtils';
 import * as auth0Utils from "../../utils/auth/auth0.utils";
 import { CONFIG } from '../../server/config/config.utils';
 import * as activateKeysModule from "../activate-keys/activate-keys";
 import * as delayModule from "../../utils/tools/delay";
+import { B64UrlString } from '../../utils/lib/binary-data-types/binary-data-types.types';
 
 describe('create user handler', () => {
   const createUserHandler = createUserHandlerFactory();

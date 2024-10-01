@@ -3,9 +3,12 @@ import { signHandlerFactory, SignIdTokenData, SignResponseData, LegacySignIdToke
 import httpMocks from "node-mocks-http";
 import { ExpressRequestWithToken } from '../../utils/auth/auth0.types';
 import { Route } from '../../server/server.constants';
-import { B64String, B64UrlString, stringToUint8Array, uint8ArrayTob64, uint8ArrayTob64Url } from '../../utils/arweave/arweaveUtils';
-import { EMPTY_VALUES, LEGACY_TOKEN_DATA_FORMATS, LegacyBufferRecord, LegacyTokenDataFormat, normalizeBufferData, TOKEN_DATA_FORMATS, TokenDataFormat } from '../common.types';
+import { EMPTY_VALUES, LEGACY_TOKEN_DATA_FORMATS, LegacyTokenDataFormat, TOKEN_DATA_FORMATS, TokenDataFormat } from '../common.types';
 import { LocalKeyManagementServiceClient } from '../../utils/kms/localKeyManagementServiceClient';
+import { B64String, B64UrlString } from '../../utils/lib/binary-data-types/binary-data-types.types';
+import { LegacyBufferRecord } from '../../utils/lib/legacy-serialized-buffers/legacy-serialized-buffer.types';
+import { normalizeLegacyBufferDataOrB64 } from '../../utils/lib/legacy-serialized-buffers/legacy-serialized-buffer.utils';
+import { B64, B64Url } from '../../utils/lib/binary-data-types/binary-data-types.utils';
 
 describe('sign handler', () => {
   const signHandler = signHandlerFactory();
@@ -47,9 +50,9 @@ describe('sign handler', () => {
     let data: B64String | B64UrlString = "" as B64String;
 
     if (format === "B64String") {
-      data = uint8ArrayTob64(HASHED_DATA_TO_SIGN);
+      data = B64.from(HASHED_DATA_TO_SIGN);
     } else if (format === "B64UrlString") {
-      data = uint8ArrayTob64Url(HASHED_DATA_TO_SIGN);
+      data = B64Url.from(HASHED_DATA_TO_SIGN);
     }
 
     return {
@@ -107,7 +110,7 @@ describe('sign handler', () => {
           }),
         );
 
-        const resultDataBuffer = normalizeBufferData(data);
+        const resultDataBuffer = normalizeLegacyBufferDataOrB64(data);
         const isSignatureValid = await LocalKeyManagementServiceClient.verifySignature(
           Buffer.from(DATA_TO_SIGN),
           resultDataBuffer,
@@ -155,7 +158,7 @@ describe('sign handler', () => {
 
         expect(data).toMatch(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/);
 
-        const resultDataBuffer = normalizeBufferData(data, true);
+        const resultDataBuffer = normalizeLegacyBufferDataOrB64(data, true);
         const isSignatureValid = await LocalKeyManagementServiceClient.verifySignature(
           Buffer.from(DATA_TO_SIGN),
           resultDataBuffer,
@@ -170,7 +173,7 @@ describe('sign handler', () => {
     await expect(callSignHandlerWithToken({
       keyName: "<KEYNAME>",
       path: Route.SIGN,
-      data: uint8ArrayTob64(stringToUint8Array(DATA_TO_SIGN)),
+      data: B64.from(DATA_TO_SIGN),
     })).rejects.toThrow("Invalid token data for sign()");
   });
 

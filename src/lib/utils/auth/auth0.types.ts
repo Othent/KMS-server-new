@@ -1,6 +1,6 @@
 import type { IdToken } from "@auth0/auth0-spa-js";
 import express from "express";
-import { B64UrlString } from "../arweave/arweaveUtils";
+import { B64UrlString } from "../lib/binary-data-types/binary-data-types.types";
 
 export interface UserMetadata {
   // Custom from Auth0's Add User Metadata action:
