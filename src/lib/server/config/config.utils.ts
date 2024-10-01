@@ -11,9 +11,10 @@ export class Config {
 
   static KMS_DEV_PROJECT_ID = "othent-kms-dev" as const;
 
-  // BUILD
-  pgkVersion = pkg.version;
-  buildDate = process.env.BUILD_DATE || "";
+  // BUILD:
+
+  PKG_VERSION = pkg.version;
+  BUILD_DATE = process.env.BUILD_DATE || "";
 
   // NON-ENV:
 
@@ -178,7 +179,19 @@ export class Config {
   }
 
   validate() {
-    const { PORT, IS_PROD, IS_DEV, IS_TEST } = this;
+    const {
+      PKG_VERSION,
+      BUILD_DATE,
+      PORT,
+      IS_PROD,
+      IS_DEV,
+      IS_TEST,
+    } = this;
+
+    // BUILD:
+
+    const isBuildValid = /\d{1,2}\.\d{1,2}\.\d{1,2}/.test(PKG_VERSION || "")
+      && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/.test(BUILD_DATE);
 
     // NODE / SERVER ENV:
 
@@ -225,6 +238,7 @@ export class Config {
     const isSlackValid = IS_PROD ? this.SLACK_ENABLED : true;
 
     return {
+      isBuildValid,
       isNodeEnvValid,
       isAuth0Valid,
       isGoogleKMSValid,
@@ -238,9 +252,18 @@ export class Config {
   }
 
   log() {
-    const { PORT, IS_PROD, IS_DEV, IS_TEST, KMS_ENVIRONMENT } = this;
+    const {
+      PKG_VERSION,
+      BUILD_DATE,
+      PORT,
+      IS_PROD,
+      IS_DEV,
+      IS_TEST,
+      KMS_ENVIRONMENT,
+    } = this;
 
     const {
+      isBuildValid,
       isNodeEnvValid,
       isAuth0Valid,
       isGoogleKMSValid,
@@ -248,6 +271,13 @@ export class Config {
       isSlackValid,
     } = this.validate();
 
+    console.log("");
+    console.log(
+      `${isBuildValid ? "✅" : "❌"}  BUILD${isBuildValid ? ":" : " - Invalid build"}`,
+    );
+    console.log(" ╷");
+    console.log(` ├ PKG_VERSION = ${PKG_VERSION}`);
+    console.log(` └ BUILD_DATE = ${BUILD_DATE}`);
     console.log("");
     console.log(
       `${isNodeEnvValid ? "✅" : "❌"}  NODE / SERVER ENV${isNodeEnvValid ? ":" : " - Invalid environment"}`,
