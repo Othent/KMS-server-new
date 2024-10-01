@@ -2,7 +2,7 @@ import { updateAuth0User } from "../../utils/auth/auth0.utils";
 import { IdTokenWithData } from "../../utils/auth/auth0.types";
 import { CreateUserIdTokenData, LegacyCreateUserIdTokenData } from "./create-user.handler";
 import { delay } from "../../utils/tools/delay";
-import { createKeyRing, createSignKey, createEncryptDecryptKey, createImportJob } from "./createUser.utils";
+import { createKeyRing, createSignKey, createEncryptDecryptKey, createImportJob } from "./create-user.utils";
 import { notifyUserCreationOnSlack } from "../../utils/slack/slack.utils";
 import { ACTIVATE_KEYS_INTERVALS, activateKeys } from "../activate-keys/activate-keys";
 import { CryptoKeyVersionState } from "../../utils/kms/google-kms.utils";

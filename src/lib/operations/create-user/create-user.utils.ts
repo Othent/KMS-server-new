@@ -15,7 +15,7 @@ export async function createKeyRing(
     parent: locationPath,
     keyRingId,
   }).catch((err) => {
-    if (err?.code === 6) {
+    if (err.code === 6) {
       logRequestInfo(`KeyRing already exists.`);
 
       return [null];
@@ -47,7 +47,7 @@ export async function createSignKey(
     },
     skipInitialVersionCreation: importOnly,
   }).catch((err) => {
-    if (err?.code === 6) {
+    if (err.code === 6) {
       logRequestInfo(`SignKey already exists.`);
 
       return [null];
@@ -79,7 +79,7 @@ export async function createEncryptDecryptKey(
     },
     skipInitialVersionCreation: importOnly,
   }).catch((err) => {
-    if (err?.code === 6) {
+    if (err.code === 6) {
       logRequestInfo(`EncryptDecryptKey already exists.`);
 
       return [null];
@@ -120,7 +120,7 @@ export async function createImportJob(
       importMethod: 'RSA_OAEP_3072_SHA256',
     },
   }).catch((err) => {
-    if (err?.code === 6) {
+    if (err.code === 6) {
       logRequestInfo(`ImportJob already exists.`);
 
       return [null];
