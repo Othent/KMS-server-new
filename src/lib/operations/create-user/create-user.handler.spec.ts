@@ -6,8 +6,10 @@ import { Route } from '../../server/server.constants';
 import { B64UrlString } from '../../utils/arweave/arweaveUtils';
 import * as auth0Utils from "../../utils/auth/auth0.utils";
 import { CONFIG } from '../../server/config/config.utils';
+import * as activateKeysModule from "../activate-keys/activate-keys";
+import * as delayModule from "../../utils/tools/delay";
 
-describe('createUser handler', () => {
+describe('create user handler', () => {
   const createUserHandler = createUserHandlerFactory();
 
   async function callCreateUserHandlerWithToken(idTokenData: null | CreateUserIdTokenData | LegacyCreateUserIdTokenData) {
@@ -31,6 +33,10 @@ describe('createUser handler', () => {
   };
 
   beforeAll(() => {
+    jest.spyOn(delayModule, "delay").mockImplementation(() => {
+      return Promise.resolve();
+    });
+
     jest.spyOn(auth0Utils, "updateAuth0User").mockImplementation(() => {
       return Promise.resolve({
         authSystem: CONFIG.AUTH_SYSTEM,
@@ -103,6 +109,15 @@ describe('createUser handler', () => {
         walletAddress: "<WALLET_ADDRESS>",
       });
     });
+
+    test(`throws an error if activation fails`, async () => {
+      jest.spyOn(activateKeysModule, "activateKeys").mockImplementation(async () => {
+        throw new Error("<MOCK ERROR MESSAGE>");
+      });
+
+      await expect(callCreateUserHandlerWithToken(idTokenData)).rejects.toThrow("Timed out while trying to activate keys.");
+    });
+
   });
 
 });

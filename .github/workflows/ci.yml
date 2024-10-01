@@ -28,6 +28,7 @@ env:
   PORT: ${{ secrets.PORT }}
 
   NODE_ENV: test
+  BUILD_DATE: 0000-00-00T00:00:00Z
 
   # These are only used in the production environment, they are not used in the CI which uses a test environment:
 

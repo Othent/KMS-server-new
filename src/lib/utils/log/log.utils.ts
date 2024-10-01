@@ -35,6 +35,15 @@ export function logRequestStart<D>(route: Route, idToken: IdTokenWithData<D>) {
   );
 }
 
+export function logRequestInfo<D>(message: string) {
+  // TODO: This logger is for development only. Replace with Winston / Morgan in production.
+  if (CONFIG.IS_PROD || CONFIG.IS_TEST || !CONFIG.IS_DEV) return;
+
+  console.log(
+    `├ ${message}`,
+  );
+}
+
 export function logRequestSuccess<D>(
   route: Route,
   idToken: IdTokenWithData<D>,

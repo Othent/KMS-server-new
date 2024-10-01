@@ -18,7 +18,7 @@ describe('Config', () => {
 
       const digest = hash.digest('hex');
 
-      expect(digest).toBe("5606eac24084a7a615d28a265e17c7e8db4b2f39857fed3afe86ae0906cd32ce");
+      expect(digest).toBe("d1368f2d19076af82fb28646b336cd8f08586108660f9e106341315d46fdbd39");
     });
 
     test("log hasn't changed", () => {
@@ -31,6 +31,11 @@ describe('Config', () => {
       CONFIG.log();
 
      expect(aggregatedConsoleLogOutput).toBe(`
+✅  BUILD:
+ ╷
+ ├ PKG_VERSION = 2.1.2
+ └ BUILD_DATE = 0000-00-00T00:00:00Z
+
 ✅  NODE / SERVER ENV:
  ╷
  ├ PORT = 3010

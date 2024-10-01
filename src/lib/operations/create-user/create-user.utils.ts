@@ -3,6 +3,7 @@ import { kmsClient } from "../../utils/kms/kmsClient";
 import { getKeyRingIdFromIdToken, getKeyRingPath, getLocationPath } from "../../utils/kms/google-kms.utils";
 import { IdTokenWithData } from "../../utils/auth/auth0.types";
 import { CreateUserIdTokenData, LegacyCreateUserIdTokenData } from "./create-user.handler";
+import { logRequestInfo } from "../../utils/log/log.utils";
 
 export async function createKeyRing(
   idToken: IdTokenWithData<CreateUserIdTokenData | LegacyCreateUserIdTokenData>,
@@ -13,7 +14,17 @@ export async function createKeyRing(
   const [keyRing] = await kmsClient.createKeyRing({
     parent: locationPath,
     keyRingId,
+  }).catch((err) => {
+    if (err.code === 6) {
+      logRequestInfo(`KeyRing already exists.`);
+
+      return [null];
+    }
+
+    throw err;
   });
+
+  logRequestInfo(`KeyRing created.`);
 
   return keyRing;
 }
@@ -35,7 +46,17 @@ export async function createSignKey(
       importOnly,
     },
     skipInitialVersionCreation: importOnly,
+  }).catch((err) => {
+    if (err.code === 6) {
+      logRequestInfo(`SignKey already exists.`);
+
+      return [null];
+    }
+
+    throw err;
   });
+
+  logRequestInfo(`SignKey created.`);
 
   return key;
 }
@@ -57,7 +78,17 @@ export async function createEncryptDecryptKey(
       importOnly,
     },
     skipInitialVersionCreation: importOnly,
+  }).catch((err) => {
+    if (err.code === 6) {
+      logRequestInfo(`EncryptDecryptKey already exists.`);
+
+      return [null];
+    }
+
+    throw err;
   });
+
+  logRequestInfo(`EncryptDecryptKey created.`);
 
   return key;
 }
@@ -88,7 +119,17 @@ export async function createImportJob(
       protectionLevel: 'HSM',
       importMethod: 'RSA_OAEP_3072_SHA256',
     },
+  }).catch((err) => {
+    if (err.code === 6) {
+      logRequestInfo(`ImportJob already exists.`);
+
+      return [null];
+    }
+
+    throw err;
   });
+
+  logRequestInfo(`ImportJob created.`);
 
   return importJob;
 }

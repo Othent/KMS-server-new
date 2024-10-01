@@ -1,5 +1,5 @@
 import express from "express";
-import { createUser } from "./createUser";
+import { createUser } from "./create-user";
 import { ExpressRequestWithToken, IdTokenWithData } from "../../utils/auth/auth0.types";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { Route } from "../../server/server.constants";
