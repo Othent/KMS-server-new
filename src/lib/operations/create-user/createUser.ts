@@ -34,8 +34,6 @@ export async function createUser(
     logRequestInfo(`Attempt ${ activateKeysAttempt } / ${ ACTIVATE_KEYS_INTERVALS.length }...`);
 
     const activateKeyResult = await activateKeys(idToken).catch((err) => {
-      console.log("activateKeys error =", err);
-
       return null;
     });
 

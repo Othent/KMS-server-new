@@ -253,7 +253,7 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
         createTime: null,
         primary: {
           name: "<PRIMARY>",
-          state: CryptoKeyVersionState.CRYPTO_KEY_VERSION_STATE_UNSPECIFIED,
+          state: CryptoKeyVersionState.ENABLED,
         },
       } satisfies ICryptoKey,
       request,
@@ -268,7 +268,7 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       {
         name: request?.name || "<CRYPTO_KEY_VERSION>",
         createTime: null,
-        state: CryptoKeyVersionState.CRYPTO_KEY_VERSION_STATE_UNSPECIFIED,
+        state: CryptoKeyVersionState.ENABLED,
       } satisfies ICryptoKeyVersion,
       request,
       undefined,
@@ -284,7 +284,7 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
         createTime: null,
         primary: {
           name: "<PRIMARY>",
-          state: CryptoKeyVersionState.CRYPTO_KEY_VERSION_STATE_UNSPECIFIED,
+          state: CryptoKeyVersionState.ENABLED,
         },
       } satisfies ICryptoKey,
       request,
@@ -329,7 +329,7 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
       {
         name: "<CRYPTO_KEY_VERSION>",
         createTime: null,
-        state: CryptoKeyVersionState.CRYPTO_KEY_VERSION_STATE_UNSPECIFIED,
+        state: CryptoKeyVersionState.ENABLED,
       } satisfies ICryptoKeyVersion,
       request,
       undefined,

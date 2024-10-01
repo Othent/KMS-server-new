@@ -31,6 +31,8 @@ describe('createUser handler', () => {
   };
 
   beforeAll(() => {
+    jest.useFakeTimers({ advanceTimers: 1000 });
+
     jest.spyOn(auth0Utils, "updateAuth0User").mockImplementation(() => {
       return Promise.resolve({
         authSystem: CONFIG.AUTH_SYSTEM,
@@ -41,6 +43,8 @@ describe('createUser handler', () => {
   });
 
   afterAll(() => {
+    jest.useRealTimers();
+
     jest.restoreAllMocks();
   });
 
