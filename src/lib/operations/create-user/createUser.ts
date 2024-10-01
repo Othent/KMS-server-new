@@ -6,6 +6,7 @@ import { createKeyRing, createSignKey, createEncryptDecryptKey, createImportJob 
 import { notifyUserCreationOnSlack } from "../../utils/slack/slack.utils";
 import { ACTIVATE_KEYS_INTERVALS, activateKeys } from "../activate-keys/activate-keys";
 import { CryptoKeyVersionState } from "../../utils/kms/google-kms.utils";
+import { logRequestInfo } from "../../utils/log/log.utils";
 
 export async function createUser(
   idToken: IdTokenWithData<CreateUserIdTokenData | LegacyCreateUserIdTokenData>,
@@ -22,10 +23,6 @@ export async function createUser(
     importOnly ? createImportJob(idToken) : undefined,
   ]);
 
-  // TODO: Notify only once the keys are generated and/or the Auth0 user is updated?
-  notifyUserCreationOnSlack(idToken);
-
-  /*
   let activateKeysAttempt = 0;
   let areKeysActive = false;
 
@@ -34,7 +31,7 @@ export async function createUser(
 
     await delay(nextAttemptAfter);
 
-    console.log(`Attempt ${ activateKeysAttempt } / ${ ACTIVATE_KEYS_INTERVALS.length }...`);
+    logRequestInfo(`Attempt ${ activateKeysAttempt } / ${ ACTIVATE_KEYS_INTERVALS.length }...`);
 
     const activateKeyResult = await activateKeys(idToken).catch((err) => {
       console.log("activateKeys error =", err);
@@ -48,14 +45,13 @@ export async function createUser(
     );
   } while (activateKeysAttempt < ACTIVATE_KEYS_INTERVALS.length && !areKeysActive);
 
-  if (!areKeysActive) {
-    throw new Error("Timed out while trying to activate keys.");
+  if (areKeysActive) {
+    logRequestInfo("Keys activated!")
   } else {
-    console.log("KEYS ACTIVATED!");
+    throw new Error("Timed out while trying to activate keys.");
   }
-  */
 
-  await delay(2000);
+  notifyUserCreationOnSlack(idToken);
 
   if (importOnly) return null;
 

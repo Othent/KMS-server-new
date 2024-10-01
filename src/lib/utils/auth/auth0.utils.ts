@@ -69,8 +69,6 @@ async function getPublicKey(idToken: IdTokenWithData<any>) {
 export async function updateAuth0User(
   idToken: IdTokenWithData<CreateUserIdTokenData | LegacyCreateUserIdTokenData> | IdTokenWithData<ActivateKeysIdTokenData>,
 ): Promise<UserMetadata> {
-  console.log("PREV TOKEN =", idToken);
-
   const { sub } = idToken;
 
   if (!sub) throw new Error("Cannot generate wallet address.");

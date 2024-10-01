@@ -3,6 +3,7 @@ import { kmsClient } from "../../utils/kms/kmsClient";
 import { getKeyRingIdFromIdToken, getKeyRingPath, getLocationPath } from "../../utils/kms/google-kms.utils";
 import { IdTokenWithData } from "../../utils/auth/auth0.types";
 import { CreateUserIdTokenData, LegacyCreateUserIdTokenData } from "./create-user.handler";
+import { logRequestInfo } from "../../utils/log/log.utils";
 
 export async function createKeyRing(
   idToken: IdTokenWithData<CreateUserIdTokenData | LegacyCreateUserIdTokenData>,
@@ -14,11 +15,16 @@ export async function createKeyRing(
     parent: locationPath,
     keyRingId,
   }).catch((err) => {
-    console.log("createKeyRing error =", err);
+    if (err?.code === 6) {
+      logRequestInfo(`KeyRing already exists.`);
 
-    // TODO: Only ignore errors regarding duplicate entities.
-    return [null];
+      return [null];
+    }
+
+    throw err;
   });
+
+  logRequestInfo(`KeyRing created.`);
 
   return keyRing;
 }
@@ -41,11 +47,16 @@ export async function createSignKey(
     },
     skipInitialVersionCreation: importOnly,
   }).catch((err) => {
-    console.log("createSignKey error =", err);
+    if (err?.code === 6) {
+      logRequestInfo(`SignKey already exists.`);
 
-    // TODO: Only ignore errors regarding duplicate entities.
-    return [null];
+      return [null];
+    }
+
+    throw err;
   });
+
+  logRequestInfo(`SignKey created.`);
 
   return key;
 }
@@ -68,11 +79,16 @@ export async function createEncryptDecryptKey(
     },
     skipInitialVersionCreation: importOnly,
   }).catch((err) => {
-    console.log("createEncryptDecryptKey error =", err);
+    if (err?.code === 6) {
+      logRequestInfo(`EncryptDecryptKey already exists.`);
 
-    // TODO: Only ignore errors regarding duplicate entities.
-    return [null];
+      return [null];
+    }
+
+    throw err;
   });
+
+  logRequestInfo(`EncryptDecryptKey created.`);
 
   return key;
 }
@@ -104,11 +120,16 @@ export async function createImportJob(
       importMethod: 'RSA_OAEP_3072_SHA256',
     },
   }).catch((err) => {
-    console.log("createImportJob error =", err);
+    if (err?.code === 6) {
+      logRequestInfo(`ImportJob already exists.`);
 
-    // TODO: Only ignore errors regarding duplicate entities.
-    return [null];
+      return [null];
+    }
+
+    throw err;
   });
+
+  logRequestInfo(`ImportJob created.`);
 
   return importJob;
 }
