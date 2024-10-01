@@ -3,9 +3,12 @@ import { ExpressRequestWithToken } from "../../utils/auth/auth0.types";
 import { sign } from "./sign";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
 import { Route } from "../../server/server.constants";
-import { BaseOperationIdTokenData, LegacyBaseOperationIdTokenData, LegacyBufferData, LegacyBufferObject, LegacyBufferRecord, normalizeBufferData, toLegacyBufferObject } from "../common.types";
+import { BaseOperationIdTokenData, LegacyBaseOperationIdTokenData } from "../common.types";
 import { validateSignIdTokenOrThrow } from "./sign.validation";
-import { B64String, B64UrlString, uint8ArrayTob64 } from "../../utils/arweave/arweaveUtils";
+import { B64String, B64UrlString } from "../../utils/lib/binary-data-types/binary-data-types.types";
+import { LegacyBufferRecord, LegacyBufferObject } from "../../utils/lib/legacy-serialized-buffers/legacy-serialized-buffer.types";
+import { normalizeLegacyBufferDataOrB64, toLegacyBufferObject } from "../../utils/lib/legacy-serialized-buffers/legacy-serialized-buffer.utils";
+import { B64 } from "../../utils/lib/binary-data-types/binary-data-types.utils";
 
 /**
  * @deprecated
@@ -41,7 +44,7 @@ export function signHandlerFactory() {
     const isLegacyData = !data.hasOwnProperty("path");
     const treatStringAsB64 = !isLegacyData;
 
-    const dataToSignBuffer = normalizeBufferData(data.data, treatStringAsB64);
+    const dataToSignBuffer = normalizeLegacyBufferDataOrB64(data.data, treatStringAsB64);
     const signature = await sign(idToken, dataToSignBuffer);
 
     logRequestSuccess(Route.SIGN, idToken);
@@ -49,7 +52,7 @@ export function signHandlerFactory() {
     res.send(
       isLegacyData
         ? { data: toLegacyBufferObject(signature) } satisfies LegacySignResponseData
-        : { signature: uint8ArrayTob64(signature) } satisfies SignResponseData
+        : { signature: B64.from(signature) } satisfies SignResponseData
     );
   };
 }

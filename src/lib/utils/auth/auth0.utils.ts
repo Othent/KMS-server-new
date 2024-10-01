@@ -1,5 +1,4 @@
 import { CONFIG } from "../../server/config/config.utils";
-import { B64UrlString, ownerToAddress } from "../arweave/arweaveUtils";
 import axios from "axios";
 import { CreateUserIdTokenData, LegacyCreateUserIdTokenData } from "../../operations/create-user/create-user.handler";
 import { OthentErrorID } from "../../server/errors/error";
@@ -9,6 +8,8 @@ import { getSignKeyVersionPath } from "../kms/google-kms.utils";
 import { kmsClient } from "../kms/kmsClient";
 import { ActivateKeysIdTokenData } from "../../operations/activate-keys/activate-keys.handler";
 import { IdTokenWithData, UserMetadata } from "./auth0.types";
+import { B64UrlString } from "../lib/binary-data-types/binary-data-types.types";
+import { ownerToAddress } from "../lib/address/address.utils";
 
 export function getAuth0IssuerURL() {
   return `https://${CONFIG.AUTH0_CUSTOM_DOMAIN}/` as const;

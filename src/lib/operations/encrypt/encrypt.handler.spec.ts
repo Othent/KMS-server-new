@@ -3,9 +3,12 @@ import { encryptHandlerFactory, EncryptIdTokenData, EncryptResponseData, LegacyE
 import httpMocks from "node-mocks-http";
 import { ExpressRequestWithToken } from '../../utils/auth/auth0.types';
 import { Route } from '../../server/server.constants';
-import { B64String, B64UrlString, binaryDataTypeToString, stringToUint8Array, uint8ArrayTob64, uint8ArrayTob64Url } from '../../utils/arweave/arweaveUtils';
 import { decrypt } from '../decrypt/decrypt';
-import { EMPTY_VALUES, LEGACY_TOKEN_DATA_FORMATS, LegacyBufferObject, LegacyBufferRecord, LegacyTokenDataFormat, normalizeBufferData, TOKEN_DATA_FORMATS, TokenDataFormat } from '../common.types';
+import { EMPTY_VALUES, LEGACY_TOKEN_DATA_FORMATS, LegacyTokenDataFormat, TOKEN_DATA_FORMATS, TokenDataFormat } from '../common.types';
+import { B64String, B64UrlString } from '../../utils/lib/binary-data-types/binary-data-types.types';
+import { LegacyBufferObject, LegacyBufferRecord } from '../../utils/lib/legacy-serialized-buffers/legacy-serialized-buffer.types';
+import { B64, B64Url, BDT, UI8A } from '../../utils/lib/binary-data-types/binary-data-types.utils';
+import { normalizeLegacyBufferDataOrB64 } from '../../utils/lib/legacy-serialized-buffers/legacy-serialized-buffer.utils';
 
 describe('encrypt handler', () => {
   const encryptHandler = encryptHandlerFactory();
@@ -33,10 +36,10 @@ describe('encrypt handler', () => {
     if (format === "LegacyBufferObject") {
       plaintext = {
         type: "Buffer",
-        data: Array.from(stringToUint8Array(SECRET)),
+        data: Array.from(UI8A.from(SECRET, "string")),
       };
     } else if (format === "LegacyBufferRecord") {
-      plaintext = { ...Array.from(stringToUint8Array(SECRET)) };
+      plaintext = { ...Array.from(UI8A.from(SECRET, "string")) };
     }
 
     return {
@@ -50,9 +53,9 @@ describe('encrypt handler', () => {
     let plaintext: B64String | B64UrlString = "" as B64String;
 
     if (format === "B64String") {
-      plaintext = uint8ArrayTob64(stringToUint8Array(SECRET));
+      plaintext = B64.from(SECRET);
     } else if (format === "B64UrlString") {
-      plaintext = uint8ArrayTob64Url(stringToUint8Array(SECRET));
+      plaintext = B64Url.from(SECRET);
     }
 
     return {
@@ -96,9 +99,9 @@ describe('encrypt handler', () => {
           }),
         );
 
-        const resultDataBuffer = normalizeBufferData(data);
+        const resultDataBuffer = normalizeLegacyBufferDataOrB64(data);
         const decrypted = await decrypt({ sub: "<SUB>" } as any, resultDataBuffer);
-        const decryptedText = binaryDataTypeToString(decrypted);
+        const decryptedText = BDT.decode(decrypted);
 
         expect(decryptedText).toEqual(SECRET);
       });
@@ -142,9 +145,9 @@ describe('encrypt handler', () => {
 
         expect(data).toMatch(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/);
 
-        const resultDataBuffer = normalizeBufferData(data, true);
+        const resultDataBuffer = normalizeLegacyBufferDataOrB64(data, true);
         const decrypted = await decrypt({ sub: "<SUB>" } as any, resultDataBuffer);
-        const decryptedText = binaryDataTypeToString(decrypted);
+        const decryptedText = BDT.decode(decrypted);
 
         expect(decryptedText).toEqual(SECRET);
       });

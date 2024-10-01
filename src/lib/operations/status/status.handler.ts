@@ -22,8 +22,8 @@ export function statusHandlerFactory({
     const isTokenUnused = unusedResponse?.nextCalled;
 
     res.json({
-      version: CONFIG.pgkVersion,
-      buildDate: CONFIG.buildDate,
+      version: CONFIG.PKG_VERSION,
+      buildDate: CONFIG.BUILD_DATE,
       hasToken,
       hasTokenData,
       isTokenValid,

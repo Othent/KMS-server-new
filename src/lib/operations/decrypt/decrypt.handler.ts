@@ -3,9 +3,12 @@ import { decrypt } from "./decrypt";
 import { ExpressRequestWithToken } from "../../utils/auth/auth0.types";
 import { Route } from "../../server/server.constants";
 import { logRequestSuccess, logRequestStart } from "../../utils/log/log.utils";
-import { BaseOperationIdTokenData, LegacyBaseOperationIdTokenData, LegacyBufferData, LegacyBufferObject, normalizeBufferData, toLegacyBufferObject } from "../common.types";
+import { BaseOperationIdTokenData, LegacyBaseOperationIdTokenData } from "../common.types";
 import { validateDecryptIdTokenOrThrow } from "./decrypt.validation";
-import { B64String, B64UrlString, uint8ArrayTob64 } from "../../utils/arweave/arweaveUtils";
+import { LegacyBufferData, LegacyBufferObject } from "../../utils/lib/legacy-serialized-buffers/legacy-serialized-buffer.types";
+import { B64String, B64UrlString } from "../../utils/lib/binary-data-types/binary-data-types.types";
+import { normalizeLegacyBufferDataOrB64, toLegacyBufferObject } from "../../utils/lib/legacy-serialized-buffers/legacy-serialized-buffer.utils";
+import { B64 } from "../../utils/lib/binary-data-types/binary-data-types.utils";
 
 /**
  * @deprecated
@@ -41,7 +44,7 @@ export function decryptHandlerFactory() {
     const isLegacyData = !data.hasOwnProperty("path");
     const treatStringAsB64 = !isLegacyData;
 
-    const ciphertextBuffer = normalizeBufferData(data.ciphertext, treatStringAsB64);
+    const ciphertextBuffer = normalizeLegacyBufferDataOrB64(data.ciphertext, treatStringAsB64);
     const plaintext = await decrypt(idToken, ciphertextBuffer);
 
     logRequestSuccess(Route.DECRYPT, idToken);
@@ -49,7 +52,7 @@ export function decryptHandlerFactory() {
     res.send(
       isLegacyData
         ? { data: toLegacyBufferObject(plaintext) } satisfies LegacyDecryptResponseData
-        : { decryptedData: uint8ArrayTob64(plaintext) } satisfies DecryptResponseData
+        : { decryptedData: B64.from(plaintext) } satisfies DecryptResponseData
     );
   };
 }

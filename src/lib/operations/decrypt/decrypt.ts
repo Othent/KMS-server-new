@@ -4,7 +4,7 @@ import { IdTokenWithData } from "../../utils/auth/auth0.types";
 import { kmsClient } from "../../utils/kms/kmsClient";
 import { getEncryptDecryptKeyPath } from "../../utils/kms/google-kms.utils";
 import { DecryptIdTokenData, LegacyDecryptIdTokenData } from "./decrypt.handler";
-import { normalizeKMSResponseData } from "../common.types";
+import { UI8A } from "../../utils/lib/binary-data-types/binary-data-types.utils";
 
 export async function decrypt(
   idToken: IdTokenWithData<DecryptIdTokenData | LegacyDecryptIdTokenData>,
@@ -34,5 +34,5 @@ export async function decrypt(
     throw createOrPropagateError(OthentErrorID.Decryption, 500, "No plaintext");
   }
 
-  return normalizeKMSResponseData(plaintext);
+  return UI8A.from(plaintext, "string");
 }

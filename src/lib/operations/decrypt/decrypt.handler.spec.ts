@@ -3,9 +3,12 @@ import { decryptHandlerFactory, DecryptIdTokenData, DecryptResponseData, LegacyD
 import httpMocks from "node-mocks-http";
 import { ExpressRequestWithToken } from '../../utils/auth/auth0.types';
 import { Route } from '../../server/server.constants';
-import { B64String, B64UrlString, binaryDataTypeToString, stringToUint8Array, uint8ArrayTob64, uint8ArrayTob64Url } from '../../utils/arweave/arweaveUtils';
-import { EMPTY_VALUES, LEGACY_TOKEN_DATA_FORMATS, LegacyBufferObject, LegacyBufferRecord, LegacyTokenDataFormat, normalizeBufferData, TOKEN_DATA_FORMATS, TokenDataFormat } from '../common.types';
+import { EMPTY_VALUES, LEGACY_TOKEN_DATA_FORMATS, LegacyTokenDataFormat, TOKEN_DATA_FORMATS, TokenDataFormat } from '../common.types';
 import { encrypt } from '../encrypt/encrypt';
+import { LegacyBufferObject, LegacyBufferRecord } from '../../utils/lib/legacy-serialized-buffers/legacy-serialized-buffer.types';
+import { normalizeLegacyBufferDataOrB64 } from '../../utils/lib/legacy-serialized-buffers/legacy-serialized-buffer.utils';
+import { B64String, B64UrlString } from '../../utils/lib/binary-data-types/binary-data-types.types';
+import { B64, B64Url, BDT, UI8A } from '../../utils/lib/binary-data-types/binary-data-types.utils';
 
 describe('decrypt handler', () => {
   const decryptHandler = decryptHandlerFactory();
@@ -55,9 +58,9 @@ describe('decrypt handler', () => {
     let ciphertext: B64String | B64UrlString = "" as B64String;
 
     if (format === "B64String") {
-      ciphertext = uint8ArrayTob64(ENCRYPTED_SECRET_BUFFER);
+      ciphertext = B64.from(ENCRYPTED_SECRET_BUFFER);
     } else if (format === "B64UrlString") {
-      ciphertext = uint8ArrayTob64Url(ENCRYPTED_SECRET_BUFFER);
+      ciphertext = B64Url.from(ENCRYPTED_SECRET_BUFFER);
     }
 
     return {
@@ -67,7 +70,7 @@ describe('decrypt handler', () => {
   };
 
   beforeAll(async () => {
-    const encryptedSecretBuffer = await encrypt({ sub: "<SUB>" } as any, stringToUint8Array(SECRET));
+    const encryptedSecretBuffer = await encrypt({ sub: "<SUB>" } as any, UI8A.from(SECRET, "string"));
 
     ENCRYPTED_SECRET_BUFFER = encryptedSecretBuffer;
   });
@@ -110,8 +113,8 @@ describe('decrypt handler', () => {
           }),
         );
 
-        const resultDataBuffer = normalizeBufferData(data);
-        const decryptedText = binaryDataTypeToString(resultDataBuffer);
+        const resultDataBuffer = normalizeLegacyBufferDataOrB64(data);
+        const decryptedText = BDT.decode(resultDataBuffer);
 
         expect(decryptedText).toEqual(SECRET);
       });
@@ -155,8 +158,8 @@ describe('decrypt handler', () => {
 
         expect(data).toMatch(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/);
 
-        const resultDataBuffer = normalizeBufferData(data, true);
-        const decryptedText = binaryDataTypeToString(resultDataBuffer);
+        const resultDataBuffer = normalizeLegacyBufferDataOrB64(data, true);
+        const decryptedText = BDT.decode(resultDataBuffer);
 
         expect(decryptedText).toEqual(SECRET);
       });
@@ -167,7 +170,7 @@ describe('decrypt handler', () => {
     await expect(callDecryptHandlerWithToken({
       keyName: "<KEYNAME>",
       path: Route.DECRYPT,
-      ciphertext: uint8ArrayTob64(ENCRYPTED_SECRET_BUFFER),
+      ciphertext: B64.from(ENCRYPTED_SECRET_BUFFER),
     })).rejects.toThrow("Invalid token data for decrypt()");
   });
 

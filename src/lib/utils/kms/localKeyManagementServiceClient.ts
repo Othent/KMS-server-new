@@ -1,7 +1,7 @@
 import assert from "assert";
 import crypto from "crypto";
-import { binaryDataTypeToString, uint8ArrayTob64 } from "../arweave/arweaveUtils";
 import { CryptoKeyVersionState } from "./google-kms.utils";
+import { B64, BDT } from "../lib/binary-data-types/binary-data-types.utils";
 // import { KeyManagementServiceClient } from "@google-cloud/kms";
 
 // KeyRing:
@@ -136,7 +136,7 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
     const { ciphertext } = encryptResponse[0];
     const ciphertextB64String = !ciphertext || typeof ciphertext === "string"
       ? (ciphertext || "")
-      : uint8ArrayTob64(ciphertext);
+      : B64.from(ciphertext);
 
     console.log(` ├ encrypt("${originalPlaintext}") => ${ciphertextB64String}`);
 
@@ -149,10 +149,10 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
     const { plaintext } = decryptResponse[0];
     const plaintextB64String = !plaintext || typeof plaintext === "string"
       ? (plaintext || "")
-      : uint8ArrayTob64(plaintext);
+      : B64.from(plaintext);
     const plaintextString = !plaintext || typeof plaintext === "string"
       ? (plaintext || "")
-      : binaryDataTypeToString(plaintext);
+      : BDT.decode(plaintext);
 
     console.log(` ├ decrypt("${ciphertextB64String}") => ${ plaintextB64String } => ${ plaintextString }`);
 
@@ -172,7 +172,7 @@ export class LocalKeyManagementServiceClient /* implements KeyManagementServiceC
     const { signature } = asymmetricSignResponse[0];
     const signatureB64String = !signature || typeof signature === "string"
       ? (signature || "")
-      : uint8ArrayTob64(signature);
+      : B64.from(signature);
 
     console.log(` ├ asymmetricSign("${originalPlaintextHash}") => ${signatureB64String.slice(0, 32)}...`);
 
