@@ -7,7 +7,7 @@ Try our demo at [kms-demo.othent.io](https://kms-demo.othent.io)!
 
 <br />
 
-[![Othent KMS JS SDK NPM page](https://img.shields.io/npm/v/%40othent%2Fkms?style=for-the-badge&color=%23CC3534)](https://www.npmjs.com/package/@othent/kms) [![Othent KMS Server Statements Coverage](https://img.shields.io/badge/Stmts_Coverage-81.52%25-black?style=for-the-badge&color=%23008000)](https://www.npmjs.com/package/@othent/kms)
+[![Othent KMS JS SDK NPM page](https://img.shields.io/npm/v/%40othent%2Fkms?style=for-the-badge&color=%23CC3534)](https://www.npmjs.com/package/@othent/kms) [![Othent KMS Server Statements Coverage](https://img.shields.io/badge/Stmts_Coverage-81.66%25-black?style=for-the-badge&color=%23008000)](https://www.npmjs.com/package/@othent/kms)
 
 
 <br />
