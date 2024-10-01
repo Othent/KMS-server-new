@@ -210,14 +210,14 @@ export class Config {
       this.KMS_ENCRYPT_DECRYPT_KEY_VERSION &&
       this.KMS_SIGN_KEY_ALGORITHM &&
       this.KMS_ENCRYPT_DECRYPT_KEY_ALGORITHM
-    )/* && (
+    ) && (
       (IS_PROD && this.KMS_ENVIRONMENT === "PRODUCTION_SERVER") || (
         (IS_DEV || IS_TEST) && (
           this.KMS_ENVIRONMENT === "DEVELOPMENT_SERVER" ||
           this.KMS_ENVIRONMENT === "LOCAL_MOCK"
         )
       )
-    )*/;
+    );
 
     // MONGODB & SLACK:
 
