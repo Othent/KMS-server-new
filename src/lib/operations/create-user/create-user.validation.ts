@@ -8,7 +8,7 @@ import { createOrPropagateError } from "../../server/errors/errors.utils";
 
 const LegacyCreateUserIdTokenDataSchema = z.object({
   sub: z.string(),
-  data: z.undefined(),
+  data: z.union([z.undefined(), z.null()]),
 });
 
 const CreateUserIdTokenDataSchema = extendBaseOperationIdTokenDataSchema(Route.CREATE_USER, {
