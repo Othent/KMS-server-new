@@ -53,6 +53,17 @@ describe('createUser handler', () => {
       test('has no data', async () => {
         await expect(callCreateUserHandlerWithToken(true, {} as unknown as LegacyCreateUserIdTokenData)).rejects.toThrow("Invalid token data for createUser()");
       });
+
+      test('has no `null` data', async () => {
+        await expect(callCreateUserHandlerWithToken(true, null)).rejects.toThrow("Invalid token data for createUser()");
+      });
+
+      test('if it has data, it has `null` data inside', async () => {
+        await expect(callCreateUserHandlerWithToken(true, { data: undefined } as unknown as LegacyCreateUserIdTokenData)).rejects.toThrow("Invalid token data for createUser()");
+        await expect(callCreateUserHandlerWithToken(true, { data: {} } as unknown as LegacyCreateUserIdTokenData)).rejects.toThrow("Invalid token data for createUser()");
+        await expect(callCreateUserHandlerWithToken(true, { data: 123 } as unknown as LegacyCreateUserIdTokenData)).rejects.toThrow("Invalid token data for createUser()");
+        await expect(callCreateUserHandlerWithToken(true, { data: "" } as unknown as LegacyCreateUserIdTokenData)).rejects.toThrow("Invalid token data for createUser()");
+      });
     });
 
     test("accepts `undefined` data and returns the right result", async () => {
@@ -62,8 +73,8 @@ describe('createUser handler', () => {
       expect(data).toEqual(true);
     });
 
-    test("accepts `null` data and returns the right result", async () => {
-      const result = await callCreateUserHandlerWithToken(true, null);
+    test("accepts `{ data: null }` data and returns the right result", async () => {
+      const result = await callCreateUserHandlerWithToken(true, { data: null } as unknown as LegacyCreateUserIdTokenData);
       const data = (result as LegacyCreateUserResponseData).data || (result as CreateUserResponseData).idTokenWithData;
 
       expect(data).toEqual(true);
