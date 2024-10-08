@@ -10,12 +10,12 @@ import { CONFIG } from '../../server/config/config.utils';
 describe('createUser handler', () => {
   const createUserHandler = createUserHandlerFactory();
 
-  async function callCreateUserHandlerWithToken(idTokenData: null | CreateUserIdTokenData | LegacyCreateUserIdTokenData) {
+  async function callCreateUserHandlerWithToken(sub: boolean, idTokenData?: null | CreateUserIdTokenData | LegacyCreateUserIdTokenData) {
     const req = httpMocks.createRequest({}) satisfies ExpressRequestWithToken<CreateUserIdTokenData | LegacyCreateUserIdTokenData>;
 
     req.idToken = {
-      sub: idTokenData === null ? undefined : "<SUB>",
-      data: idTokenData === null ? undefined : idTokenData,
+      sub: sub ? "<SUB>" : undefined,
+      data: idTokenData,
     } as any;
 
     const res = httpMocks.createResponse();
@@ -47,16 +47,23 @@ describe('createUser handler', () => {
   describe('(legacy format)', () => {
     describe('validates the ID JWT token data', () => {
       test('has a sub', async () => {
-        await expect(callCreateUserHandlerWithToken(null)).rejects.toThrow("Invalid token data for createUser()");
+        await expect(callCreateUserHandlerWithToken(false)).rejects.toThrow("Invalid token data for createUser()");
       });
 
       test('has no data', async () => {
-        await expect(callCreateUserHandlerWithToken({} as unknown as LegacyCreateUserIdTokenData)).rejects.toThrow("Invalid token data for createUser()");
+        await expect(callCreateUserHandlerWithToken(true, {} as unknown as LegacyCreateUserIdTokenData)).rejects.toThrow("Invalid token data for createUser()");
       });
     });
 
-    test(`accepts no data and returns the right result`, async () => {
-      const result = await callCreateUserHandlerWithToken(undefined);
+    test("accepts `undefined` data and returns the right result", async () => {
+      const result = await callCreateUserHandlerWithToken(true, undefined);
+      const data = (result as LegacyCreateUserResponseData).data || (result as CreateUserResponseData).idTokenWithData;
+
+      expect(data).toEqual(true);
+    });
+
+    test("accepts `null` data and returns the right result", async () => {
+      const result = await callCreateUserHandlerWithToken(true, null);
       const data = (result as LegacyCreateUserResponseData).data || (result as CreateUserResponseData).idTokenWithData;
 
       expect(data).toEqual(true);
@@ -66,25 +73,25 @@ describe('createUser handler', () => {
   describe('(new format)', () => {
     describe('validates the ID JWT token data', () => {
       test('has a sub', async () => {
-        await expect(callCreateUserHandlerWithToken(null)).rejects.toThrow("Invalid token data for createUser()");
+        await expect(callCreateUserHandlerWithToken(false)).rejects.toThrow("Invalid token data for createUser()");
       });
 
       test('has a path', async () => {
-        await expect(callCreateUserHandlerWithToken({
+        await expect(callCreateUserHandlerWithToken(true, {
           ...idTokenData,
           path: "" as any,
         })).rejects.toThrow("Invalid token data for createUser()");
       });
 
       test(`has path = ${Route.DECRYPT}`, async () => {
-        await expect(callCreateUserHandlerWithToken({
+        await expect(callCreateUserHandlerWithToken(true, {
           ...idTokenData,
           path: Route.HOME as any,
         })).rejects.toThrow("Invalid token data for createUser()");
       });
 
       test('has data', async () => {
-        await expect(callCreateUserHandlerWithToken({
+        await expect(callCreateUserHandlerWithToken(true, {
           ...idTokenData,
           importOnly: undefined as any,
         })).rejects.toThrow("Invalid token data for createUser()");
@@ -92,7 +99,7 @@ describe('createUser handler', () => {
     });
 
     test(`accepts data and returns the right result`, async () => {
-      const result = await callCreateUserHandlerWithToken(idTokenData);
+      const result = await callCreateUserHandlerWithToken(true, idTokenData);
       const data = (result as LegacyCreateUserResponseData).data || (result as CreateUserResponseData).idTokenWithData;
 
       expect(data).toEqual({
